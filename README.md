@@ -6,11 +6,9 @@
 
 Buyer-facing B2B workspace for Nexa Suite's cold-chain organization.
 
-[![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)](https://angular.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Angular Material](https://img.shields.io/badge/Angular%20Material-22-757575?logo=materialdesign&logoColor=white)](https://material.angular.dev/)
-[![Buyer Portal](https://img.shields.io/badge/product-Buyer%20Portal-0891B2)](#role-in-the-nexa-ecosystem)
-[![Status](https://img.shields.io/badge/status-baseline%20v0.1.0-16A34A)](#current-status)
+[![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)](https://angular.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Angular Material](https://img.shields.io/badge/Angular%20Material-22-757575?logo=materialdesign&logoColor=white)](https://material.angular.dev/)
+
+[Changelog](./CHANGELOG.md) · [v0.2.0 release notes](./docs/releases/v0.2.0.md) · [GitHub Releases](https://github.com/nexa-suite/portal/releases)
 
 [Platform](https://github.com/nexa-suite/platform) · [Portal](https://github.com/nexa-suite/portal) · [API](https://github.com/nexa-suite/api)
 
@@ -20,55 +18,38 @@ Buyer-facing B2B workspace for Nexa Suite's cold-chain organization.
 
 ## Overview
 
-Nexa Buyer Portal is the independent Angular application for buyer-facing catalog discovery, requests, orders, tracking, documents and support.
+Nexa Buyer Portal is the independent Angular application for buyer-facing B2B workflows in the cold-chain business.
 
 ## Role in the Nexa Ecosystem
 
-Portal serves B2B buyers. Its shell prioritizes clarity, trust and low cognitive load; it is not a reduced version of Nexa Platform.
-
-```mermaid
-flowchart LR
-    Buyer["B2B Buyer"] --> Portal["Nexa Buyer Portal<br/>Angular"]
-    Portal --> API["Nexa API<br/>Spring Boot"]
-```
+Portal is a buyer-facing surface distinct from the internal Platform. Both consume the API only through approved contracts.
 
 ## Repository Map
 
 | Repository | Responsibility | Technology |
 |---|---|---|
-| [Platform](https://github.com/nexa-suite/platform) | Internal operations for Sales, Warehouse, Logistics and Administration | Angular |
+| [Platform](https://github.com/nexa-suite/platform) | Internal operations | Angular |
 | **Portal** — This repository | Buyer-facing B2B experience | Angular |
-| [API](https://github.com/nexa-suite/api) | Business rules, contracts, security and persistence authority | Spring Boot |
+| [API](https://github.com/nexa-suite/api) | Business and integration API | Spring Boot |
 
 ## Scope
 
-- Buyer-facing shell and navigation direction.
-- Independent Angular workspace.
-- Layered DDD structure per buyer-relevant bounded context.
-- Nexa identity and Angular Material adaptation.
-- Baseline EN/ES translation surface.
+- Durable buyer shell with `/home` routing.
+- Reusable visual foundations, EN/ES language infrastructure and pure utilities.
+- Canonical catalog asset subset under `public/catalog-items/`.
+- No catalog JSON, catalog REST, authentication, persistence or buyer use cases.
 
 ## Architecture
 
-Presentation depends on Application. Application depends on Domain. Infrastructure implements future ports without leaking technical concerns into Domain.
-
-No product, order, buyer account, payment, authentication, persistence or API integration is implemented in this baseline.
+Presentation depends on Application. Application depends on Domain. Infrastructure remains outside Domain. Shared components are context-independent and visual.
 
 ## Bounded Contexts
 
-- IAM for buyer identity.
-- Catalog Management for authorized catalog visibility.
-- Sales for buyer requests and orders.
-- Logistics for buyer-visible tracking.
-- Invoicing for buyer-visible documents, payments or credit.
+IAM, Catalog Management, Sales, Logistics and Invoicing remain represented as independent layers for future approved buyer slices.
 
 ## Tech Stack
 
-- Angular 22 standalone components, routing, SCSS and strict mode.
-- Angular Material 22 and Angular CDK 22.
-- TypeScript, RxJS, Signals and HttpClient.
-- ngx-translate 18.
-- Node.js and npm.
+Angular 22, TypeScript strict mode, Angular Material/CDK 22, Signals, RxJS, ngx-translate 18, SCSS and npm.
 
 ## Getting Started
 
@@ -82,6 +63,7 @@ Open [http://localhost:4300](http://localhost:4300).
 ## Available Commands
 
 ```bash
+npm run validate:catalog-assets
 npm test
 npm run build
 ```
@@ -89,34 +71,22 @@ npm run build
 ## Project Structure
 
 ```text
-docs/assets/                 # Local Nexa documentation asset
-public/assets/               # Branding and baseline translations
-src/app/core/                # Portal shell, configuration and presentation
-src/app/<bounded-context>/   # domain, application, infrastructure, presentation
-src/styles.scss              # Nexa tokens and global styles
+src/app/core/                         # Shell, routes and language service
+src/app/shared/presentation/components # Reusable visual components
+src/app/shared/application/utilities   # Pure address, date and number utilities
+public/catalog-items/                  # Manifest-validated canonical media subset
+src/styles/                            # Tokens, typography, motion, Material and a11y
+docs/releases/                        # Versioned release notes
 ```
 
 ## Current Status
 
-This repository currently contains the approved architecture baseline.
-
-Business capabilities, API integrations, persistence and security will be implemented incrementally through vertical slices.
-
-Release v0.1.0 records this approved baseline; it does not claim production capability.
+v0.2.0 provides the durable Portal shell, `/home` route, shared visual foundations, normalized tokens, EN/ES switching, pure utilities, and 50 canonical catalog assets. It does not claim buyer capability or production integration.
 
 ## Out of Scope
 
-- Authentication.
-- API integration.
-- Real business screens.
-- Persistence.
-- Production deployment.
-- Complete Vue parity.
+Authentication, API integration, catalog pages, requests, orders, tracking, payments, persistence, deployment and complete Vue parity.
 
 ## Roadmap
 
-1. Architecture baseline.
-2. First approved vertical slice.
-3. Security and tenant isolation.
-4. Persistence and contracts.
-5. Progressive legacy parity.
+Future vertical slices require explicit contracts, buyer identity, tenant rules and runtime/browser evidence.
