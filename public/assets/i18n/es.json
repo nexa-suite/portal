@@ -1,0 +1,30 @@
+{
+  "shell": {
+    "portalLabel": "Portal comprador",
+    "portalName": "Nexa Buyer Portal",
+    "buyerWorkspace": "Espacio del comprador B2B",
+    "buyerDescription": "Un espacio claro y confiable preparado para descubrir productos autorizados de cadena de frío, solicitudes, órdenes y visibilidad de entregas.",
+    "baseline": "Baseline arquitectónico",
+    "version": "v0.1.0",
+    "language": "Idioma",
+    "preparedAreas": "Bounded contexts preparados",
+    "contextsTitle": "Modelo de experiencia del comprador",
+    "scopeNote": "Este baseline establece límites y dirección visual para compradores. No se simulan productos, órdenes ni cuentas.",
+    "navigation": {
+      "home": "Inicio",
+      "catalog": "Catálogo",
+      "requests": "Mis solicitudes",
+      "orders": "Mis órdenes",
+      "tracking": "Seguimiento",
+      "payments": "Pagos",
+      "profile": "Perfil"
+    },
+    "contexts": {
+      "iam": "Identidad del comprador",
+      "catalogManagement": "Catálogo autorizado",
+      "sales": "Solicitudes y órdenes",
+      "logistics": "Seguimiento visible",
+      "invoicing": "Documentos y crédito"
+    }
+  }
+}
