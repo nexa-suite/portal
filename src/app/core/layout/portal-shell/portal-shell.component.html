@@ -1,0 +1,19 @@
+<a class="skip-link" href="#main-content">{{ 'shell.skipToContent' | translate }}</a>
+<div class="portal-shell">
+  <header class="portal-header">
+    <a class="brand-lockup" routerLink="/home" aria-label="Nexa Buyer Portal home">
+      <nexa-brand-logo [width]="100" />
+      <span>{{ 'shell.portalLabel' | translate }}</span>
+    </a>
+
+    <nav class="portal-navigation" aria-label="Buyer portal navigation">
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'shell.navigation.home' | translate }}</a>
+    </nav>
+
+    <nexa-language-switcher />
+  </header>
+
+  <main id="main-content" class="portal-content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>

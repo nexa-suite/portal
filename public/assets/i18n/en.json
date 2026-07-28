@@ -1,30 +1,16 @@
 {
   "shell": {
-    "portalLabel": "Buyer portal",
+    "portalLabel": "B2B buyer workspace",
     "portalName": "Nexa Buyer Portal",
     "buyerWorkspace": "B2B buyer workspace",
-    "buyerDescription": "A clear, trusted workspace prepared for discovering authorized cold-chain products, requests, orders and delivery visibility.",
-    "baseline": "Architecture baseline",
-    "version": "v0.1.0",
+    "buyerDescription": "Discover authorized products, manage purchase requests, review orders and follow deliveries.",
     "language": "Language",
-    "preparedAreas": "Prepared bounded contexts",
-    "contextsTitle": "Buyer experience model",
-    "scopeNote": "This baseline establishes buyer-facing boundaries and visual direction. Product, order and account data are not simulated.",
-    "navigation": {
-      "home": "Home",
-      "catalog": "Catalog",
-      "requests": "My requests",
-      "orders": "My orders",
-      "tracking": "Tracking",
-      "payments": "Payments",
-      "profile": "Profile"
-    },
-    "contexts": {
-      "iam": "Buyer identity",
-      "catalogManagement": "Authorized catalog",
-      "sales": "Requests and orders",
-      "logistics": "Visible tracking",
-      "invoicing": "Documents and credit"
-    }
+    "skipToContent": "Skip to content",
+    "navigation": { "home": "Home" }
+  },
+  "home": {
+    "title": "Buyer workspace",
+    "description": "A focused space for the purchasing work that connects buyers with the cold-chain business.",
+    "body": "This workspace connects buyer workflows with the cold-chain business."
   }
 }
