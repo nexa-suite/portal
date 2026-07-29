@@ -11,6 +11,19 @@ The project uses Semantic Versioning.
 - Kept broader persistence, AI, IoT, cloud and mobile scope explicit while documenting the secured IAM, workspace and Catalog read slice.
 - Added a local repository map and a release-notes index.
 
+## [0.4.0] - 2026-07-28
+
+### Added
+
+- Buyer sign-in, memory-only session restoration and Buyer-only surface enforcement.
+- Secured responsive Product Catalog grid, filters, pagination, detail and retry states.
+- Integrated `/api/v1/authentication/*`, `/api/v1/session` and secured Catalog read requests.
+
+### Security
+
+- Portal accepts `BUYER` only; internal roles are rejected.
+- Browser storage is not used for access or refresh tokens.
+
 ## [0.3.0] - 2026-07-28
 
 ### Added
@@ -53,19 +66,6 @@ The project uses Semantic Versioning.
 ### Added
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
-
-## [0.4.0] - 2026-07-28
-
-### Added
-
-- Buyer sign-in, memory-only session restoration and Buyer-only surface enforcement.
-- Secured responsive Product Catalog grid, filters, pagination, detail and retry states.
-- Integrated `/api/v1/authentication/*`, `/api/v1/session` and secured Catalog read requests.
-
-### Security
-
-- Portal accepts `BUYER` only; internal roles are rejected.
-- Browser storage is not used for access or refresh tokens.
 
 [Unreleased]: https://github.com/nexa-suite/portal/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.4.0
