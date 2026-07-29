@@ -5,7 +5,7 @@
 .aside-content, .sign-in-aside footer { position: relative; z-index: 1; }
 .aside-content { width: min(100%, 560px); margin-top: 2vh; }
 .aside-content nexa-brand-logo { display: block; margin-bottom: clamp(56px, 9vh, 112px); }
-.aside-content h2 { max-width: 560px; margin: 0 0 var(--nexa-space-6); font-family: var(--nexa-font-family-display); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.1; }
+.aside-content h2 { max-width: 560px; margin: 0 0 var(--nexa-space-6); color: #fff; font-family: var(--nexa-font-family-display); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.1; }
 .aside-content p { max-width: 560px; margin: 0; color: rgb(255 255 255 / 75%); font-size: var(--nexa-font-size-md); line-height: var(--nexa-line-height-relaxed); }
 .access-pill { width: fit-content; margin-top: var(--nexa-space-8); padding: var(--nexa-space-3) var(--nexa-space-4); border: 1px solid rgb(255 255 255 / 35%); border-radius: var(--nexa-radius-full); color: #fff; font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); text-transform: uppercase; }
 .sign-in-aside footer { color: rgb(255 255 255 / 55%); font-size: var(--nexa-font-size-xs); }
