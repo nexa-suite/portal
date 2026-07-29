@@ -9,6 +9,7 @@
     }}</a>
   </nexa-page-header>
 
+  <div class="catalog-layout">
   <form class="catalog-toolbar" (submit)="$event.preventDefault(); submitSearch()" role="search">
     <label class="search-field">
       <span>{{ 'catalog.searchLabel' | translate }}</span>
@@ -48,6 +49,7 @@
     <button class="search-button" type="submit">{{ 'catalog.search' | translate }}</button>
   </form>
 
+  <div class="catalog-content">
   @switch (catalog.listStatus()) {
     @case ('idle') {
       <nexa-loading-state [label]="'catalog.states.loading' | translate" />
@@ -156,4 +158,6 @@
       </section>
     }
   }
+  </div>
+  </div>
 </div>
