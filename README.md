@@ -22,7 +22,7 @@ Buyer-facing B2B workspace for catalog discovery, purchase requests, orders, del
 
 `v0.4.0` packages Angular 22 Buyer access foundations and secured Product Catalog discovery/detail flow. Runtime and browser evidence remain limited to checks recorded for this release.
 
-Portal is the buyer experience and is separate from internal Platform. Buyer workflows, API integration, authentication, authorization, tenant management, persistence and production deployment are not implemented in this release.
+Portal is the buyer experience and is separate from internal Platform. This release integrates the secured Buyer IAM/session/catalog read contract with the API; broader buyer workflows, persistence beyond the API contract and production deployment are not implemented here.
 
 ## Product boundaries
 
@@ -35,11 +35,11 @@ flowchart LR
 
     Website -. "product navigation" .-> Platform
     Website -. "product navigation" .-> Portal
-    Platform -. "future approved HTTP contract" .-> API
-    Portal -. "future approved HTTP contract" .-> API
+    Platform -. "secured IAM and Catalog read contract" .-> API
+    Portal -->|"secured IAM and Catalog read contract"| API
 ```
 
-The dotted links are boundaries for future approved contracts, not evidence of current API integration. Mobile is not implemented and is intentionally absent from the runtime map. PostgreSQL, AI, IoT and cloud services are not implemented in this release.
+The Portal link is the approved secured vertical slice for this release. Mobile is not implemented and is intentionally absent from the runtime map. PostgreSQL, AI, IoT and cloud services remain outside this frontend release.
 
 ![Nexa Suite repository map](./docs/assets/repository-map/nexa-suite-map.svg)
 
@@ -57,8 +57,8 @@ The dotted links are boundaries for future approved contracts, not evidence of c
 
 | Area | Current maturity |
 |---|---|
-| IAM | Foundation shell / implementation planned |
-| Catalog Management | Foundation shell / API foundation exists |
+| IAM | Secured client/API slice |
+| Catalog Management | Secured read slice; shared local reference seed |
 | Sales from buyer perspective | Planned |
 | Logistics tracking | Planned |
 | Invoicing documents and payments | Planned |
