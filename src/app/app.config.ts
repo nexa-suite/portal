@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { providePortalRuntimeConfig } from './core/security/runtime-config';
 import { accessTokenInterceptor } from './core/security/access-token.interceptor';
 import { portalSurfaceInterceptor } from './core/security/portal-surface.interceptor';
 import { refreshInterceptor } from './core/security/refresh.interceptor';
+import { PortalAuthStateService } from './iam/application/portal-auth-state.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([portalSurfaceInterceptor, accessTokenInterceptor, refreshInterceptor]),
     ),
+    provideAppInitializer(() => inject(PortalAuthStateService).restore()),
     provideRouter(routes, withComponentInputBinding()),
     provideTranslateService({
       fallbackLang: 'en',

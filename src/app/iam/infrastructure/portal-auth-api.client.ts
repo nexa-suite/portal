@@ -22,6 +22,7 @@ export class PortalAuthApiClient {
         username: credentials.email,
         password: credentials.password,
         workspaceSlug: credentials.workspaceSlug,
+        surface: 'PORTAL',
       },
       {
         context: new HttpContext().set(SKIP_AUTH, true).set(SKIP_REFRESH, true),
@@ -44,9 +45,9 @@ export class PortalAuthApiClient {
   signOut(): Observable<unknown> {
     return this.http.post<unknown>(
       portalApiUrl(this.config, this.config.signOutPath),
-      {},
+      null,
       {
-        context: new HttpContext().set(SKIP_AUTH, true).set(SKIP_REFRESH, true),
+        context: new HttpContext().set(SKIP_REFRESH, true),
         withCredentials: true,
       },
     );

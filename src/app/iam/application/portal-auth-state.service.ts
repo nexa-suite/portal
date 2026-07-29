@@ -52,6 +52,20 @@ export class PortalAuthStateService {
     );
   }
 
+  restore(): Observable<void> {
+    this.statusState.set('refreshing');
+    this.errorState.set(null);
+    return this.api.refresh().pipe(
+      map((response) => toPortalSession(response)),
+      tap((session) => this.acceptSession(session)),
+      map(() => undefined),
+      catchError(() => {
+        this.clearSession();
+        return of(undefined);
+      }),
+    );
+  }
+
   refreshAccessToken(): Observable<string> {
     if (!this.tokenState())
       return throwError(() => new Error('No active Portal session can be refreshed.'));

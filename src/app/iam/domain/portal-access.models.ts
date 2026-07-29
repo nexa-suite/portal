@@ -94,15 +94,17 @@ function identityFromResponse(
   response: RecordValue,
   previousIdentity: PortalIdentity | null,
 ): PortalIdentity {
-  const user = recordValue(property(response, 'user') ?? property(response, 'User'));
+  const session = recordValue(property(response, 'session') ?? property(response, 'Session'));
+  const user = recordValue(property(response, 'user') ?? property(response, 'User') ?? session);
   const membership = recordValue(
-    property(response, 'membership') ?? property(response, 'Membership'),
+    property(response, 'membership') ?? property(response, 'Membership') ?? session,
   );
   const email = firstString(
     property(user, 'email'),
     property(user, 'Email'),
     property(response, 'email'),
     property(response, 'Email'),
+    property(session, 'email'),
     property(user, 'username'),
     property(user, 'Username'),
   );
@@ -111,6 +113,7 @@ function identityFromResponse(
     property(user, 'Id'),
     property(response, 'id'),
     property(response, 'Id'),
+    property(session, 'userId'),
     email,
   );
   const displayName = firstString(
@@ -122,6 +125,7 @@ function identityFromResponse(
     property(response, 'DisplayName'),
     property(response, 'fullName'),
     property(response, 'FullName'),
+    property(session, 'displayName'),
     email,
   );
   const role = normalizeRole(
@@ -139,6 +143,7 @@ function identityFromResponse(
     property(response, 'Role'),
     property(response, 'roleName'),
     property(response, 'RoleName'),
+    property(session, 'role'),
     previousIdentity?.role,
   );
 
@@ -157,6 +162,7 @@ function identityFromResponse(
       property(membership, 'WorkspaceSlug'),
       property(response, 'workspaceSlug'),
       property(response, 'WorkspaceSlug'),
+      property(session, 'workspaceSlug'),
       previousIdentity?.workspaceSlug,
     ),
     clientAccountId: firstNumber(
@@ -188,6 +194,10 @@ export function toPortalSession(
     property(response, 'Token'),
   );
   if (!accessToken) throw new MissingAccessTokenError();
+
+  const session = recordValue(property(response, 'session') ?? property(response, 'Session'));
+  const surface = firstString(property(session, 'surface'), property(response, 'surface'));
+  if (surface && surface.toUpperCase() !== PORTAL_SURFACE) throw new PortalAccessDeniedError();
 
   return {
     accessToken,

@@ -11,7 +11,7 @@ export interface PortalRuntimeConfig {
 }
 
 const DEFAULT_RUNTIME_CONFIG: PortalRuntimeConfig = {
-  apiBaseUrl: 'http://localhost:8081',
+  apiBaseUrl: 'http://localhost:8080',
   signInPath: '/api/v1/authentication/sign-in',
   refreshPath: '/api/v1/authentication/refresh',
   signOutPath: '/api/v1/authentication/sign-out',
