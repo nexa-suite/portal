@@ -54,7 +54,20 @@ The project uses Semantic Versioning.
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.3.0...HEAD
+## [0.4.0] - 2026-07-28
+
+### Added
+
+- Buyer sign-in, memory-only session restoration and Buyer-only surface enforcement.
+- Secured responsive Product Catalog grid, filters, pagination, detail and retry states.
+
+### Security
+
+- Portal accepts `BUYER` only; internal roles are rejected.
+- Browser storage is not used for access or refresh tokens.
+
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/nexa-suite/portal/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/nexa-suite/portal/compare/v0.1.0...v0.2.0
