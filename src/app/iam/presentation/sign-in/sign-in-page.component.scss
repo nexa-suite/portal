@@ -1,153 +1,29 @@
-:host {
-  display: block;
-  min-height: 100dvh;
-}
-.sign-in-page {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(20rem, 42%);
-  min-height: 100dvh;
-  background: var(--nexa-surface-page);
-}
-.sign-in-panel {
-  display: grid;
-  align-content: center;
-  gap: var(--nexa-space-8);
-  width: min(100%, 34rem);
-  margin: 0 auto;
-  padding: clamp(var(--nexa-space-8), 8vw, var(--nexa-space-16))
-    clamp(var(--nexa-space-5), 7vw, var(--nexa-space-12));
-}
-.sign-in-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--nexa-space-4);
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-sm);
-  font-weight: var(--nexa-font-weight-semibold);
-}
-.sign-in-brand span {
-  padding-left: var(--nexa-space-4);
-  border-left: 1px solid var(--nexa-color-border-default);
-}
-.sign-in-copy {
-  display: grid;
-  gap: var(--nexa-space-3);
-}
-.eyebrow {
-  margin: 0;
-  color: var(--nexa-color-cold-refrigerated);
-  font-size: var(--nexa-font-size-xs);
-  font-weight: var(--nexa-font-weight-bold);
-  letter-spacing: var(--nexa-letter-spacing-wider);
-  text-transform: uppercase;
-}
-h1,
-h2 {
-  margin: 0;
-  font-family: var(--nexa-font-family-display);
-  line-height: var(--nexa-line-height-tight);
-}
-h1 {
-  font-size: clamp(2rem, 5vw, 3.25rem);
-}
-h2 {
-  font-size: clamp(2rem, 4vw, 3rem);
-}
-.sign-in-copy p:last-child,
-.sign-in-aside p:not(.eyebrow) {
-  margin: 0;
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-lg);
-  line-height: var(--nexa-line-height-relaxed);
-}
-.sign-in-form {
-  display: grid;
-  gap: var(--nexa-space-4);
-}
-.sign-in-form label {
-  display: grid;
-  gap: var(--nexa-space-2);
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-sm);
-  font-weight: var(--nexa-font-weight-semibold);
-}
-.sign-in-form input {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0 var(--nexa-space-4);
-  border: 1px solid var(--nexa-color-border-default);
-  border-radius: var(--nexa-radius-md);
-  background: var(--nexa-surface-card);
-  color: var(--nexa-color-text-primary);
-  font: inherit;
-}
-.sign-in-form input:focus-visible {
-  outline: 3px solid var(--nexa-color-primary-100);
-  border-color: var(--nexa-color-primary-600);
-}
-.sign-in-form button {
-  min-height: 3rem;
-  margin-top: var(--nexa-space-2);
-  border: 0;
-  border-radius: var(--nexa-radius-md);
-  background: var(--nexa-color-primary-600);
-  color: var(--nexa-color-text-inverse);
-  font: inherit;
-  font-weight: var(--nexa-font-weight-bold);
-  cursor: pointer;
-}
-.sign-in-form button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-.form-error,
-.form-hint {
-  margin: 0;
-  padding: var(--nexa-space-3) var(--nexa-space-4);
-  border-radius: var(--nexa-radius-md);
-  font-size: var(--nexa-font-size-sm);
-}
-.form-error {
-  background: var(--nexa-color-danger-50);
-  color: var(--nexa-color-danger-700);
-}
-.form-hint {
-  background: var(--nexa-color-warning-50);
-  color: var(--nexa-color-warning-700);
-}
-.sign-in-aside {
-  display: grid;
-  align-content: center;
-  gap: var(--nexa-space-5);
-  padding: clamp(var(--nexa-space-8), 8vw, var(--nexa-space-16));
-  background: linear-gradient(
-    155deg,
-    var(--nexa-color-cold-refrigerated),
-    var(--nexa-color-primary-700)
-  );
-  color: var(--nexa-color-text-inverse);
-}
-.sign-in-aside .eyebrow {
-  color: var(--nexa-color-primary-100);
-}
-.sign-in-aside p:not(.eyebrow) {
-  color: rgb(255 255 255 / 82%);
-}
-.access-pill {
-  width: fit-content;
-  padding: var(--nexa-space-2) var(--nexa-space-4);
-  border: 1px solid rgb(255 255 255 / 35%);
-  border-radius: var(--nexa-radius-full);
-  color: var(--nexa-color-text-inverse);
-  font-size: var(--nexa-font-size-sm);
-  font-weight: var(--nexa-font-weight-bold);
-}
-@media (max-width: 760px) {
-  .sign-in-page {
-    grid-template-columns: 1fr;
-  }
-  .sign-in-aside {
-    min-height: 16rem;
-    padding: var(--nexa-space-8) clamp(var(--nexa-space-5), 7vw, var(--nexa-space-12));
-  }
-}
+:host { display: block; min-height: 100dvh; }
+.sign-in-page { display: grid; grid-template-columns: minmax(0, 50%) minmax(0, 50%); min-height: 100dvh; background: #fff; }
+.sign-in-aside { position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: clamp(40px, 5vw, 80px); color: #fff; background: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px), radial-gradient(circle at 24% 18%, rgba(125,211,252,.24), transparent 26%), radial-gradient(circle at 78% 74%, rgba(59,130,246,.20), transparent 30%), linear-gradient(148deg, #082f6f 0%, #1551a8 48%, #063160 100%); background-size: 56px 56px, 56px 56px, auto, auto, auto; }
+.sign-in-aside::before { content: ''; position: absolute; width: 44vw; height: 44vw; max-width: 620px; max-height: 620px; right: -22%; top: 10%; border-radius: 50%; background: rgb(255 255 255 / 8%); filter: blur(20px); }
+.aside-content, .sign-in-aside footer { position: relative; z-index: 1; }
+.aside-content { width: min(100%, 560px); margin-top: 2vh; }
+.aside-content nexa-brand-logo { display: block; margin-bottom: clamp(56px, 9vh, 112px); }
+.aside-content h2 { max-width: 560px; margin: 0 0 var(--nexa-space-6); color: #fff; font-family: var(--nexa-font-family-display); font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.1; }
+.aside-content p { max-width: 560px; margin: 0; color: rgb(255 255 255 / 75%); font-size: var(--nexa-font-size-md); line-height: var(--nexa-line-height-relaxed); }
+.access-pill { width: fit-content; margin-top: var(--nexa-space-8); padding: var(--nexa-space-3) var(--nexa-space-4); border: 1px solid rgb(255 255 255 / 35%); border-radius: var(--nexa-radius-full); color: #fff; font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); text-transform: uppercase; }
+.sign-in-aside footer { color: rgb(255 255 255 / 55%); font-size: var(--nexa-font-size-xs); }
+.sign-in-panel { position: relative; display: grid; align-content: center; width: min(100%, 34rem); margin: 0 auto; padding: clamp(40px, 5vw, 80px); }
+.language-switcher { position: absolute; top: clamp(40px, 5vw, 80px); right: clamp(40px, 5vw, 80px); display: flex; gap: var(--nexa-space-2); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-xs); }
+.language-switcher span { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-full); }
+.language-switcher .active { border-color: var(--nexa-color-primary-100); color: var(--nexa-color-primary-600); background: var(--nexa-color-primary-50); }
+.sign-in-copy { margin-bottom: var(--nexa-space-8); }
+.eyebrow { margin: 0 0 var(--nexa-space-2); color: var(--nexa-color-cold-refrigerated); font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); letter-spacing: var(--nexa-letter-spacing-wider); text-transform: uppercase; }
+h1 { margin: 0; font-family: var(--nexa-font-family-display); font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.1; }
+.sign-in-copy > p:last-child { margin: var(--nexa-space-4) 0 0; color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-md); line-height: var(--nexa-line-height-relaxed); }
+.sign-in-form { display: grid; gap: var(--nexa-space-4); }
+.sign-in-form label { display: grid; gap: var(--nexa-space-2); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-sm); font-weight: var(--nexa-font-weight-semibold); }
+.sign-in-form input { width: 100%; min-height: 3rem; padding: 0 var(--nexa-space-4); border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-md); background: #fff; color: var(--nexa-color-text-primary); font: inherit; }
+.sign-in-form input:focus-visible { outline: 3px solid var(--nexa-color-primary-100); border-color: var(--nexa-color-primary-600); }
+.sign-in-form button { min-height: 3rem; margin-top: var(--nexa-space-2); border: 0; border-radius: var(--nexa-radius-md); background: var(--nexa-color-primary-600); color: #fff; font: inherit; font-weight: var(--nexa-font-weight-bold); cursor: pointer; }
+.sign-in-form button:disabled { opacity: .55; cursor: not-allowed; }
+.form-error, .form-hint { margin: 0; padding: var(--nexa-space-3) var(--nexa-space-4); border-radius: var(--nexa-radius-md); font-size: var(--nexa-font-size-sm); }
+.form-error { background: var(--nexa-color-danger-50); color: var(--nexa-color-danger-700); }
+.form-hint { background: var(--nexa-color-warning-50); color: var(--nexa-color-warning-700); }
+@media (max-width: 760px) { .sign-in-page { grid-template-columns: 1fr; } .sign-in-aside { min-height: 11.25rem; padding: var(--nexa-space-5); } .aside-content nexa-brand-logo { margin-bottom: var(--nexa-space-5); } .aside-content h2 { margin-bottom: 0; font-size: 1.55rem; } .aside-content p, .access-pill, .sign-in-aside footer { display: none; } .sign-in-panel { width: 100%; padding: 56px var(--nexa-space-5) var(--nexa-space-8); } .language-switcher { top: var(--nexa-space-5); right: var(--nexa-space-5); } }

@@ -1,10 +1,16 @@
 <main class="sign-in-page">
-  <section class="sign-in-panel" aria-labelledby="sign-in-title">
-    <div class="sign-in-brand">
-      <nexa-brand-logo [width]="128" />
-      <span>{{ 'auth.signIn.surface' | translate }}</span>
+  <aside class="sign-in-aside" aria-label="Nexa Buyer Portal">
+    <div class="aside-content">
+      <nexa-brand-logo variant="inverse" [width]="136" />
+      <h2>{{ 'auth.signIn.asideTitle' | translate }}</h2>
+      <p>{{ 'auth.signIn.asideDescription' | translate }}</p>
+      <div class="access-pill">{{ 'auth.signIn.buyerAccess' | translate }}</div>
     </div>
+    <footer>Nexa Buyer Portal</footer>
+  </aside>
 
+  <section class="sign-in-panel" aria-labelledby="sign-in-title">
+    <div class="language-switcher" aria-label="Language"><span>ES</span><span class="active">EN</span></div>
     <div class="sign-in-copy">
       <p class="eyebrow">{{ 'auth.signIn.eyebrow' | translate }}</p>
       <h1 id="sign-in-title">{{ 'auth.signIn.title' | translate }}</h1>
@@ -57,11 +63,4 @@
       }
     </form>
   </section>
-
-  <aside class="sign-in-aside" aria-label="Nexa Buyer Portal">
-    <p class="eyebrow">{{ 'auth.signIn.asideEyebrow' | translate }}</p>
-    <h2>{{ 'auth.signIn.asideTitle' | translate }}</h2>
-    <p>{{ 'auth.signIn.asideDescription' | translate }}</p>
-    <div class="access-pill">{{ 'auth.signIn.buyerAccess' | translate }}</div>
-  </aside>
 </main>
