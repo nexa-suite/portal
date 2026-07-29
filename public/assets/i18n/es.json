@@ -6,11 +6,80 @@
     "buyerDescription": "Descubre productos autorizados, gestiona solicitudes de compra, revisa órdenes y sigue tus entregas.",
     "language": "Idioma",
     "skipToContent": "Saltar al contenido",
-    "navigation": { "home": "Inicio" }
+    "navigation": { "home": "Inicio", "catalog": "Catálogo de productos" },
+    "signOut": "Cerrar sesión"
   },
   "home": {
     "title": "Espacio del comprador",
     "description": "Un espacio enfocado en el trabajo de compra que conecta a compradores con la cadena de frío.",
     "body": "Este espacio conecta los flujos del comprador con la cadena de frío."
+  },
+  "auth": {
+    "signIn": {
+      "surface": "Portal comprador",
+      "eyebrow": "Acceso seguro de comprador",
+      "title": "Ingresa a Nexa",
+      "description": "Usa las credenciales autorizadas de tu workspace para acceder al catálogo comprador.",
+      "workspace": "Workspace",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Continuar al Portal",
+      "submitting": "Verificando acceso…",
+      "required": "Workspace, correo y contraseña son obligatorios.",
+      "invalidCredentials": "Las credenciales no fueron aceptadas.",
+      "buyerOnly": "Esta superficie está restringida al acceso Buyer.",
+      "unavailable": "No pudimos completar el ingreso. Inténtalo nuevamente.",
+      "asideEyebrow": "Comercio de cadena de frío",
+      "asideTitle": "Un espacio enfocado para compradores autorizados.",
+      "asideDescription": "Descubre el catálogo disponible para tu workspace comprador y revisa el detalle de los productos sin controles operativos.",
+      "buyerAccess": "Solo acceso BUYER"
+    }
+  },
+  "forbidden": {
+    "eyebrow": "Acceso restringido",
+    "title": "Esta superficie no está disponible para tu rol.",
+    "description": "El Portal comprador de Nexa está reservado para membresías Buyer activas. Regresa a un workspace permitido o ingresa con otra cuenta.",
+    "home": "Ir al inicio del Portal",
+    "signIn": "Usar otra cuenta"
+  },
+  "catalog": {
+    "eyebrow": "Catálogo autorizado",
+    "title": "Catálogo de productos",
+    "subtitle": "Explora los productos de cadena de frío disponibles para tu workspace comprador.",
+    "backHome": "Volver al inicio",
+    "backToCatalog": "Volver al catálogo",
+    "backToResults": "Volver a resultados",
+    "searchLabel": "Buscar",
+    "searchPlaceholder": "Busca por producto, marca o categoría",
+    "search": "Buscar",
+    "brand": "Marca",
+    "allBrands": "Todas las marcas",
+    "category": "Categoría",
+    "allCategories": "Todas las categorías",
+    "coldChain": "Requisito de cadena de frío",
+    "allColdChain": "Todos los requisitos",
+    "refrigerated": "Refrigerado",
+    "frozen": "Congelado",
+    "ambient": "Ambiente",
+    "results": "Productos disponibles",
+    "resultCount": "{count} productos encontrados",
+    "pageOf": "Página {page} de {pages}",
+    "viewDetails": "Ver detalle",
+    "productCode": "Código de producto",
+    "catalogItemCode": "Ítem de catálogo",
+    "pagination": "Paginación del catálogo",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "retry": "Reintentar",
+    "detailErrorTitle": "Detalle del producto no disponible",
+    "detailErrorDescription": "No pudimos cargar este ítem del catálogo. Inténtalo nuevamente o vuelve al catálogo.",
+    "states": {
+      "loading": "Cargando catálogo",
+      "retrying": "Reintentando solicitud del catálogo",
+      "errorTitle": "Catálogo no disponible",
+      "errorDescription": "No pudimos cargar el catálogo autorizado. Inténtalo nuevamente.",
+      "emptyTitle": "No hay productos con estos filtros",
+      "emptyDescription": "Cambia la búsqueda o los filtros para ver otros productos autorizados."
+    }
   }
 }

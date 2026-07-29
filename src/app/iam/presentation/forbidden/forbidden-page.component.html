@@ -1,0 +1,12 @@
+<main class="forbidden-page">
+  <section class="forbidden-panel" aria-labelledby="forbidden-title">
+    <nexa-brand-logo [width]="128" />
+    <p class="eyebrow">{{ 'forbidden.eyebrow' | translate }}</p>
+    <h1 id="forbidden-title">{{ 'forbidden.title' | translate }}</h1>
+    <p>{{ 'forbidden.description' | translate }}</p>
+    <div class="actions">
+      <a routerLink="/portal/home">{{ 'forbidden.home' | translate }}</a>
+      <a class="secondary" routerLink="/sign-in">{{ 'forbidden.signIn' | translate }}</a>
+    </div>
+  </section>
+</main>
