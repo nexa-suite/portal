@@ -18,8 +18,7 @@ export class PortalAuthApiClient {
     return this.http.post<unknown>(
       portalApiUrl(this.config, this.config.signInPath),
       {
-        email: credentials.email,
-        username: credentials.email,
+        identifier: credentials.email,
         password: credentials.password,
         workspaceSlug: credentials.workspaceSlug,
         surface: 'PORTAL',
@@ -45,7 +44,7 @@ export class PortalAuthApiClient {
   currentSession(accessToken: string): Observable<unknown> {
     return this.http.get<unknown>(
       portalApiUrl(this.config, '/api/v1/session'),
-      { setHeaders: { Authorization: `Bearer ${accessToken}` } },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
   }
 

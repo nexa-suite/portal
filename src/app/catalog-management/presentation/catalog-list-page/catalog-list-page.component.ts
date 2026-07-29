@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -63,8 +64,10 @@ export class CatalogListPageComponent {
   constructor() {
     effect(() => {
       const query = this.query();
-      this.searchText.set(query.q);
-      this.catalog.loadList(query);
+      untracked(() => {
+        this.searchText.set(query.q);
+        this.catalog.loadList(query);
+      });
     });
   }
 

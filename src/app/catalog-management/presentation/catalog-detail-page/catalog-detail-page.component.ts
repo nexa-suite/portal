@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, untracked } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -42,7 +42,7 @@ export class CatalogDetailPageComponent {
   constructor() {
     effect(() => {
       const id = this.catalogItemId();
-      if (id) this.catalog.loadDetail(id);
+      if (id) untracked(() => this.catalog.loadDetail(id));
     });
   }
 
