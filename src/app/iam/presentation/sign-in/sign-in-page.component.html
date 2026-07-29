@@ -1,0 +1,67 @@
+<main class="sign-in-page">
+  <section class="sign-in-panel" aria-labelledby="sign-in-title">
+    <div class="sign-in-brand">
+      <nexa-brand-logo [width]="128" />
+      <span>{{ 'auth.signIn.surface' | translate }}</span>
+    </div>
+
+    <div class="sign-in-copy">
+      <p class="eyebrow">{{ 'auth.signIn.eyebrow' | translate }}</p>
+      <h1 id="sign-in-title">{{ 'auth.signIn.title' | translate }}</h1>
+      <p>{{ 'auth.signIn.description' | translate }}</p>
+    </div>
+
+    <form class="sign-in-form" (submit)="$event.preventDefault(); submit()" novalidate>
+      <label>
+        <span>{{ 'auth.signIn.workspace' | translate }}</span>
+        <input
+          [value]="workspaceSlug()"
+          (input)="onValue('workspaceSlug', $event)"
+          autocomplete="organization"
+          required
+        />
+      </label>
+      <label>
+        <span>{{ 'auth.signIn.email' | translate }}</span>
+        <input
+          type="email"
+          [value]="email()"
+          (input)="onValue('email', $event)"
+          autocomplete="username"
+          required
+        />
+      </label>
+      <label>
+        <span>{{ 'auth.signIn.password' | translate }}</span>
+        <input
+          type="password"
+          [value]="password()"
+          (input)="onValue('password', $event)"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+
+      @if (errorMessage(); as message) {
+        <p class="form-error" role="alert">{{ message | translate }}</p>
+      }
+
+      <button type="submit" [disabled]="!canSubmit() || auth.status() === 'authenticating'">
+        {{
+          (auth.status() === 'authenticating' ? 'auth.signIn.submitting' : 'auth.signIn.submit')
+            | translate
+        }}
+      </button>
+      @if (submitted() && !canSubmit()) {
+        <p class="form-hint" role="status">{{ 'auth.signIn.required' | translate }}</p>
+      }
+    </form>
+  </section>
+
+  <aside class="sign-in-aside" aria-label="Nexa Buyer Portal">
+    <p class="eyebrow">{{ 'auth.signIn.asideEyebrow' | translate }}</p>
+    <h2>{{ 'auth.signIn.asideTitle' | translate }}</h2>
+    <p>{{ 'auth.signIn.asideDescription' | translate }}</p>
+    <div class="access-pill">{{ 'auth.signIn.buyerAccess' | translate }}</div>
+  </aside>
+</main>

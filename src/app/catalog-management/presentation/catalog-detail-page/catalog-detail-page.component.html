@@ -1,0 +1,67 @@
+<div class="catalog-detail-page">
+  <a class="back-link" routerLink="/portal/product-catalog" [queryParams]="backQueryParams()"
+    >← {{ 'catalog.backToCatalog' | translate }}</a
+  >
+
+  @switch (catalog.detailStatus()) {
+    @case ('idle') {
+      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+    }
+    @case ('loading') {
+      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+    }
+    @case ('retrying') {
+      <nexa-loading-state [label]="'catalog.states.retrying' | translate" />
+    }
+    @case ('error') {
+      <nexa-error-state
+        [title]="'catalog.detailErrorTitle' | translate"
+        [description]="'catalog.detailErrorDescription' | translate"
+        [retryLabel]="'catalog.retry' | translate"
+        (retry)="catalog.retryDetail()"
+      />
+    }
+    @case ('success') {
+      @if (catalog.detail(); as item) {
+        <article class="catalog-detail-card">
+          <div class="detail-visual">
+            @if (item.image?.url) {
+              <img [src]="item.image?.url" [alt]="item.itemName" />
+            } @else {
+              <span class="image-placeholder" aria-hidden="true">N</span>
+            }
+          </div>
+          <div class="detail-copy">
+            <p class="catalog-category">{{ item.categoryName }}</p>
+            <h1>{{ item.itemName }}</h1>
+            <p class="catalog-brand">
+              {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
+            </p>
+            @if (item.coldChainRequirement) {
+              <nexa-cold-chain-badge
+                [label]="item.coldChainRequirement"
+                [variant]="coldChainVariant(item.coldChainRequirement)"
+              />
+            }
+            @if (item.description) {
+              <p class="description">{{ item.description }}</p>
+            }
+            <dl class="detail-meta">
+              <div>
+                <dt>{{ 'catalog.productCode' | translate }}</dt>
+                <dd>{{ item.productId }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'catalog.catalogItemCode' | translate }}</dt>
+                <dd>{{ item.catalogItemId }}</dd>
+              </div>
+            </dl>
+            <button type="button" class="back-button" (click)="backToCatalog()">
+              {{ 'catalog.backToResults' | translate }}
+            </button>
+          </div>
+        </article>
+      }
+    }
+  }
+</div>

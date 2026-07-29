@@ -7,10 +7,20 @@
     </a>
 
     <nav class="portal-navigation" aria-label="Buyer portal navigation">
-      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'shell.navigation.home' | translate }}</a>
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{
+        'shell.navigation.home' | translate
+      }}</a>
+      <a routerLink="/portal/product-catalog" routerLinkActive="active">{{
+        'shell.navigation.catalog' | translate
+      }}</a>
     </nav>
 
-    <nexa-language-switcher />
+    <div class="portal-actions">
+      <nexa-language-switcher />
+      <button type="button" class="sign-out-button" (click)="signOut()">
+        {{ 'shell.signOut' | translate }}
+      </button>
+    </div>
   </header>
 
   <main id="main-content" class="portal-content" tabindex="-1">

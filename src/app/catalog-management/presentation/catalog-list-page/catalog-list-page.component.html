@@ -1,0 +1,159 @@
+<div class="catalog-page">
+  <nexa-page-header
+    [eyebrow]="'catalog.eyebrow' | translate"
+    [title]="'catalog.title' | translate"
+    [subtitle]="'catalog.subtitle' | translate"
+  >
+    <a page-header-actions class="home-link" routerLink="/portal/home">{{
+      'catalog.backHome' | translate
+    }}</a>
+  </nexa-page-header>
+
+  <form class="catalog-toolbar" (submit)="$event.preventDefault(); submitSearch()" role="search">
+    <label class="search-field">
+      <span>{{ 'catalog.searchLabel' | translate }}</span>
+      <input
+        [value]="searchText()"
+        (input)="searchText.set($any($event.target).value)"
+        [placeholder]="'catalog.searchPlaceholder' | translate"
+      />
+    </label>
+    <label>
+      <span>{{ 'catalog.brand' | translate }}</span>
+      <select [value]="query().brand" (change)="updateFilter('brand', $event)">
+        <option value="">{{ 'catalog.allBrands' | translate }}</option>
+        @for (brand of brands(); track brand) {
+          <option [value]="brand">{{ brand }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>{{ 'catalog.category' | translate }}</span>
+      <select [value]="query().category" (change)="updateFilter('category', $event)">
+        <option value="">{{ 'catalog.allCategories' | translate }}</option>
+        @for (category of categories(); track category) {
+          <option [value]="category">{{ category }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>{{ 'catalog.coldChain' | translate }}</span>
+      <select [value]="query().coldChain" (change)="updateFilter('coldChain', $event)">
+        <option value="">{{ 'catalog.allColdChain' | translate }}</option>
+        <option value="REFRIGERATED">{{ 'catalog.refrigerated' | translate }}</option>
+        <option value="FROZEN">{{ 'catalog.frozen' | translate }}</option>
+        <option value="NONE">{{ 'catalog.ambient' | translate }}</option>
+      </select>
+    </label>
+    <button class="search-button" type="submit">{{ 'catalog.search' | translate }}</button>
+  </form>
+
+  @switch (catalog.listStatus()) {
+    @case ('idle') {
+      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+    }
+    @case ('loading') {
+      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+    }
+    @case ('retrying') {
+      <nexa-loading-state [label]="'catalog.states.retrying' | translate" />
+    }
+    @case ('error') {
+      <nexa-error-state
+        [title]="'catalog.states.errorTitle' | translate"
+        [description]="'catalog.states.errorDescription' | translate"
+        [retryLabel]="'catalog.retry' | translate"
+        (retry)="catalog.retryList()"
+      />
+    }
+    @case ('empty') {
+      <nexa-empty-state
+        [title]="'catalog.states.emptyTitle' | translate"
+        [description]="'catalog.states.emptyDescription' | translate"
+      />
+    }
+    @case ('success') {
+      <section class="catalog-results" aria-live="polite" aria-labelledby="catalog-results-title">
+        <div class="results-heading">
+          <div>
+            <h2 id="catalog-results-title">{{ 'catalog.results' | translate }}</h2>
+            <p>
+              {{ 'catalog.resultCount' | translate: { count: catalog.page()?.totalItems ?? 0 } }}
+            </p>
+          </div>
+          <span class="result-page">{{
+            'catalog.pageOf'
+              | translate
+                : { page: (catalog.page()?.page ?? 0) + 1, pages: catalog.page()?.totalPages ?? 1 }
+          }}</span>
+        </div>
+
+        <div class="catalog-grid">
+          @for (item of catalog.items(); track item.catalogItemId) {
+            <article class="catalog-card">
+              <a
+                class="catalog-card-visual"
+                [routerLink]="['/portal/product-catalog', item.catalogItemId]"
+                [queryParams]="routeQueryParams()"
+              >
+                @if (item.image?.url) {
+                  <img [src]="item.image?.url" [alt]="item.itemName" loading="lazy" />
+                } @else {
+                  <span class="image-placeholder" aria-hidden="true">N</span>
+                }
+              </a>
+              <div class="catalog-card-body">
+                <p class="catalog-category">{{ item.categoryName }}</p>
+                <h3>{{ item.itemName }}</h3>
+                <p class="catalog-brand">
+                  {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
+                </p>
+                @if (item.coldChainRequirement) {
+                  <nexa-cold-chain-badge
+                    [label]="item.coldChainRequirement"
+                    [variant]="coldChainVariant(item.coldChainRequirement)"
+                  />
+                }
+                <a
+                  class="detail-link"
+                  [routerLink]="['/portal/product-catalog', item.catalogItemId]"
+                  [queryParams]="routeQueryParams()"
+                  >{{ 'catalog.viewDetails' | translate }}</a
+                >
+              </div>
+            </article>
+          }
+        </div>
+
+        @if ((catalog.page()?.totalPages ?? 0) > 1) {
+          <nav class="pagination" [attr.aria-label]="'catalog.pagination' | translate">
+            <button
+              type="button"
+              (click)="goToPage(query().page - 1)"
+              [disabled]="query().page === 0"
+            >
+              {{ 'catalog.previous' | translate }}
+            </button>
+            @for (page of pageNumbers(); track page) {
+              <button
+                type="button"
+                [class.active]="page === query().page"
+                [attr.aria-current]="page === query().page ? 'page' : null"
+                (click)="goToPage(page)"
+              >
+                {{ page + 1 }}
+              </button>
+            }
+            <button
+              type="button"
+              (click)="goToPage(query().page + 1)"
+              [disabled]="query().page + 1 >= (catalog.page()?.totalPages ?? 0)"
+            >
+              {{ 'catalog.next' | translate }}
+            </button>
+          </nav>
+        }
+      </section>
+    }
+  }
+</div>
