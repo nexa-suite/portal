@@ -185,9 +185,10 @@ function identityFromResponse(
 export function toPortalSession(
   responseValue: unknown,
   previousIdentity: PortalIdentity | null = null,
+  accessTokenOverride?: string,
 ): PortalSession {
   const response = recordValue(responseValue);
-  const accessToken = firstString(
+  const accessToken = accessTokenOverride ?? firstString(
     property(response, 'accessToken'),
     property(response, 'AccessToken'),
     property(response, 'token'),

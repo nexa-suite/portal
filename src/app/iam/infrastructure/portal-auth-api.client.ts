@@ -34,11 +34,18 @@ export class PortalAuthApiClient {
   refresh(): Observable<unknown> {
     return this.http.post<unknown>(
       portalApiUrl(this.config, this.config.refreshPath),
-      {},
+      null,
       {
         context: new HttpContext().set(SKIP_AUTH, true).set(SKIP_REFRESH, true),
         withCredentials: true,
       },
+    );
+  }
+
+  currentSession(accessToken: string): Observable<unknown> {
+    return this.http.get<unknown>(
+      portalApiUrl(this.config, '/api/v1/session'),
+      { setHeaders: { Authorization: `Bearer ${accessToken}` } },
     );
   }
 

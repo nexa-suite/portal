@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { PortalAuthApiClient } from '../infrastructure/portal-auth-api.client';
 import {
   PortalAuthStatus,
@@ -57,6 +57,9 @@ export class PortalAuthStateService {
     this.errorState.set(null);
     return this.api.refresh().pipe(
       map((response) => toPortalSession(response)),
+      switchMap((session) => this.api.currentSession(session.accessToken).pipe(
+        map((current) => toPortalSession(current, session.identity, session.accessToken)),
+      )),
       tap((session) => this.acceptSession(session)),
       map(() => undefined),
       catchError(() => {
