@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.6.0] - 2026-07-30
+
+### Added
+
+- Buyer Sales Order list/detail, source-request link and event timeline.
+- Secure change-feed reconnect behavior with logout disconnect and one token refresh attempt.
+- Portal CI, CodeQL and Dependabot configuration.
+
+### Security
+
+- Buyer Sales Order actions are read-only; internal lifecycle mutations remain outside the Portal surface.
+- Change-feed events are consumed only after authenticated API access.
+
 ## [0.5.0] - 2026-07-30
 
 This release consolidates previously unreleased Identity, tenant, security and commercial vertical work. Intermediate planned versions were never published.
@@ -60,7 +73,8 @@ This release consolidates previously unreleased Identity, tenant, security and c
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
 [0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/nexa-suite/portal/compare/v0.2.0...v0.2.1
