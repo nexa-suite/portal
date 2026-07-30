@@ -1,4 +1,6 @@
 import { routes } from './app.routes';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 describe('Portal routes', () => {
   it('exposes public access and protected buyer routes', () => {
@@ -11,8 +13,17 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
     expect(children.find((route) => route.path === 'catalog')?.redirectTo).toBe('product-catalog');
-    expect(children.find((route) => route.path === 'catalog/:catalogItemId')?.redirectTo).toBe(
-      'product-catalog/:catalogItemId',
-    );
+    expect(typeof children.find((route) => route.path === 'catalog/:catalogItemId')?.redirectTo).toBe('function');
+  });
+
+  it('preserves dynamic request and catalog alias parameters', () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const children = routes.find((route) => route.path === 'portal')?.children ?? [];
+    const requestAlias = children.find((route) => route.path === 'requests/:purchaseRequestId');
+    const catalogAlias = children.find((route) => route.path === 'catalog/:catalogItemId');
+    const requestRedirect = TestBed.runInInjectionContext(() => (requestAlias?.redirectTo as (data: unknown) => unknown)({ params: { purchaseRequestId: 'PR-123' } }));
+    const catalogRedirect = TestBed.runInInjectionContext(() => (catalogAlias?.redirectTo as (data: unknown) => unknown)({ params: { catalogItemId: 'CAT-123' } }));
+    expect(String(requestRedirect)).toContain('/portal/purchase-requests/PR-123');
+    expect(String(catalogRedirect)).toContain('/portal/product-catalog/CAT-123');
   });
 });
