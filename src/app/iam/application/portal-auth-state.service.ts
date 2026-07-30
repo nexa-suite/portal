@@ -106,6 +106,23 @@ export class PortalAuthStateService {
     );
   }
 
+  revalidateSession(): Observable<boolean> {
+    const token = this.tokenState();
+    if (!token) return of(false);
+    return this.api.currentSession(token).pipe(
+      map((response) => {
+        const session = toPortalSession(response, this.identityState(), token);
+        this.acceptSession(session);
+        return true;
+      }),
+      catchError((error: unknown) => {
+        this.clearSession();
+        this.errorState.set(error);
+        return of(false);
+      }),
+    );
+  }
+
   clearSession(): void {
     this.tokenState.set(null);
     this.identityState.set(null);
