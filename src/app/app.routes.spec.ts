@@ -1,10 +1,29 @@
 import { routes } from './app.routes';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 describe('Portal routes', () => {
-  it('redirects the root and unknown paths to home inside the shell', () => {
-    const children = routes[0].children ?? [];
-    expect(children.find((route) => route.path === '')?.redirectTo).toBe('home');
-    expect(children.find((route) => route.path === '**')?.redirectTo).toBe('home');
+  it('exposes public access and protected buyer routes', () => {
+    expect(routes.find((route) => route.path === '')?.redirectTo).toBe('sign-in');
+    expect(routes.some((route) => route.path === 'sign-in')).toBe(true);
+    expect(routes.some((route) => route.path === 'forbidden')).toBe(true);
+    const portal = routes.find((route) => route.path === 'portal');
+    const children = portal?.children ?? [];
     expect(children.some((route) => route.path === 'home')).toBe(true);
+    expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
+    expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
+    expect(children.find((route) => route.path === 'catalog')?.redirectTo).toBe('product-catalog');
+    expect(typeof children.find((route) => route.path === 'catalog/:catalogItemId')?.redirectTo).toBe('function');
+  });
+
+  it('preserves dynamic request and catalog alias parameters', () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const children = routes.find((route) => route.path === 'portal')?.children ?? [];
+    const requestAlias = children.find((route) => route.path === 'requests/:purchaseRequestId');
+    const catalogAlias = children.find((route) => route.path === 'catalog/:catalogItemId');
+    const requestRedirect = TestBed.runInInjectionContext(() => (requestAlias?.redirectTo as (data: unknown) => unknown)({ params: { purchaseRequestId: 'PR-123' } }));
+    const catalogRedirect = TestBed.runInInjectionContext(() => (catalogAlias?.redirectTo as (data: unknown) => unknown)({ params: { catalogItemId: 'CAT-123' } }));
+    expect(String(requestRedirect)).toContain('/portal/purchase-requests/PR-123');
+    expect(String(catalogRedirect)).toContain('/portal/product-catalog/CAT-123');
   });
 });

@@ -1,0 +1,71 @@
+import { TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { of, forkJoin } from 'rxjs';
+import { PortalAuthApiClient } from '../infrastructure/portal-auth-api.client';
+import { PortalAuthStateService } from './portal-auth-state.service';
+
+describe('PortalAuthStateService', () => {
+  const api = {
+    signIn: vi.fn(),
+    refresh: vi.fn(),
+    signOut: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    TestBed.configureTestingModule({
+      providers: [PortalAuthStateService, { provide: PortalAuthApiClient, useValue: api }],
+    });
+  });
+
+  it('keeps the access token and identity in signal state only', () => {
+    api.signIn.mockReturnValue(
+      of({
+        id: 1,
+        email: 'buyer@icisa.example',
+        fullName: 'Buyer',
+        role: 'BUYER',
+        accessToken: 'token',
+      }),
+    );
+    const service = TestBed.inject(PortalAuthStateService);
+
+    service
+      .signIn({ email: 'buyer@icisa.example', password: 'secret', workspaceSlug: 'icisa' })
+      .subscribe();
+
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.accessToken()).toBe('token');
+    expect(service.identity()?.role).toBe('BUYER');
+  });
+
+  it('shares one refresh request between concurrent 401 recoveries', () => {
+    api.signIn.mockReturnValue(
+      of({
+        id: 1,
+        email: 'buyer@icisa.example',
+        fullName: 'Buyer',
+        role: 'BUYER',
+        accessToken: 'old-token',
+      }),
+    );
+    api.refresh.mockReturnValue(
+      of({
+        id: 1,
+        email: 'buyer@icisa.example',
+        fullName: 'Buyer',
+        role: 'BUYER',
+        accessToken: 'new-token',
+      }),
+    );
+    const service = TestBed.inject(PortalAuthStateService);
+    service
+      .signIn({ email: 'buyer@icisa.example', password: 'secret', workspaceSlug: 'icisa' })
+      .subscribe();
+
+    forkJoin([service.refreshAccessToken(), service.refreshAccessToken()]).subscribe();
+
+    expect(api.refresh).toHaveBeenCalledTimes(1);
+    expect(service.accessToken()).toBe('new-token');
+  });
+});

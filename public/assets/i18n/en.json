@@ -6,11 +6,80 @@
     "buyerDescription": "Discover authorized products, manage purchase requests, review orders and follow deliveries.",
     "language": "Language",
     "skipToContent": "Skip to content",
-    "navigation": { "home": "Home" }
+    "navigation": { "home": "Home", "catalog": "Product catalog" },
+    "signOut": "Sign out"
   },
   "home": {
     "title": "Buyer workspace",
     "description": "A focused space for the purchasing work that connects buyers with the cold-chain business.",
     "body": "This workspace connects buyer workflows with the cold-chain business."
+  },
+  "auth": {
+    "signIn": {
+      "surface": "Buyer Portal",
+      "eyebrow": "Secure buyer access",
+      "title": "Sign in to Nexa",
+      "description": "Use your authorized workspace credentials to access the buyer catalog.",
+      "workspace": "Workspace",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Continue to Portal",
+      "submitting": "Checking access…",
+      "required": "Workspace, email and password are required.",
+      "invalidCredentials": "The credentials were not accepted.",
+      "buyerOnly": "This surface is restricted to Buyer access.",
+      "unavailable": "We could not complete sign-in. Try again.",
+      "asideEyebrow": "Cold-chain commerce",
+      "asideTitle": "A focused workspace for authorized buyers.",
+      "asideDescription": "Discover the catalog your workspace has made available and review product details without operational controls.",
+      "buyerAccess": "BUYER access only"
+    }
+  },
+  "forbidden": {
+    "eyebrow": "Access restricted",
+    "title": "This surface is not available for your role.",
+    "description": "The Nexa Buyer Portal is reserved for active Buyer memberships. Return to a permitted workspace or sign in with another account.",
+    "home": "Go to Portal home",
+    "signIn": "Use another account"
+  },
+  "catalog": {
+    "eyebrow": "Authorized catalog",
+    "title": "Product catalog",
+    "subtitle": "Explore the cold-chain products available to your buyer workspace.",
+    "backHome": "Back to home",
+    "backToCatalog": "Back to catalog",
+    "backToResults": "Back to results",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search by product, brand or category",
+    "search": "Search",
+    "brand": "Brand",
+    "allBrands": "All brands",
+    "category": "Category",
+    "allCategories": "All categories",
+    "coldChain": "Cold-chain requirement",
+    "allColdChain": "All requirements",
+    "refrigerated": "Refrigerated",
+    "frozen": "Frozen",
+    "ambient": "Ambient",
+    "results": "Available products",
+    "resultCount": "{{count}} products found",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "viewDetails": "View details",
+    "productCode": "Product code",
+    "catalogItemCode": "Catalog item",
+    "pagination": "Catalog pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "retry": "Retry",
+    "detailErrorTitle": "Product details unavailable",
+    "detailErrorDescription": "We could not load this catalog item. Try again or return to the catalog.",
+    "states": {
+      "loading": "Loading catalog",
+      "retrying": "Retrying catalog request",
+      "errorTitle": "Catalog unavailable",
+      "errorDescription": "We could not load the authorized catalog. Try again.",
+      "emptyTitle": "No products match these filters",
+      "emptyDescription": "Change the search or filters to see other authorized products."
+    }
   }
 }
