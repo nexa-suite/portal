@@ -3,13 +3,19 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
-## [Unreleased]
+## [0.5.0] - 2026-07-30
 
-### Documentation
+This release consolidates previously unreleased Identity, tenant, security and commercial vertical work. Intermediate planned versions were never published.
 
-- Aligned the README, suite map and runtime diagram with the tagged `v0.2.1` Angular buyer shell.
-- Made non-implemented API integration, persistence, identity, tenant, AI, IoT, cloud and mobile scope explicit.
-- Added a local repository map and a release-notes index.
+### Added
+
+- Buyer authentication, Product Catalog and detail, Request Builder, My Requests and Request Detail.
+- Server-backed catalog/price snapshots, typed request forms, idempotency handling and focused tests.
+- Structural Vue parity improvements for implemented buyer surfaces.
+
+### Security
+
+- Portal accepts `BUYER` only; internal roles are rejected; browser storage is not used for access or refresh tokens.
 
 ## [0.3.0] - 2026-07-28
 
@@ -21,7 +27,7 @@ The project uses Semantic Versioning.
 
 ### Changed
 
-- Versioned repository baseline as `v0.3.0` while keeping API integration explicitly pending an approved client contract.
+- Versioned repository baseline as `v0.3.0` before the approved secured API vertical slice.
 
 ## [0.2.1] - 2026-07-28
 
@@ -54,7 +60,8 @@ The project uses Semantic Versioning.
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
 [0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/nexa-suite/portal/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/nexa-suite/portal/compare/v0.1.0...v0.2.0

@@ -1,0 +1,66 @@
+<main class="sign-in-page">
+  <aside class="sign-in-aside" aria-label="Nexa Buyer Portal">
+    <div class="aside-content">
+      <nexa-brand-logo variant="inverse" [width]="136" />
+      <h2>{{ 'auth.signIn.asideTitle' | translate }}</h2>
+      <p>{{ 'auth.signIn.asideDescription' | translate }}</p>
+      <div class="access-pill">{{ 'auth.signIn.buyerAccess' | translate }}</div>
+    </div>
+    <footer>Nexa Buyer Portal</footer>
+  </aside>
+
+  <section class="sign-in-panel" aria-labelledby="sign-in-title">
+    <div class="language-switcher" aria-label="Language"><span>ES</span><span class="active">EN</span></div>
+    <div class="sign-in-copy">
+      <p class="eyebrow">{{ 'auth.signIn.eyebrow' | translate }}</p>
+      <h1 id="sign-in-title">{{ 'auth.signIn.title' | translate }}</h1>
+      <p>{{ 'auth.signIn.description' | translate }}</p>
+    </div>
+
+    <form class="sign-in-form" (submit)="$event.preventDefault(); submit()" novalidate>
+      <label>
+        <span>{{ 'auth.signIn.workspace' | translate }}</span>
+        <input
+          [value]="workspaceSlug()"
+          (input)="onValue('workspaceSlug', $event)"
+          autocomplete="organization"
+          required
+        />
+      </label>
+      <label>
+        <span>{{ 'auth.signIn.email' | translate }}</span>
+        <input
+          type="email"
+          [value]="email()"
+          (input)="onValue('email', $event)"
+          autocomplete="username"
+          required
+        />
+      </label>
+      <label>
+        <span>{{ 'auth.signIn.password' | translate }}</span>
+        <input
+          type="password"
+          [value]="password()"
+          (input)="onValue('password', $event)"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+
+      @if (errorMessage(); as message) {
+        <p class="form-error" role="alert">{{ message | translate }}</p>
+      }
+
+      <button type="submit" [disabled]="!canSubmit() || auth.status() === 'authenticating'">
+        {{
+          (auth.status() === 'authenticating' ? 'auth.signIn.submitting' : 'auth.signIn.submit')
+            | translate
+        }}
+      </button>
+      @if (submitted() && !canSubmit()) {
+        <p class="form-hint" role="status">{{ 'auth.signIn.required' | translate }}</p>
+      }
+    </form>
+  </section>
+</main>

@@ -1,10 +1,94 @@
-:host { display: block; min-height: 100dvh; }
-.portal-shell { min-height: 100dvh; background: radial-gradient(circle at 90% 0%, var(--nexa-color-cold-frost) 0, transparent 28rem), var(--nexa-surface-page); }
-.portal-header { display: flex; align-items: center; gap: var(--nexa-space-6); min-height: 76px; padding: var(--nexa-space-3) clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10)); border-bottom: 1px solid var(--nexa-color-border-default); background: rgb(255 255 255 / 92%); }
-.brand-lockup { display: flex; align-items: center; gap: var(--nexa-space-3); flex: 0 0 auto; color: inherit; text-decoration: none; }
-.brand-lockup span { padding-left: var(--nexa-space-3); border-left: 1px solid var(--nexa-color-border-default); color: var(--nexa-color-cold-refrigerated); font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); letter-spacing: var(--nexa-letter-spacing-wide); text-transform: uppercase; }
-.portal-navigation { display: flex; align-items: center; justify-content: center; flex: 1; }
-.portal-navigation a { padding: var(--nexa-space-2) var(--nexa-space-3); border-radius: var(--nexa-radius-md); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-sm); font-weight: var(--nexa-font-weight-semibold); text-decoration: none; }
-.portal-navigation a.active { background: var(--nexa-color-primary-50); color: var(--nexa-color-primary-700); }
-.portal-content { width: min(100%, var(--nexa-layout-content-max)); min-height: calc(100dvh - 76px); margin: 0 auto; padding: clamp(var(--nexa-space-8), 8vw, var(--nexa-space-16)) clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10)); }
-@media (max-width: 700px) { .portal-header { gap: var(--nexa-space-4); flex-wrap: wrap; } .portal-navigation { order: 3; justify-content: flex-start; width: 100%; } }
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+.portal-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 90% 0%, var(--nexa-color-cold-frost) 0, transparent 28rem),
+    var(--nexa-surface-page);
+}
+.portal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--nexa-space-6);
+  min-height: 76px;
+  padding: var(--nexa-space-3) clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10));
+  border-bottom: 1px solid var(--nexa-color-border-default);
+  background: rgb(255 255 255 / 92%);
+}
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--nexa-space-3);
+  flex: 0 0 auto;
+  color: inherit;
+  text-decoration: none;
+}
+.brand-lockup span {
+  padding-left: var(--nexa-space-3);
+  border-left: 1px solid var(--nexa-color-border-default);
+  color: var(--nexa-color-cold-refrigerated);
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+  letter-spacing: var(--nexa-letter-spacing-wide);
+  text-transform: uppercase;
+}
+.portal-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: var(--nexa-space-2);
+}
+.portal-navigation a {
+  padding: var(--nexa-space-2) var(--nexa-space-3);
+  border-radius: var(--nexa-radius-md);
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-sm);
+  font-weight: var(--nexa-font-weight-semibold);
+  text-decoration: none;
+}
+.portal-navigation a.active {
+  background: var(--nexa-color-primary-50);
+  color: var(--nexa-color-primary-700);
+}
+.portal-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--nexa-space-3);
+  flex: 0 0 auto;
+}
+.sign-out-button {
+  min-height: 2rem;
+  padding: 0 var(--nexa-space-3);
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-md);
+  background: transparent;
+  color: var(--nexa-color-text-secondary);
+  font: inherit;
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+  cursor: pointer;
+}
+.portal-content {
+  width: min(100%, var(--nexa-layout-content-max));
+  min-height: calc(100dvh - 76px);
+  margin: 0 auto;
+  padding: clamp(var(--nexa-space-8), 8vw, var(--nexa-space-16))
+    clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10));
+}
+@media (max-width: 700px) {
+  .portal-header {
+    gap: var(--nexa-space-4);
+    flex-wrap: wrap;
+  }
+  .portal-navigation {
+    order: 3;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .portal-actions {
+    margin-left: auto;
+  }
+}
