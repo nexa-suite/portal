@@ -27,7 +27,7 @@ function mapOrderLine(value: unknown): SalesOrder['lines'][number] {
     unit: text(raw['unit']) || 'unit',
     unitPriceAmount: number(raw['unitPriceAmount'] ?? record(raw['unitPrice'])['amount']),
     currency: text(raw['currency'] ?? raw['unitPriceCurrency'] ?? record(raw['unitPrice'])['currency']),
-    totalAmount: number(raw['totalAmount'] ?? raw['lineTotalAmount']),
+    totalAmount: number(raw['totalAmount'] ?? raw['lineTotalAmount'] ?? raw['lineSubtotal']),
   };
 }
 
@@ -92,7 +92,8 @@ export class SalesOrderApiClient {
       const values: readonly unknown[] = Array.isArray(raw) ? raw : Array.isArray(payload['items']) ? payload['items'] : [];
       return values.map((value): SalesOrderEvent => {
         const item = record(value);
-        return { id: text(item['id']), type: text(item['type'] ?? item['eventType']), occurredAt: nullableText(item['occurredAt'] ?? item['createdAt']), detail: nullableText(item['detail'] ?? item['description']) };
+        const occurredAt = nullableText(item['occurredAt'] ?? item['createdAt']);
+        return { id: text(item['id'] ?? item['eventId']) || `${text(item['eventType'])}:${occurredAt}`, type: text(item['type'] ?? item['eventType']), occurredAt, detail: nullableText(item['detail'] ?? item['description'] ?? item['reason'] ?? item['toStatus']) };
       });
     }));
   }

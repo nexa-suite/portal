@@ -1,5 +1,5 @@
 import { firstValueFrom } from 'rxjs';
-import { Injectable, inject } from '@angular/core';
+import { effect, Injectable, inject } from '@angular/core';
 import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../security/runtime-config';
 import { ChangeFeedEvent, ChangeFeedListener } from '../domain/change-feed.models';
@@ -41,6 +41,18 @@ export class ChangeFeedFetchClient {
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private lastEventId = '';
   private running = false;
+  private retryAttempt = 0;
+  private refreshAttempted = false;
+
+  constructor() {
+    effect(() => {
+      if (!this.auth.isAuthenticated()) this.stop();
+      else if (this.listeners.size && !this.running) {
+        this.running = true;
+        void this.run();
+      }
+    });
+  }
 
   watch(listener: ChangeFeedListener): () => void {
     this.listeners.add(listener);
@@ -91,15 +103,22 @@ export class ChangeFeedFetchClient {
         credentials: 'include',
         signal: this.controller.signal,
       });
+      if (response.status === 401 && !this.refreshAttempted) {
+        this.refreshAttempted = true;
+        await firstValueFrom(this.auth.refreshAccessToken());
+        throw new Error('Change feed access token refreshed');
+      }
       if (!response.ok) throw new Error(`Change feed returned ${response.status}`);
       if (!response.body) throw new Error('Change feed did not return a readable stream');
+      this.retryAttempt = 0;
+      this.refreshAttempted = false;
       await this.readStream(response.body);
     } catch {
       // The feed is an accelerator. Targeted HTTP reloads remain authoritative.
     } finally {
       clearTimeout(deadline);
       this.controller = null;
-      if (this.running) this.scheduleRetry(1000);
+      if (this.running) this.scheduleRetry();
     }
   }
 
@@ -145,11 +164,12 @@ export class ChangeFeedFetchClient {
     }
   }
 
-  private scheduleRetry(delay: number): void {
+  private scheduleRetry(delay?: number): void {
     if (!this.running || this.retryTimer) return;
+    const wait = delay ?? Math.min(30_000, 1_000 * 2 ** this.retryAttempt++);
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
       void this.run();
-    }, delay);
+    }, wait);
   }
 }

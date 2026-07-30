@@ -42,7 +42,7 @@ export interface SalesOrderEvent {
   readonly detail: string | null;
 }
 
-export const SALES_ORDER_SORTS = ['createdAt,desc', 'createdAt,asc', 'number,asc', 'number,desc'] as const;
+export const SALES_ORDER_SORTS = ['createdAt,desc', 'createdAt,asc', 'orderNumber,asc', 'orderNumber,desc'] as const;
 export type SalesOrderSort = (typeof SALES_ORDER_SORTS)[number];
 
 export function validSalesOrderSort(value: string): SalesOrderSort {
