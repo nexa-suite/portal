@@ -3,26 +3,19 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
-## [Unreleased]
+## [0.5.0] - 2026-07-30
 
-### Documentation
-
-- Aligned the README, suite map and runtime diagram with the tagged `v0.2.1` Angular buyer shell.
-- Kept broader persistence, AI, IoT, cloud and mobile scope explicit while documenting the secured IAM, workspace and Catalog read slice.
-- Added a local repository map and a release-notes index.
+This release consolidates previously unreleased Identity, tenant, security and commercial vertical work. Intermediate planned versions were never published.
 
 ### Added
 
-- Buyer sign-in, memory-only session restoration and Buyer-only surface enforcement.
-- Secured responsive Product Catalog grid, filters, pagination, detail and retry states.
-- Integrated `/api/v1/authentication/*`, `/api/v1/session` and secured Catalog read requests.
-- Lazy request-builder, buyer request list and request-detail flows with typed reactive forms.
-- Server-owned catalog and price snapshots in the purchase-request command; no client-supplied price.
+- Buyer authentication, Product Catalog and detail, Request Builder, My Requests and Request Detail.
+- Server-backed catalog/price snapshots, typed request forms, idempotency handling and focused tests.
+- Structural Vue parity improvements for implemented buyer surfaces.
 
 ### Security
 
-- Portal accepts `BUYER` only; internal roles are rejected.
-- Browser storage is not used for access or refresh tokens.
+- Portal accepts `BUYER` only; internal roles are rejected; browser storage is not used for access or refresh tokens.
 
 ## [0.3.0] - 2026-07-28
 
@@ -67,7 +60,8 @@ The project uses Semantic Versioning.
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
 [0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/nexa-suite/portal/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/nexa-suite/portal/compare/v0.1.0...v0.2.0
