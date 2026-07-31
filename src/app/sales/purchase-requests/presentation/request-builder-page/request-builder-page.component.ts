@@ -13,6 +13,7 @@ import { ErrorStateComponent } from '../../../../shared/presentation/components/
 import { LoadingStateComponent } from '../../../../shared/presentation/components/loading-state/loading-state.component';
 import { PageHeaderComponent } from '../../../../shared/presentation/components/page-header/page-header.component';
 import { PurchaseRequestSelfServiceFacade } from '../../application/purchase-request-self-service.facade';
+import { InventoryAvailabilityFacade } from '../../../../warehouse/application/inventory-availability.facade';
 import {
   canEditPurchaseRequest,
   PaymentOption,
@@ -44,6 +45,7 @@ export class RequestBuilderPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly facade = inject(PurchaseRequestSelfServiceFacade);
+  readonly availability = inject(InventoryAvailabilityFacade);
   readonly form = this.fb.group({
     priority: this.fb.control<PurchaseRequestPriority>('NORMAL', Validators.required),
     requestedDeliveryDate: this.fb.control(''),
@@ -82,7 +84,7 @@ export class RequestBuilderPageComponent {
   searchCatalog(): void {
     const q = this.catalogSearch.value.trim();
     this.catalog.list({ ...DEFAULT_CATALOG_QUERY, q, size: 20 }).subscribe({
-      next: (page) => { this.catalogItems.set(page.items); this.message.set(null); },
+      next: (page) => { this.catalogItems.set(page.items); this.availability.load(page.items.map((item) => item.catalogItemId)); this.message.set(null); },
       error: () => this.message.set('CATALOG_SELECTION_FAILED'),
     });
   }

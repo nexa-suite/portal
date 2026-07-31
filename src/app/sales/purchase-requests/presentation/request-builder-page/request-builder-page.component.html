@@ -19,7 +19,7 @@
           <div class="catalog-picker">
             <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.catalog.search' | translate }}</mat-label><input matInput [formControl]="catalogSearch" /></mat-form-field>
             <button mat-stroked-button type="button" (click)="searchCatalog()">{{ 'purchaseRequests.catalog.searchAction' | translate }}</button>
-            <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.catalog.item' | translate }}</mat-label><mat-select [formControl]="catalogSelection"><mat-option value="">{{ 'purchaseRequests.catalog.choose' | translate }}</mat-option>@for (item of catalogItems(); track item.catalogItemId) {<mat-option [value]="item.catalogItemId">{{ item.itemName }} · {{ item.presentation }}</mat-option>}</mat-select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.catalog.item' | translate }}</mat-label><mat-select [formControl]="catalogSelection"><mat-option value="">{{ 'purchaseRequests.catalog.choose' | translate }}</mat-option>@for (item of catalogItems(); track item.catalogItemId) {<mat-option [value]="item.catalogItemId">{{ item.itemName }} · {{ availability.forItem(item.catalogItemId).status }}</mat-option>}</mat-select></mat-form-field>
             <mat-form-field appearance="outline" class="quantity"><mat-label>{{ 'purchaseRequests.catalog.quantity' | translate }}</mat-label><input matInput type="number" [formControl]="quantity" /></mat-form-field>
             <button mat-flat-button color="primary" type="button" (click)="addCatalogItem()">{{ 'purchaseRequests.catalog.add' | translate }}</button>
           </div>
@@ -31,6 +31,7 @@
             <div class="line"><div><strong>{{ line.itemName }}</strong><span>{{ line.presentation }} · {{ line.catalogItemId }}</span></div><div class="line-actions"><label>{{ 'purchaseRequests.catalog.quantity' | translate }}<input type="number" min="0.01" [value]="line.quantity" [disabled]="!canEdit()" (change)="updateLine(line, $event)" /></label>@if (canEdit()) {<button mat-button type="button" (click)="removeLine(line)">{{ 'purchaseRequests.catalog.remove' | translate }}</button>}</div></div>
           } @empty { <p class="hint">{{ 'purchaseRequests.catalog.empty' | translate }}</p> }
         </div>
+        <p class="hint">Availability may change until inventory is reserved. A Purchase Request may still be created when availability is unavailable or unknown.</p>
       </mat-card-content>
       <mat-card-actions>
         @if (canEdit()) { <button mat-stroked-button type="button" (click)="saveDraft()">{{ 'purchaseRequests.actions.save' | translate }}</button><button mat-flat-button color="primary" type="button" (click)="submit()">{{ 'purchaseRequests.actions.submit' | translate }}</button> }
