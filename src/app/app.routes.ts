@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { RedirectFunction, Router, Routes } from '@angular/router';
 import { PortalShellComponent } from './core/layout/portal-shell/portal-shell.component';
 import { HomePageComponent } from './core/presentation/home-page/home-page.component';
-import { portalAuthGuard, buyerRoleGuard, publicOnlyGuard } from './core/routing/portal.guards';
+import { portalAuthGuard, buyerRoleGuard, publicOnlyGuard, buyerPermissionGuard } from './core/routing/portal.guards';
 import { ForbiddenPageComponent } from './iam/presentation/forbidden/forbidden-page.component';
 import { SignInPageComponent } from './iam/presentation/sign-in/sign-in-page.component';
 
@@ -21,15 +21,15 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'home', component: HomePageComponent },
-      { path: 'product-catalog', loadComponent: () => import('./catalog-management/presentation/catalog-list-page/catalog-list-page.component').then((module) => module.CatalogListPageComponent) },
-      { path: 'product-catalog/:catalogItemId', loadComponent: () => import('./catalog-management/presentation/catalog-detail-page/catalog-detail-page.component').then((module) => module.CatalogDetailPageComponent) },
-      { path: 'request-builder', loadComponent: () => import('./sales/purchase-requests/presentation/request-builder-page/request-builder-page.component').then((module) => module.RequestBuilderPageComponent) },
-      { path: 'request-builder/:purchaseRequestId', loadComponent: () => import('./sales/purchase-requests/presentation/request-builder-page/request-builder-page.component').then((module) => module.RequestBuilderPageComponent) },
-      { path: 'purchase-requests', loadComponent: () => import('./sales/purchase-requests/presentation/my-requests-page/my-requests-page.component').then((module) => module.MyRequestsPageComponent) },
+      { path: 'product-catalog', loadComponent: () => import('./catalog-management/presentation/catalog-list-page/catalog-list-page.component').then((module) => module.CatalogListPageComponent), canActivate: [buyerPermissionGuard('catalog:read')] },
+      { path: 'product-catalog/:catalogItemId', loadComponent: () => import('./catalog-management/presentation/catalog-detail-page/catalog-detail-page.component').then((module) => module.CatalogDetailPageComponent), canActivate: [buyerPermissionGuard('catalog:read')] },
+      { path: 'request-builder', loadComponent: () => import('./sales/purchase-requests/presentation/request-builder-page/request-builder-page.component').then((module) => module.RequestBuilderPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:write')] },
+      { path: 'request-builder/:purchaseRequestId', loadComponent: () => import('./sales/purchase-requests/presentation/request-builder-page/request-builder-page.component').then((module) => module.RequestBuilderPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:write')] },
+      { path: 'purchase-requests', loadComponent: () => import('./sales/purchase-requests/presentation/my-requests-page/my-requests-page.component').then((module) => module.MyRequestsPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:read')] },
       { path: 'purchase-requests/:purchaseRequestId/edit', redirectTo: dynamicRedirect('/portal/request-builder', 'purchaseRequestId') },
-      { path: 'purchase-requests/:purchaseRequestId', loadComponent: () => import('./sales/purchase-requests/presentation/request-detail-page/request-detail-page.component').then((module) => module.RequestDetailPageComponent) },
-      { path: 'sales-orders', loadComponent: () => import('./sales/orders/presentation/my-sales-orders-page/my-sales-orders-page.component').then((module) => module.MySalesOrdersPageComponent) },
-      { path: 'sales-orders/:salesOrderId', loadComponent: () => import('./sales/orders/presentation/sales-order-detail-page/sales-order-detail-page.component').then((module) => module.SalesOrderDetailPageComponent) },
+      { path: 'purchase-requests/:purchaseRequestId', loadComponent: () => import('./sales/purchase-requests/presentation/request-detail-page/request-detail-page.component').then((module) => module.RequestDetailPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:read')] },
+      { path: 'sales-orders', loadComponent: () => import('./sales/orders/presentation/my-sales-orders-page/my-sales-orders-page.component').then((module) => module.MySalesOrdersPageComponent), canActivate: [buyerPermissionGuard('orders:buyer:read')] },
+      { path: 'sales-orders/:salesOrderId', loadComponent: () => import('./sales/orders/presentation/sales-order-detail-page/sales-order-detail-page.component').then((module) => module.SalesOrderDetailPageComponent), canActivate: [buyerPermissionGuard('orders:buyer:read')] },
       { path: 'requests', pathMatch: 'full', redirectTo: 'purchase-requests' },
       { path: 'my-orders', pathMatch: 'full', redirectTo: 'sales-orders' },
       { path: 'orders', pathMatch: 'full', redirectTo: 'sales-orders' },
