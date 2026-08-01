@@ -27,8 +27,9 @@ export class PortalAuthStateService {
     () => this.statusState() === 'authenticated' && this.tokenState() !== null,
   );
   readonly canAccessBuyerPortal = computed(
-    () => this.isAuthenticated() && this.identityState()?.role === 'BUYER',
+    () => this.isAuthenticated() && this.identityState()?.role === 'BUYER' && this.hasPermission('catalog:read'),
   );
+  hasPermission(permission: string): boolean { return this.identityState()?.permissions?.includes(permission.toLowerCase()) ?? false; }
 
   signIn(credentials: SignInCredentials): Observable<void> {
     this.statusState.set('authenticating');
@@ -103,6 +104,23 @@ export class PortalAuthStateService {
       map(() => undefined),
       catchError(() => of(undefined)),
       finalize(() => this.clearSession()),
+    );
+  }
+
+  revalidateSession(): Observable<boolean> {
+    const token = this.tokenState();
+    if (!token) return of(false);
+    return this.api.currentSession(token).pipe(
+      map((response) => {
+        const session = toPortalSession(response, this.identityState(), token);
+        this.acceptSession(session);
+        return true;
+      }),
+      catchError((error: unknown) => {
+        this.clearSession();
+        this.errorState.set(error);
+        return of(false);
+      }),
     );
   }
 

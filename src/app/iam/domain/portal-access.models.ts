@@ -18,6 +18,7 @@ export interface PortalIdentity {
   readonly workspaceSlug: string | null;
   readonly clientAccountId: number | null;
   readonly membershipStatus: string | null;
+  readonly permissions?: readonly string[];
 }
 
 export interface PortalSession {
@@ -50,6 +51,14 @@ export class InvalidPortalSessionError extends Error {
     super('Authentication response did not contain a valid Buyer session.');
     this.name = 'InvalidPortalSessionError';
   }
+}
+
+export interface WorkspacePreview {
+  readonly recognized: boolean;
+  readonly displayName: string | null;
+  readonly workspaceUrl: string | null;
+  readonly logoUrl: string | null;
+  readonly loginAvailable: boolean;
 }
 
 type RecordValue = Record<string, unknown>;
@@ -179,6 +188,10 @@ function identityFromResponse(
       property(response, 'MembershipStatus'),
       previousIdentity?.membershipStatus,
     ),
+    permissions: Array.from(new Set([
+      ...(Array.isArray(property(membership, 'permissions')) ? property(membership, 'permissions') as unknown[] : []),
+      ...(previousIdentity?.permissions ?? []),
+    ].filter((value): value is string => typeof value === 'string').map((value) => value.toLowerCase()))),
   };
 }
 

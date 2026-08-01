@@ -19,6 +19,7 @@ import { ErrorStateComponent } from '../../../shared/presentation/components/err
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
 import {
   catalogQueryFromParams,
   catalogQueryToParams,
@@ -44,6 +45,7 @@ export class CatalogListPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
+  readonly availability = inject(InventoryAvailabilityFacade);
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
@@ -69,6 +71,7 @@ export class CatalogListPageComponent {
         this.catalog.loadList(query);
       });
     });
+    effect(() => { const items = this.catalog.items(); untracked(() => this.availability.load(items.map((item) => item.catalogItemId))); });
   }
 
   submitSearch(): void {

@@ -1,1 +1,41 @@
-<section class="page"><nexa-page-header eyebrow="Buyer portal" title="Request builder" subtitle="Prepare a purchase request from the current catalog." /><mat-card><mat-card-content><form [formGroup]="form"><div class="form-grid"><mat-form-field appearance="outline"><mat-label>Priority</mat-label><mat-select formControlName="priority"><mat-option value="NORMAL">Normal</mat-option><mat-option value="HIGH">High</mat-option><mat-option value="URGENT">Urgent</mat-option></mat-select></mat-form-field><mat-form-field appearance="outline"><mat-label>Requested delivery date</mat-label><input matInput type="date" formControlName="requestedDeliveryDate" /></mat-form-field><mat-form-field appearance="outline"><mat-label>Delivery details</mat-label><input matInput formControlName="deliveryProfileSnapshot" /></mat-form-field><mat-form-field appearance="outline"><mat-label>Payment option</mat-label><mat-select formControlName="paymentOption"><mat-option value="cash_on_delivery">Cash on delivery</mat-option><mat-option value="credit_15">Credit 15 days</mat-option><mat-option value="credit_30">Credit 30 days</mat-option></mat-select></mat-form-field></div><mat-form-field appearance="outline" class="wide"><mat-label>Comment</mat-label><textarea matInput rows="3" formControlName="comment"></textarea></mat-form-field></form><div class="add-line"><mat-form-field appearance="outline"><mat-label>Catalog item ID</mat-label><input matInput [formControl]="catalogItemId" placeholder="CAT-..." /></mat-form-field><mat-form-field appearance="outline"><mat-label>Quantity</mat-label><input matInput type="number" [formControl]="quantity" /></mat-form-field><button mat-stroked-button type="button" (click)="addCatalogItem()">Add item</button></div><p class="hint">Prices and product snapshots are confirmed by the server when the request is saved.</p>@if(message()){<p class="message">{{message()}}</p>}<div class="lines">@for(line of lines();track line.item.catalogItemId){<div class="line"><div><strong>{{line.item.itemName}}</strong><span>{{line.item.presentation}}</span></div><span>Qty {{line.quantity}}</span><button mat-button type="button" (click)="remove(line.item.catalogItemId)">Remove</button></div>}</div></mat-card-content><mat-card-actions><button mat-flat-button color="primary" type="button" (click)="saveDraft()">Save draft</button></mat-card-actions></mat-card></section>
+<section class="page">
+  <nexa-page-header [eyebrow]="'purchaseRequests.eyebrow' | translate" [title]="'purchaseRequests.builder.title' | translate" [subtitle]="'purchaseRequests.builder.subtitle' | translate" />
+  @if (facade.detailState().status === 'loading') { <nexa-loading-state [lines]="6" [label]="'purchaseRequests.states.loading' | translate" /> }
+  @if (facade.detailState().status === 'error') { <nexa-error-state [title]="'purchaseRequests.states.errorTitle' | translate" (retry)="reload()" /> }
+  @if (facade.detailState().item; as request) {
+    <a mat-button routerLink="/portal/purchase-requests">{{ 'purchaseRequests.backToList' | translate }}</a>
+    <mat-card>
+      <mat-card-content>
+        <div class="request-meta"><span>{{ request.code }}</span><span>{{ ('purchaseRequests.status.' + request.status) | translate }}</span></div>
+        @if (request.reviewNote) { <p class="review-note">{{ request.reviewNote }}</p> }
+        <form [formGroup]="form" class="form-grid">
+          <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.fields.priority' | translate }}</mat-label><mat-select formControlName="priority"><mat-option value="NORMAL">{{ 'purchaseRequests.priority.NORMAL' | translate }}</mat-option><mat-option value="HIGH">{{ 'purchaseRequests.priority.HIGH' | translate }}</mat-option><mat-option value="URGENT">{{ 'purchaseRequests.priority.URGENT' | translate }}</mat-option></mat-select></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.fields.deliveryDate' | translate }}</mat-label><input matInput type="date" formControlName="requestedDeliveryDate" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.fields.deliveryDetails' | translate }}</mat-label><input matInput formControlName="deliveryProfileSnapshot" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.fields.payment' | translate }}</mat-label><mat-select formControlName="paymentOption"><mat-option value="CREDIT_LINE">{{ 'purchaseRequests.payment.CREDIT_LINE' | translate }}</mat-option><mat-option value="BANK_TRANSFER">{{ 'purchaseRequests.payment.BANK_TRANSFER' | translate }}</mat-option><mat-option value="CASH">{{ 'purchaseRequests.payment.CASH' | translate }}</mat-option><mat-option value="CASH_ON_DELIVERY">{{ 'purchaseRequests.payment.CASH_ON_DELIVERY' | translate }}</mat-option></mat-select></mat-form-field>
+          <mat-form-field appearance="outline" class="wide"><mat-label>{{ 'purchaseRequests.fields.comment' | translate }}</mat-label><textarea matInput rows="3" formControlName="comment"></textarea></mat-form-field>
+        </form>
+        @if (canEdit()) {
+          <div class="catalog-picker">
+            <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.catalog.search' | translate }}</mat-label><input matInput [formControl]="catalogSearch" /></mat-form-field>
+            <button mat-stroked-button type="button" (click)="searchCatalog()">{{ 'purchaseRequests.catalog.searchAction' | translate }}</button>
+            <mat-form-field appearance="outline"><mat-label>{{ 'purchaseRequests.catalog.item' | translate }}</mat-label><mat-select [formControl]="catalogSelection"><mat-option value="">{{ 'purchaseRequests.catalog.choose' | translate }}</mat-option>@for (item of catalogItems(); track item.catalogItemId) {<mat-option [value]="item.catalogItemId">{{ item.itemName }} · {{ availability.forItem(item.catalogItemId).status }}</mat-option>}</mat-select></mat-form-field>
+            <mat-form-field appearance="outline" class="quantity"><mat-label>{{ 'purchaseRequests.catalog.quantity' | translate }}</mat-label><input matInput type="number" [formControl]="quantity" /></mat-form-field>
+            <button mat-flat-button color="primary" type="button" (click)="addCatalogItem()">{{ 'purchaseRequests.catalog.add' | translate }}</button>
+          </div>
+        }
+        @if (message()) { <p class="message">{{ ('messages.' + message()) | translate }}</p> }
+        @if (facade.detailState().message) { <p class="message">{{ ('messages.' + facade.detailState().message) | translate }}</p> }
+        <div class="lines">
+          @for (line of lines(); track line.id) {
+            <div class="line"><div><strong>{{ line.itemName }}</strong><span>{{ line.presentation }} · {{ line.catalogItemId }}</span></div><div class="line-actions"><label>{{ 'purchaseRequests.catalog.quantity' | translate }}<input type="number" min="0.01" [value]="line.quantity" [disabled]="!canEdit()" (change)="updateLine(line, $event)" /></label>@if (canEdit()) {<button mat-button type="button" (click)="removeLine(line)">{{ 'purchaseRequests.catalog.remove' | translate }}</button>}</div></div>
+          } @empty { <p class="hint">{{ 'purchaseRequests.catalog.empty' | translate }}</p> }
+        </div>
+        <p class="hint">Availability may change until inventory is reserved. A Purchase Request may still be created when availability is unavailable or unknown.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        @if (canEdit()) { <button mat-stroked-button type="button" (click)="saveDraft()">{{ 'purchaseRequests.actions.save' | translate }}</button><button mat-flat-button color="primary" type="button" (click)="submit()">{{ 'purchaseRequests.actions.submit' | translate }}</button> }
+      </mat-card-actions>
+    </mat-card>
+  }
+</section>
