@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.7.0] - 2026-07-31
+
+This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-008.6, TASK-NEXA-009, TASK-NEXA-010 and TASK-NEXA-010.5 work.
+
+### Added
+
+- Workspace recognition, localized Buyer catalog and Purchase Request flows.
+- Sales Order list/detail and Buyer-safe delivery tracking with status timeline.
+- Delivery and POD metadata views without evidence-file storage.
+
+### Security
+
+- Buyer delivery reads remain client-account scoped; internal identifiers and operational mutations are not exposed in the Portal.
+
 ## [0.6.0] - 2026-07-30
 
 ### Added
@@ -73,7 +87,8 @@ This release consolidates previously unreleased Identity, tenant, security and c
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.7.0
 [0.6.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
 [0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
