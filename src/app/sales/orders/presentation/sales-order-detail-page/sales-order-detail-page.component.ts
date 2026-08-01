@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -9,6 +9,7 @@ import { LoadingStateComponent } from '../../../../shared/presentation/component
 import { PageHeaderComponent } from '../../../../shared/presentation/components/page-header/page-header.component';
 import { SalesOrderSelfServiceFacade } from '../../application/sales-order-self-service.facade';
 import { DeliveryTrackingApiClient } from '../../../../logistics/infrastructure/delivery-tracking-api.client';
+import { DeliveryPage } from '../../../../logistics/domain/delivery.models';
 
 @Component({
   selector: 'nexa-sales-order-detail-page',
@@ -21,15 +22,19 @@ export class SalesOrderDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   readonly facade = inject(SalesOrderSelfServiceFacade);
   private readonly deliveryApi = inject(DeliveryTrackingApiClient);
-  readonly matchingDeliveryId = signal<string | null>(null);
+  readonly matchingDeliveryId = computed(() => {
+    const number = this.facade.detailState().item?.number;
+    return this.deliveryPage()?.items.find(item => item.salesOrderNumber === number)?.id ?? null;
+  });
+  private readonly deliveryPage = signal<DeliveryPage | null>(null);
 
   constructor() {
     const id = this.route.snapshot.paramMap.get('salesOrderId');
     if (id) {
       this.facade.loadDetail(id);
       this.deliveryApi.list().subscribe({
-        next: page => this.matchingDeliveryId.set(page.items.find(item => item.salesOrderId === id)?.id ?? null),
-        error: () => this.matchingDeliveryId.set(null),
+        next: page => this.deliveryPage.set(page),
+        error: () => this.deliveryPage.set(null),
       });
     }
   }
