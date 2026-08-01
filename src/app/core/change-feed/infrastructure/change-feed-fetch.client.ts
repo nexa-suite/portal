@@ -22,6 +22,8 @@ function parseEvent(type: string, id: string, data: string): ChangeFeedEvent | n
     ? 'PURCHASE_REQUEST'
     : resourceValue === 'SALES_ORDER' || resourceValue === 'SALES-ORDER'
       ? 'SALES_ORDER'
+      : resourceValue === 'DISPATCH_ORDER' || resourceValue === 'DISPATCH-ORDER'
+        ? 'DISPATCH_ORDER'
       : 'UNKNOWN';
   return {
     id: id || stringValue(raw['id']) || `${type}:${stringValue(raw['resourceId'] ?? raw['aggregateId'])}`,

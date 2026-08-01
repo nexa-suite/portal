@@ -1,4 +1,4 @@
-export type ChangeFeedResource = 'PURCHASE_REQUEST' | 'SALES_ORDER' | 'UNKNOWN';
+export type ChangeFeedResource = 'PURCHASE_REQUEST' | 'SALES_ORDER' | 'DISPATCH_ORDER' | 'UNKNOWN';
 
 export interface ChangeFeedEvent {
   readonly id: string;

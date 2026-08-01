@@ -37,7 +37,7 @@
             <p class="catalog-brand">
               {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
             </p>
-            <p class="availability-status">{{ availability.forItem(item.catalogItemId).status }} · Availability may change until inventory is reserved.</p>
+            @if (availability.loading()) { <p class="availability-status">{{ 'availability.loading' | translate }}</p> } @else { <p class="availability-status">{{ ('availability.status.' + availability.forItem(item.catalogItemId).status) | translate }} · {{ 'availability.disclaimer' | translate }}</p> }
             @if (item.coldChainRequirement) {
               <nexa-cold-chain-badge
                 [label]="item.coldChainRequirement"

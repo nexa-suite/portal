@@ -30,6 +30,8 @@ export const routes: Routes = [
       { path: 'purchase-requests/:purchaseRequestId', loadComponent: () => import('./sales/purchase-requests/presentation/request-detail-page/request-detail-page.component').then((module) => module.RequestDetailPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:read')] },
       { path: 'sales-orders', loadComponent: () => import('./sales/orders/presentation/my-sales-orders-page/my-sales-orders-page.component').then((module) => module.MySalesOrdersPageComponent), canActivate: [buyerPermissionGuard('orders:buyer:read')] },
       { path: 'sales-orders/:salesOrderId', loadComponent: () => import('./sales/orders/presentation/sales-order-detail-page/sales-order-detail-page.component').then((module) => module.SalesOrderDetailPageComponent), canActivate: [buyerPermissionGuard('orders:buyer:read')] },
+      { path: 'deliveries', loadComponent: () => import('./logistics/presentation/my-deliveries-page.component').then((module) => module.MyDeliveriesPageComponent), canActivate: [buyerPermissionGuard('tracking:buyer:read')] },
+      { path: 'deliveries/:dispatchOrderId', loadComponent: () => import('./logistics/presentation/delivery-detail-page.component').then((module) => module.DeliveryDetailPageComponent), canActivate: [buyerPermissionGuard('tracking:buyer:read')] },
       { path: 'requests', pathMatch: 'full', redirectTo: 'purchase-requests' },
       { path: 'my-orders', pathMatch: 'full', redirectTo: 'sales-orders' },
       { path: 'orders', pathMatch: 'full', redirectTo: 'sales-orders' },
