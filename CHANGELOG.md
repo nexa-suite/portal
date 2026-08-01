@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.7.1] - 2026-08-01
+
+### Added
+
+- Dedicated coarse availability, delivery-tracking and Buyer-safe field coverage.
+
+### Changed
+
+- Delivery i18n and recoverable availability error states are explicit.
+- Duplicate workspace artifacts and generated browser outputs are ignored and removed.
+
+Documents, uploads and payments are not implemented.
+
 ## [0.7.0] - 2026-07-31
 
 This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-008.6, TASK-NEXA-009, TASK-NEXA-010 and TASK-NEXA-010.5 work.
