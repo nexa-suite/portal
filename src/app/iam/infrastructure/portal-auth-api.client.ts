@@ -2,6 +2,7 @@ import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SignInCredentials } from '../domain/portal-access.models';
+import { WorkspacePreview } from '../domain/portal-access.models';
 import {
   portalApiUrl,
   PORTAL_RUNTIME_CONFIG,
@@ -28,6 +29,12 @@ export class PortalAuthApiClient {
         withCredentials: true,
       },
     );
+  }
+
+  workspacePreview(workspaceSlug: string): Observable<WorkspacePreview> {
+    return this.http.post<WorkspacePreview>(portalApiUrl(this.config, '/api/v1/auth/workspace-previews'), { workspaceSlug }, {
+      context: new HttpContext().set(SKIP_AUTH, true).set(SKIP_REFRESH, true),
+    });
   }
 
   refresh(): Observable<unknown> {

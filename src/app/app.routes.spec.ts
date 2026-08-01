@@ -12,6 +12,11 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'home')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
+    expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(true);
+    expect(children.some((route) => route.path === 'sales-orders')).toBe(true);
+    expect(children.some((route) => route.path === 'sales-orders/:salesOrderId')).toBe(true);
+    expect(children.find((route) => route.path === 'orders')?.redirectTo).toBe('sales-orders');
+    expect(children.find((route) => route.path === 'my-orders')?.redirectTo).toBe('sales-orders');
     expect(children.find((route) => route.path === 'catalog')?.redirectTo).toBe('product-catalog');
     expect(typeof children.find((route) => route.path === 'catalog/:catalogItemId')?.redirectTo).toBe('function');
   });
@@ -21,9 +26,12 @@ describe('Portal routes', () => {
     const children = routes.find((route) => route.path === 'portal')?.children ?? [];
     const requestAlias = children.find((route) => route.path === 'requests/:purchaseRequestId');
     const catalogAlias = children.find((route) => route.path === 'catalog/:catalogItemId');
+    const orderAlias = children.find((route) => route.path === 'orders/:salesOrderId');
     const requestRedirect = TestBed.runInInjectionContext(() => (requestAlias?.redirectTo as (data: unknown) => unknown)({ params: { purchaseRequestId: 'PR-123' } }));
     const catalogRedirect = TestBed.runInInjectionContext(() => (catalogAlias?.redirectTo as (data: unknown) => unknown)({ params: { catalogItemId: 'CAT-123' } }));
+    const orderRedirect = TestBed.runInInjectionContext(() => (orderAlias?.redirectTo as (data: unknown) => unknown)({ params: { salesOrderId: 'SO-123' } }));
     expect(String(requestRedirect)).toContain('/portal/purchase-requests/PR-123');
     expect(String(catalogRedirect)).toContain('/portal/product-catalog/CAT-123');
+    expect(String(orderRedirect)).toContain('/portal/sales-orders/SO-123');
   });
 });

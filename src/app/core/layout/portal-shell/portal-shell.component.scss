@@ -86,6 +86,7 @@
   .portal-navigation {
     order: 3;
     justify-content: flex-start;
+    flex-wrap: wrap;
     width: 100%;
   }
   .portal-actions {
