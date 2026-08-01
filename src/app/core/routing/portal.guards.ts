@@ -41,3 +41,12 @@ export const publicOnlyGuard: CanActivateFn = (_route, state) => {
 
 export const portalAccessGuard = portalAuthGuard;
 export const buyerOnlyGuard = buyerRoleGuard;
+
+export function buyerPermissionGuard(permission: string): CanActivateFn {
+  return (_route, state) => {
+    const auth = inject(PortalAuthStateService);
+    const router = inject(Router);
+    if (!auth.isAuthenticated()) return router.createUrlTree(['/sign-in'], { queryParams: { returnUrl: safeReturnUrl(state.url) } });
+    return auth.hasPermission(permission) ? true : router.createUrlTree(['/forbidden'], { queryParams: { returnUrl: safeReturnUrl(state.url) } });
+  };
+}

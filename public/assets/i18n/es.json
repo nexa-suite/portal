@@ -6,9 +6,11 @@
     "buyerDescription": "Descubre productos autorizados, gestiona solicitudes de compra, revisa órdenes y sigue tus entregas.",
     "language": "Idioma",
     "skipToContent": "Saltar al contenido",
-    "navigation": { "home": "Inicio", "catalog": "Catálogo de productos" },
+    "navigation": { "home": "Inicio", "catalog": "Catálogo de productos", "requestBuilder": "Crear solicitud", "requests": "Mis solicitudes", "orders": "Mis órdenes", "deliveries": "Mis entregas" },
     "signOut": "Cerrar sesión"
   },
+  "availability": { "loading": "Consultando disponibilidad…", "disclaimer": "La disponibilidad puede cambiar hasta reservar el pedido.", "status": { "AVAILABLE": "Disponible", "UNAVAILABLE": "No disponible", "UNKNOWN": "Disponibilidad no disponible; reintenta" } },
+  "delivery": { "title": "Mis entregas", "subtitle": "Seguimiento seguro de tus entregas.", "empty": "Aún no hay entregas para mostrar.", "loading": "Cargando entregas", "error": "No pudimos cargar las entregas. Inténtalo nuevamente.", "open": "Abrir entrega", "status": { "PREPARING_DELIVERY": "Preparando tu entrega", "DELIVERY_SCHEDULED": "Entrega programada", "IN_TRANSIT": "En tránsito", "DELIVERY_REVIEW": "Revisión de entrega en curso", "DELIVERY_RESCHEDULED": "Entrega reprogramada", "DELIVERED": "Entregada", "DELIVERY_CANCELLED": "Entrega cancelada", "UNKNOWN": "Estado de entrega no disponible" }, "fields": { "salesOrder": "Orden de venta", "dispatch": "Despacho", "window": "Ventana de entrega", "destination": "Destino", "updated": "Última actualización", "pod": "Comprobante de entrega" }, "timeline": "Línea de tiempo visible para comprador", "incident": "Aviso de entrega", "alerts": { "DELIVERY_REVIEW": "La entrega requiere revisión.", "POD_PENDING": "El comprobante de entrega está pendiente." }, "event": { "DELIVERY_SCHEDULED": "Entrega programada", "IN_TRANSIT": "Entrega en tránsito", "DELIVERED": "Entrega completada", "DELIVERY_CANCELLED": "Entrega cancelada", "DELIVERY_REVIEW": "Incidente de entrega en revisión", "DELIVERY_UPDATED": "Entrega actualizada" }, "noEvents": "Aún no hay eventos visibles para comprador.", "podComplete": "Completado", "podPending": "Pendiente" },
   "home": {
     "title": "Espacio del comprador",
     "description": "Un espacio enfocado en el trabajo de compra que conecta a compradores con la cadena de frío.",
@@ -81,5 +83,35 @@
       "emptyTitle": "No hay productos con estos filtros",
       "emptyDescription": "Cambia la búsqueda o los filtros para ver otros productos autorizados."
     }
+  },
+  "purchaseRequests": {
+    "eyebrow": "Solicitudes de compra",
+    "backToList": "Volver a mis solicitudes",
+    "builder": { "title": "Crear solicitud", "subtitle": "Guarda un borrador vacío y agrega productos del catálogo autorizado por el servidor." },
+    "list": { "title": "Mis solicitudes", "subtitle": "Solicitudes de tu Client Account activo.", "filter": "Filtrar estado", "allStatuses": "Todos los estados", "emptyTitle": "Aún no hay solicitudes", "emptyDescription": "Aquí aparecerán las solicitudes guardadas para tu cuenta.", "datePending": "Fecha de entrega pendiente" },
+    "detail": { "subtitle": "Tu Client Account activo", "noComment": "Sin comentario", "emptyDraft": "Este borrador aún no tiene líneas. Agrega un ítem del catálogo autorizado antes de enviarlo." },
+    "fields": { "priority": "Prioridad", "deliveryDate": "Fecha de entrega solicitada", "deliveryDetails": "Detalles de entrega", "payment": "Opción de pago", "comment": "Comentario" },
+    "priority": { "NORMAL": "Normal", "HIGH": "Alta", "URGENT": "Urgente" },
+    "payment": { "CREDIT_LINE": "Línea de crédito", "BANK_TRANSFER": "Transferencia bancaria", "CASH": "Efectivo", "CASH_ON_DELIVERY": "Pago contra entrega" },
+    "status": { "DRAFT": "Borrador", "SUBMITTED": "Enviada", "IN_REVIEW": "En revisión", "NEEDS_ADJUSTMENT": "Requiere ajustes", "APPROVED": "Aprobada", "REJECTED": "Rechazada", "CANCELLED": "Cancelada", "CONVERTED_TO_ORDER": "Convertida en orden" },
+    "catalog": { "search": "Buscar en catálogo autorizado", "searchAction": "Buscar", "item": "Ítem de catálogo", "choose": "Elige un ítem", "quantity": "Cantidad", "add": "Agregar ítem", "remove": "Quitar", "empty": "Este borrador no tiene líneas." },
+    "actions": { "save": "Guardar borrador", "submit": "Enviar solicitud", "cancel": "Cancelar solicitud", "edit": "Editar solicitud", "open": "Abrir solicitud", "retry": "Reintentar", "reload": "Recargar" },
+    "states": { "loading": "Cargando solicitud", "errorTitle": "Solicitud no disponible", "errorDescription": "No pudimos cargar esta solicitud. Inténtalo nuevamente." }
+  },
+  "orders": {
+    "eyebrow": "Órdenes del comprador",
+    "list": { "title": "Mis órdenes", "subtitle": "Sales Orders de tu Client Account activo.", "emptyTitle": "Aún no hay órdenes", "emptyDescription": "Aquí aparecerán las solicitudes aprobadas y convertidas por Sales." },
+    "detail": { "subtitle": "Detalle de la orden comercial" },
+    "requestLink": "Solicitud de compra",
+    "deliveryLink": "Abrir seguimiento de entrega",
+    "total": "Total comercial",
+    "status": { "PENDING": "Pendiente de confirmación", "CONFIRMED": "Confirmada", "REJECTED": "Rechazada", "CANCELLED": "Cancelada" },
+    "fields": { "rejectionReason": "Motivo del rechazo" },
+    "actions": { "open": "Abrir orden", "back": "Volver a mis órdenes", "confirm": "Confirmar orden", "reject": "Rechazar orden", "cancel": "Cancelar orden", "retry": "Reintentar", "reload": "Recargar" },
+    "states": { "loading": "Cargando órdenes", "errorTitle": "Órdenes no disponibles", "errorDescription": "No pudimos cargar tus Sales Orders. Inténtalo nuevamente." },
+    "events": { "title": "Eventos de la orden", "empty": "No hay eventos registrados para esta orden." }
+  },
+  "messages": {
+    "PURCHASE_REQUEST_SAVED": "Borrador guardado.", "PURCHASE_REQUEST_SUBMITTED": "Solicitud enviada.", "PURCHASE_REQUESTS_LOAD_FAILED": "No pudimos cargar las solicitudes.", "PURCHASE_REQUEST_LOAD_FAILED": "No pudimos cargar la solicitud.", "PURCHASE_REQUEST_DRAFT_LOAD_FAILED": "No pudimos reanudar el borrador.", "PURCHASE_REQUEST_CREATE_FAILED": "No pudimos crear el borrador.", "PURCHASE_REQUEST_SAVE_FAILED": "No pudimos guardar el borrador.", "PURCHASE_REQUEST_SUBMIT_FAILED": "No pudimos enviar la solicitud. El servidor puede requerir una línea.", "PURCHASE_REQUEST_CANCEL_FAILED": "No pudimos cancelar la solicitud.", "PURCHASE_REQUEST_STALE_RELOAD": "La solicitud cambió en otro lugar. Recárgala antes de continuar.", "PURCHASE_REQUEST_LINE_ADD_FAILED": "No pudimos agregar la línea.", "PURCHASE_REQUEST_LINE_UPDATE_FAILED": "No pudimos actualizar la línea.", "PURCHASE_REQUEST_LINE_DELETE_FAILED": "No pudimos quitar la línea.", "CATALOG_SELECTION_FAILED": "No pudimos cargar el catálogo autorizado.", "REQUEST_LINE_DUPLICATE": "Este ítem ya está en la solicitud.", "SALES_ORDERS_LOAD_FAILED": "No pudimos cargar las órdenes.", "SALES_ORDER_LOAD_FAILED": "No pudimos cargar la orden.", "SALES_ORDER_CONFIRM_FAILED": "No pudimos confirmar la orden.", "SALES_ORDER_REJECT_FAILED": "No pudimos rechazar la orden.", "SALES_ORDER_CANCEL_FAILED": "No pudimos cancelar la orden.", "SALES_ORDER_STALE_RELOAD": "La orden cambió en otro lugar. Recárgala antes de continuar.", "DELIVERY_LOAD_FAILED": "No pudimos cargar las entregas.", "DELIVERY_EVENTS_FAILED": "No pudimos cargar la línea de tiempo de la entrega."
   }
 }

@@ -27,6 +27,15 @@
           required
         />
       </label>
+      <p class="workspace-preview-label">WORKSPACE PREVIEW</p>
+      @if (previewLoading()) { <p role="status">Loading workspace preview…</p> }
+      @if (!previewLoading() && preview(); as workspace) {
+        <section class="workspace-preview" aria-live="polite">
+          <strong>{{ workspace.displayName ?? 'Workspace not recognized' }}</strong>
+          @if (workspace.workspaceUrl) { <span>{{ workspace.workspaceUrl }}</span> }
+          <span>{{ workspace.recognized ? 'Recognized' : 'Not recognized' }}</span>
+        </section>
+      }
       <label>
         <span>{{ 'auth.signIn.email' | translate }}</span>
         <input

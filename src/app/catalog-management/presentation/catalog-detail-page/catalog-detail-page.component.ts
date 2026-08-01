@@ -9,6 +9,7 @@ import {
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
 import { catalogQueryFromParams, catalogQueryToParams } from '../../domain/catalog.models';
 
 @Component({
@@ -28,6 +29,7 @@ export class CatalogDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
+  readonly availability = inject(InventoryAvailabilityFacade);
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -43,6 +45,7 @@ export class CatalogDetailPageComponent {
     effect(() => {
       const id = this.catalogItemId();
       if (id) untracked(() => this.catalog.loadDetail(id));
+      if (id) untracked(() => this.availability.load([id]));
     });
   }
 
