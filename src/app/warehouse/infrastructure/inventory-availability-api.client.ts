@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, of } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
 import { InventoryAvailability } from '../domain/inventory-availability.model';
 
@@ -16,7 +16,6 @@ export class InventoryAvailabilityApiClient {
         status: item.status === 'AVAILABLE' || item.status === 'UNAVAILABLE' ? item.status : 'UNKNOWN',
         asOf: String(item.asOf ?? ''),
       }))),
-      catchError(() => of(ids.map((catalogItemId): InventoryAvailability => ({ catalogItemId, status: 'UNKNOWN', asOf: new Date().toISOString() })))),
     );
   }
 }

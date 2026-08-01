@@ -70,6 +70,7 @@
       @if (submitted() && !canSubmit()) {
         <p class="form-hint" role="status">{{ 'auth.signIn.required' | translate }}</p>
       }
+      <p><a routerLink="/forgot-password">{{ 'iamSecurity.forgotTitle' | translate }}</a></p>
     </form>
   </section>
 </main>

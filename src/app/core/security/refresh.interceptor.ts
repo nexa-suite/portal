@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { PortalAuthStateService } from '../../iam/application/portal-auth-state.service';
-import { AUTH_RETRY, SKIP_REFRESH } from './http-context.tokens';
+import { AUTH_RETRY, isPublicIdentityRequest, SKIP_REFRESH } from './http-context.tokens';
 
 export const refreshInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(PortalAuthStateService);
@@ -14,7 +14,7 @@ export const refreshInterceptor: HttpInterceptorFn = (request, next) => {
       if (!(error instanceof HttpErrorResponse) || error.status !== 401)
         return throwError(() => error);
       if (
-        request.context.get(SKIP_REFRESH) ||
+        request.context.get(SKIP_REFRESH) || isPublicIdentityRequest(request.url) ||
         request.context.get(AUTH_RETRY) ||
         !auth.accessToken()
       ) {
