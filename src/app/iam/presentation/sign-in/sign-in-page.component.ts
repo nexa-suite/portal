@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandLogoComponent } from '../../../shared/presentation/components/brand-logo/brand-logo.component';
 import { PortalAuthStateService } from '../../application/portal-auth-state.service';
@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'nexa-sign-in-page',
-  imports: [BrandLogoComponent, TranslatePipe],
+  imports: [BrandLogoComponent, RouterLink, TranslatePipe],
   templateUrl: './sign-in-page.component.html',
   styleUrl: './sign-in-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
