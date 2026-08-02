@@ -12,8 +12,8 @@ const dynamicRedirect = (target: string, parameter: string): RedirectFunction =>
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
   { path: 'sign-in', component: SignInPageComponent, canActivate: [publicOnlyGuard] },
-  { path: 'forgot-password', loadComponent: () => import('./iam/presentation/security-page/security-page.component').then((module) => module.SecurityPageComponent) },
-  { path: 'reset-password', loadComponent: () => import('./iam/presentation/security-page/security-page.component').then((module) => module.SecurityPageComponent) },
+  { path: 'forgot-password', loadComponent: () => import('./iam/presentation/forgot-password-page/forgot-password-page.component').then((module) => module.BuyerForgotPasswordPageComponent) },
+  { path: 'reset-password', loadComponent: () => import('./iam/presentation/reset-password-page/reset-password-page.component').then((module) => module.BuyerResetPasswordPageComponent) },
   { path: 'forbidden', component: ForbiddenPageComponent },
   { path: 'home', pathMatch: 'full', redirectTo: 'portal/home' },
   {
@@ -23,9 +23,9 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'home', component: HomePageComponent },
-      { path: 'profile', loadComponent: () => import('./iam/presentation/security-page/security-page.component').then((module) => module.SecurityPageComponent) },
-      { path: 'security/password', loadComponent: () => import('./iam/presentation/security-page/security-page.component').then((module) => module.SecurityPageComponent) },
-      { path: 'security/sessions', loadComponent: () => import('./iam/presentation/security-page/security-page.component').then((module) => module.SecurityPageComponent) },
+      { path: 'profile', loadComponent: () => import('./iam/presentation/buyer-profile-page/buyer-profile-page.component').then((module) => module.BuyerProfilePageComponent) },
+      { path: 'security/password', loadComponent: () => import('./iam/presentation/buyer-change-password-page/buyer-change-password-page.component').then((module) => module.BuyerChangePasswordPageComponent) },
+      { path: 'security/sessions', loadComponent: () => import('./iam/presentation/buyer-sessions-page/buyer-sessions-page.component').then((module) => module.BuyerSessionsPageComponent) },
       { path: 'product-catalog', loadComponent: () => import('./catalog-management/presentation/catalog-list-page/catalog-list-page.component').then((module) => module.CatalogListPageComponent), canActivate: [buyerPermissionGuard('catalog:read')] },
       { path: 'product-catalog/:catalogItemId', loadComponent: () => import('./catalog-management/presentation/catalog-detail-page/catalog-detail-page.component').then((module) => module.CatalogDetailPageComponent), canActivate: [buyerPermissionGuard('catalog:read')] },
       { path: 'request-builder', loadComponent: () => import('./sales/purchase-requests/presentation/request-builder-page/request-builder-page.component').then((module) => module.RequestBuilderPageComponent), canActivate: [buyerPermissionGuard('sales:buyer:write')] },

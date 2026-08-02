@@ -1,4 +1,4 @@
-import { test, expect } from 'playwright/test';
+import { test, expect } from '@playwright/test';
 import { requiresBuyerCredentials, signInBuyer } from './support/auth';
 
 test('Buyer sees safe delivery tracking and no internal fields', async ({ page }) => {
