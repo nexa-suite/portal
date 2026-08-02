@@ -10,10 +10,11 @@
   </nexa-page-header>
 
   <div class="catalog-layout">
-  <form class="catalog-toolbar" (submit)="$event.preventDefault(); submitSearch()" role="search">
+  <form class="catalog-toolbar" (submit)="$event.preventDefault(); submitSearch()" role="search" [attr.aria-label]="'catalog.search' | translate">
     <label class="search-field">
       <span>{{ 'catalog.searchLabel' | translate }}</span>
       <input
+        type="search"
         [value]="searchText()"
         (input)="searchText.set($any($event.target).value)"
         [placeholder]="'catalog.searchPlaceholder' | translate"
@@ -91,8 +92,8 @@
         </div>
 
         <div class="catalog-grid">
-          @for (item of catalog.items(); track item.catalogItemId) {
-            <article class="catalog-card">
+          @for (item of items(); track item.catalogItemId) {
+            <article class="catalog-card" [class.out-of-stock]="isOutOfStock(item.availabilityStatus)">
               <a
                 class="catalog-card-visual"
                 [routerLink]="['/portal/product-catalog', item.catalogItemId]"
@@ -110,7 +111,22 @@
                 <p class="catalog-brand">
                   {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
                 </p>
-                @if (availability.loading()) { <p class="availability-status">{{ 'availability.loading' | translate }}</p> } @else { <p class="availability-status">{{ ('availability.status.' + availability.forItem(item.catalogItemId).status) | translate }} · {{ 'availability.disclaimer' | translate }}</p> }
+                <div class="catalog-card-tags">
+                  <nexa-status-badge
+                    [label]="('availability.status.' + item.availabilityStatus) | translate"
+                    [tone]="availabilityTone(item.availabilityStatus)"
+                  />
+                  @if (item.promotionLabel) {
+                    <nexa-status-badge [label]="item.promotionLabel" tone="accent" />
+                  }
+                </div>
+                @if (item.unitPrice; as price) {
+                  <div class="price-block">
+                    <span class="price-label">{{ 'catalog.effectivePrice' | translate }}</span>
+                    <strong>{{ priceLabel(price) }}</strong>
+                  </div>
+                }
+                <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
                 @if (item.coldChainRequirement) {
                   <nexa-cold-chain-badge
                     [label]="item.coldChainRequirement"

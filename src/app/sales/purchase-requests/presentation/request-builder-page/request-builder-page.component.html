@@ -28,7 +28,7 @@
         @if (facade.detailState().message) { <p class="message">{{ ('messages.' + facade.detailState().message) | translate }}</p> }
         <div class="lines">
           @for (line of lines(); track line.id) {
-            <div class="line"><div><strong>{{ line.itemName }}</strong><span>{{ line.presentation }} · {{ line.catalogItemId }}</span></div><div class="line-actions"><label>{{ 'purchaseRequests.catalog.quantity' | translate }}<input type="number" min="0.01" [value]="line.quantity" [disabled]="!canEdit()" (change)="updateLine(line, $event)" /></label>@if (canEdit()) {<button mat-button type="button" (click)="removeLine(line)">{{ 'purchaseRequests.catalog.remove' | translate }}</button>}</div></div>
+            <div class="line"><div><strong>{{ line.itemName }}</strong><span>{{ line.presentation }}</span></div><div class="line-actions"><label>{{ 'purchaseRequests.catalog.quantity' | translate }}<input type="number" min="0.01" [value]="line.quantity" [disabled]="!canEdit()" (change)="updateLine(line, $event)" /></label>@if (canEdit()) {<button mat-button type="button" (click)="removeLine(line)">{{ 'purchaseRequests.catalog.remove' | translate }}</button>}</div></div>
           } @empty { <p class="hint">{{ 'purchaseRequests.catalog.empty' | translate }}</p> }
         </div>
         <p class="hint">Availability may change until inventory is reserved. A Purchase Request may still be created when availability is unavailable or unknown.</p>

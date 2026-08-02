@@ -37,7 +37,28 @@
             <p class="catalog-brand">
               {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
             </p>
-            @if (availability.loading()) { <p class="availability-status">{{ 'availability.loading' | translate }}</p> } @else { <p class="availability-status">{{ ('availability.status.' + availability.forItem(item.catalogItemId).status) | translate }} · {{ 'availability.disclaimer' | translate }}</p> }
+            @if (item.unitPrice; as price) {
+              <div class="effective-price">
+                <span>{{ 'catalog.effectivePrice' | translate }}</span>
+                <strong>{{ priceLabel(price) }}</strong>
+              </div>
+            }
+            <div class="detail-statuses">
+              <nexa-status-badge
+                [label]="('availability.status.' + item.availabilityStatus) | translate"
+                [tone]="availabilityTone(item.availabilityStatus)"
+              />
+              @if (item.promotionLabel) {
+                <nexa-status-badge [label]="item.promotionLabel" tone="accent" />
+              }
+            </div>
+            <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
+            @if (item.promotionLabel) {
+              <section class="promotion-detail" aria-labelledby="promotion-title">
+                <span class="promotion-heading" id="promotion-title">{{ 'catalog.promotionDetail' | translate }}</span>
+                <p>{{ item.promotionLabel }}</p>
+              </section>
+            }
             @if (item.coldChainRequirement) {
               <nexa-cold-chain-badge
                 [label]="item.coldChainRequirement"
@@ -47,16 +68,6 @@
             @if (item.description) {
               <p class="description">{{ item.description }}</p>
             }
-            <dl class="detail-meta">
-              <div>
-                <dt>{{ 'catalog.productCode' | translate }}</dt>
-                <dd>{{ item.productId }}</dd>
-              </div>
-              <div>
-                <dt>{{ 'catalog.catalogItemCode' | translate }}</dt>
-                <dd>{{ item.catalogItemId }}</dd>
-              </div>
-            </dl>
             <button type="button" class="back-button" (click)="backToCatalog()">
               {{ 'catalog.backToResults' | translate }}
             </button>

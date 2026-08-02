@@ -18,12 +18,20 @@ import { EmptyStateComponent } from '../../../shared/presentation/components/emp
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
-import { CatalogQueryService } from '../../application/catalog-query.service';
-import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
 import {
+  StatusBadgeComponent,
+  StatusTone,
+} from '../../../shared/presentation/components/status-badge/status-badge.component';
+import { CatalogQueryService } from '../../application/catalog-query.service';
+import {
+  catalogItemsWithOutOfStockLast,
   catalogQueryFromParams,
   catalogQueryToParams,
   CatalogQuery,
+  CatalogAvailabilityStatus,
+  CatalogPrice,
+  formatCatalogPrice,
+  isCatalogOutOfStock,
 } from '../../domain/catalog.models';
 
 @Component({
@@ -35,6 +43,7 @@ import {
     LoadingStateComponent,
     PageHeaderComponent,
     RouterLink,
+    StatusBadgeComponent,
     TranslatePipe,
   ],
   templateUrl: './catalog-list-page.component.html',
@@ -45,7 +54,6 @@ export class CatalogListPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
-  readonly availability = inject(InventoryAvailabilityFacade);
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
@@ -53,6 +61,7 @@ export class CatalogListPageComponent {
   readonly query = computed(() => catalogQueryFromParams(this.queryParams()));
   readonly routeQueryParams = computed(() => catalogQueryToParams(this.query()));
   readonly searchText = signal(this.query().q);
+  readonly items = computed(() => catalogItemsWithOutOfStockLast(this.catalog.items()));
   readonly brands = computed(() => this.uniqueValues((item) => item.brandName));
   readonly categories = computed(() => this.uniqueValues((item) => item.categoryName));
   readonly pageNumbers = computed(() => {
@@ -71,7 +80,6 @@ export class CatalogListPageComponent {
         this.catalog.loadList(query);
       });
     });
-    effect(() => { const items = this.catalog.items(); untracked(() => this.availability.load(items.map((item) => item.catalogItemId))); });
   }
 
   submitSearch(): void {
@@ -98,6 +106,28 @@ export class CatalogListPageComponent {
       default:
         return 'ambient';
     }
+  }
+
+  availabilityTone(status: CatalogAvailabilityStatus): StatusTone {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'success';
+      case 'LOW':
+        return 'warning';
+      case 'OUT_OF_STOCK':
+      case 'UNAVAILABLE':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
+  }
+
+  priceLabel(price: CatalogPrice | null): string {
+    return formatCatalogPrice(price);
+  }
+
+  isOutOfStock(status: CatalogAvailabilityStatus): boolean {
+    return isCatalogOutOfStock(status);
   }
 
   private navigateWithQuery(query: CatalogQuery): void {

@@ -3,6 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
 import {
+  catalogAvailabilityFromValue,
+  CatalogPrice,
   CatalogItemDetail,
   CatalogItemSummary,
   CatalogMedia,
@@ -14,6 +16,10 @@ interface RawCatalogMedia {
   readonly url?: unknown;
   readonly fileName?: unknown;
 }
+interface RawCatalogPrice {
+  readonly amount?: unknown;
+  readonly currency?: unknown;
+}
 interface RawCatalogItem {
   readonly catalogItemId?: unknown;
   readonly productId?: unknown;
@@ -24,6 +30,11 @@ interface RawCatalogItem {
   readonly presentation?: unknown;
   readonly coldChainRequirement?: unknown;
   readonly image?: RawCatalogMedia;
+  readonly unitPrice?: RawCatalogPrice | null;
+  readonly unitPriceAmount?: unknown;
+  readonly unitPriceCurrency?: unknown;
+  readonly availabilityStatus?: unknown;
+  readonly promotionLabel?: unknown;
 }
 interface RawCatalogPage {
   readonly items?: readonly RawCatalogItem[];
@@ -49,6 +60,12 @@ function media(raw: RawCatalogMedia | undefined): CatalogMedia | null {
   return url || fileName ? { url, fileName } : null;
 }
 
+function price(raw: RawCatalogItem): CatalogPrice | null {
+  const amount = text(raw.unitPrice?.amount ?? raw.unitPriceAmount);
+  const currency = text(raw.unitPrice?.currency ?? raw.unitPriceCurrency);
+  return amount || currency ? { amount, currency } : null;
+}
+
 function summary(raw: RawCatalogItem): CatalogItemSummary {
   return {
     catalogItemId: text(raw.catalogItemId),
@@ -59,6 +76,9 @@ function summary(raw: RawCatalogItem): CatalogItemSummary {
     presentation: text(raw.presentation),
     coldChainRequirement: text(raw.coldChainRequirement),
     image: media(raw.image),
+    unitPrice: price(raw),
+    availabilityStatus: catalogAvailabilityFromValue(raw.availabilityStatus),
+    promotionLabel: text(raw.promotionLabel) || null,
   };
 }
 

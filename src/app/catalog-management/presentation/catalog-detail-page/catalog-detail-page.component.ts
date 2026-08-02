@@ -8,9 +8,18 @@ import {
 } from '../../../shared/presentation/components/cold-chain-badge/cold-chain-badge.component';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
+import {
+  StatusBadgeComponent,
+  StatusTone,
+} from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
-import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
-import { catalogQueryFromParams, catalogQueryToParams } from '../../domain/catalog.models';
+import {
+  CatalogAvailabilityStatus,
+  CatalogPrice,
+  catalogQueryFromParams,
+  catalogQueryToParams,
+  formatCatalogPrice,
+} from '../../domain/catalog.models';
 
 @Component({
   selector: 'nexa-catalog-detail-page',
@@ -19,6 +28,7 @@ import { catalogQueryFromParams, catalogQueryToParams } from '../../domain/catal
     ErrorStateComponent,
     LoadingStateComponent,
     RouterLink,
+    StatusBadgeComponent,
     TranslatePipe,
   ],
   templateUrl: './catalog-detail-page.component.html',
@@ -29,7 +39,6 @@ export class CatalogDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
-  readonly availability = inject(InventoryAvailabilityFacade);
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -45,7 +54,6 @@ export class CatalogDetailPageComponent {
     effect(() => {
       const id = this.catalogItemId();
       if (id) untracked(() => this.catalog.loadDetail(id));
-      if (id) untracked(() => this.availability.load([id]));
     });
   }
 
@@ -58,6 +66,24 @@ export class CatalogDetailPageComponent {
       default:
         return 'ambient';
     }
+  }
+
+  availabilityTone(status: CatalogAvailabilityStatus): StatusTone {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'success';
+      case 'LOW':
+        return 'warning';
+      case 'OUT_OF_STOCK':
+      case 'UNAVAILABLE':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
+  }
+
+  priceLabel(price: CatalogPrice | null): string {
+    return formatCatalogPrice(price);
   }
 
   backToCatalog(): void {
