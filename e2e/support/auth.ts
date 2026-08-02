@@ -1,4 +1,4 @@
-import { expect, Page } from 'playwright/test';
+import { expect, Page } from '@playwright/test';
 
 export async function signInBuyer(page: Page): Promise<void> {
   const email = process.env.NEXA_E2E_BUYER_EMAIL;

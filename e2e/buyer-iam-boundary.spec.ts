@@ -1,4 +1,4 @@
-import { test, expect } from 'playwright/test';
+import { test, expect } from '@playwright/test';
 import { requiresBuyerCredentials, signInBuyer } from './support/auth';
 
 test('public password recovery is available without Buyer authentication', async ({ page }) => {
