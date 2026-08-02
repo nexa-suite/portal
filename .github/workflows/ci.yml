@@ -97,7 +97,7 @@ jobs:
       - name: Browser E2E (mandatory)
         run: npm run test:e2e
         env:
-          NEXA_PORTAL_URL: http://127.0.0.1:4300
+          NEXA_PORTAL_URL: http://localhost:4300
       - name: Upload Playwright failure artifacts
         if: ${{ failure() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
