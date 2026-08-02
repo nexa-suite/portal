@@ -9,7 +9,7 @@
     "navigation": { "home": "Home", "catalog": "Product catalog", "requestBuilder": "Request builder", "requests": "My requests", "orders": "My orders", "deliveries": "My deliveries" },
     "signOut": "Sign out"
   },
-  "availability": { "loading": "Checking availability…", "disclaimer": "Availability may change until inventory is reserved.", "status": { "AVAILABLE": "Available", "UNAVAILABLE": "Unavailable", "UNKNOWN": "Availability unavailable; retry" } },
+  "availability": { "loading": "Checking availability…", "disclaimer": "Availability may change until inventory is reserved.", "status": { "AVAILABLE": "Available", "LOW": "Low availability", "OUT_OF_STOCK": "Out of stock", "UNAVAILABLE": "Unavailable", "UNKNOWN": "Availability unavailable; retry" } },
   "delivery": { "title": "My deliveries", "subtitle": "Buyer-safe delivery tracking for your Client Account.", "empty": "No deliveries to show yet.", "loading": "Loading deliveries", "error": "We could not load deliveries. Try again.", "open": "Open delivery", "status": { "PREPARING_DELIVERY": "Preparing your delivery", "DELIVERY_SCHEDULED": "Delivery scheduled", "IN_TRANSIT": "In transit", "DELIVERY_REVIEW": "Delivery review in progress", "DELIVERY_RESCHEDULED": "Delivery rescheduled", "DELIVERED": "Delivered", "DELIVERY_CANCELLED": "Delivery cancelled", "UNKNOWN": "Delivery status unavailable" }, "fields": { "salesOrder": "Sales Order", "dispatch": "Dispatch", "window": "Delivery window", "destination": "Destination", "updated": "Last updated", "pod": "Proof of delivery" }, "timeline": "Buyer-visible timeline", "incident": "Delivery notice", "alerts": { "DELIVERY_REVIEW": "The delivery needs review.", "POD_PENDING": "Proof of delivery is pending." }, "event": { "DELIVERY_SCHEDULED": "Delivery scheduled", "IN_TRANSIT": "Delivery in transit", "DELIVERED": "Delivery completed", "DELIVERY_CANCELLED": "Delivery cancelled", "DELIVERY_REVIEW": "Delivery incident under review", "DELIVERY_UPDATED": "Delivery updated" }, "noEvents": "No buyer-visible events yet.", "podComplete": "Completed", "podPending": "Pending" },
   "home": {
     "title": "Buyer workspace",
@@ -63,10 +63,12 @@
     "refrigerated": "Refrigerated",
     "frozen": "Frozen",
     "ambient": "Ambient",
-    "results": "Available products",
+    "results": "Catalog products",
     "resultCount": "{{count}} products found",
     "pageOf": "Page {{page}} of {{pages}}",
     "viewDetails": "View details",
+    "effectivePrice": "Effective unit price",
+    "promotionDetail": "Promotion detail",
     "productCode": "Product code",
     "catalogItemCode": "Catalog item",
     "pagination": "Catalog pagination",

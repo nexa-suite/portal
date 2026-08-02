@@ -9,7 +9,7 @@
     "navigation": { "home": "Inicio", "catalog": "Catálogo de productos", "requestBuilder": "Crear solicitud", "requests": "Mis solicitudes", "orders": "Mis órdenes", "deliveries": "Mis entregas" },
     "signOut": "Cerrar sesión"
   },
-  "availability": { "loading": "Consultando disponibilidad…", "disclaimer": "La disponibilidad puede cambiar hasta reservar el pedido.", "status": { "AVAILABLE": "Disponible", "UNAVAILABLE": "No disponible", "UNKNOWN": "Disponibilidad no disponible; reintenta" } },
+  "availability": { "loading": "Consultando disponibilidad…", "disclaimer": "La disponibilidad puede cambiar hasta reservar el pedido.", "status": { "AVAILABLE": "Disponible", "LOW": "Disponibilidad baja", "OUT_OF_STOCK": "Agotado", "UNAVAILABLE": "No disponible", "UNKNOWN": "Disponibilidad no disponible; reintenta" } },
   "delivery": { "title": "Mis entregas", "subtitle": "Seguimiento seguro de tus entregas.", "empty": "Aún no hay entregas para mostrar.", "loading": "Cargando entregas", "error": "No pudimos cargar las entregas. Inténtalo nuevamente.", "open": "Abrir entrega", "status": { "PREPARING_DELIVERY": "Preparando tu entrega", "DELIVERY_SCHEDULED": "Entrega programada", "IN_TRANSIT": "En tránsito", "DELIVERY_REVIEW": "Revisión de entrega en curso", "DELIVERY_RESCHEDULED": "Entrega reprogramada", "DELIVERED": "Entregada", "DELIVERY_CANCELLED": "Entrega cancelada", "UNKNOWN": "Estado de entrega no disponible" }, "fields": { "salesOrder": "Orden de venta", "dispatch": "Despacho", "window": "Ventana de entrega", "destination": "Destino", "updated": "Última actualización", "pod": "Comprobante de entrega" }, "timeline": "Línea de tiempo visible para comprador", "incident": "Aviso de entrega", "alerts": { "DELIVERY_REVIEW": "La entrega requiere revisión.", "POD_PENDING": "El comprobante de entrega está pendiente." }, "event": { "DELIVERY_SCHEDULED": "Entrega programada", "IN_TRANSIT": "Entrega en tránsito", "DELIVERED": "Entrega completada", "DELIVERY_CANCELLED": "Entrega cancelada", "DELIVERY_REVIEW": "Incidente de entrega en revisión", "DELIVERY_UPDATED": "Entrega actualizada" }, "noEvents": "Aún no hay eventos visibles para comprador.", "podComplete": "Completado", "podPending": "Pendiente" },
   "home": {
     "title": "Espacio del comprador",
@@ -63,10 +63,12 @@
     "refrigerated": "Refrigerado",
     "frozen": "Congelado",
     "ambient": "Ambiente",
-    "results": "Productos disponibles",
+    "results": "Productos del catálogo",
     "resultCount": "{{count}} productos encontrados",
     "pageOf": "Página {{page}} de {{pages}}",
     "viewDetails": "Ver detalle",
+    "effectivePrice": "Precio unitario efectivo",
+    "promotionDetail": "Detalle de promoción",
     "productCode": "Código de producto",
     "catalogItemCode": "Ítem de catálogo",
     "pagination": "Paginación del catálogo",
