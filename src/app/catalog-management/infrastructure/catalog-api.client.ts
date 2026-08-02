@@ -4,6 +4,7 @@ import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
 import {
   catalogAvailabilityFromValue,
+  CatalogAppliedPromotion,
   CatalogPrice,
   CatalogItemDetail,
   CatalogItemSummary,
@@ -20,6 +21,12 @@ interface RawCatalogPrice {
   readonly amount?: unknown;
   readonly currency?: unknown;
 }
+interface RawCatalogAppliedPromotion {
+  readonly id?: unknown;
+  readonly name?: unknown;
+  readonly discountType?: unknown;
+  readonly discountAmount?: unknown;
+}
 interface RawCatalogItem {
   readonly catalogItemId?: unknown;
   readonly productId?: unknown;
@@ -33,6 +40,12 @@ interface RawCatalogItem {
   readonly unitPrice?: RawCatalogPrice | null;
   readonly unitPriceAmount?: unknown;
   readonly unitPriceCurrency?: unknown;
+  readonly basePrice?: RawCatalogPrice | null;
+  readonly effectivePrice?: RawCatalogPrice | null;
+  readonly discountAmount?: RawCatalogPrice | null;
+  readonly currency?: unknown;
+  readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null;
+  readonly pricingAsOf?: unknown;
   readonly availabilityStatus?: unknown;
   readonly promotionLabel?: unknown;
 }
@@ -60,10 +73,40 @@ function media(raw: RawCatalogMedia | undefined): CatalogMedia | null {
   return url || fileName ? { url, fileName } : null;
 }
 
-function price(raw: RawCatalogItem): CatalogPrice | null {
-  const amount = text(raw.unitPrice?.amount ?? raw.unitPriceAmount);
-  const currency = text(raw.unitPrice?.currency ?? raw.unitPriceCurrency);
+function money(raw: RawCatalogPrice | null | undefined): CatalogPrice | null {
+  const amount = text(raw?.amount);
+  const currency = text(raw?.currency);
   return amount || currency ? { amount, currency } : null;
+}
+
+function unitPrice(raw: RawCatalogItem): CatalogPrice | null {
+  return money(raw.unitPrice) ?? money({ amount: raw.unitPriceAmount, currency: raw.unitPriceCurrency });
+}
+
+function decimalText(value: unknown): string {
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
+  return text(value);
+}
+
+function appliedPromotions(raw: RawCatalogItem): readonly CatalogAppliedPromotion[] {
+  if (!Array.isArray(raw.appliedPromotions)) return [];
+  return raw.appliedPromotions.map((promotion) => ({
+    id: text(promotion.id),
+    name: text(promotion.name),
+    discountType: text(promotion.discountType),
+    discountAmount: decimalText(promotion.discountAmount),
+  }));
+}
+
+function pricing(raw: RawCatalogItem) {
+  return {
+    basePrice: money(raw.basePrice),
+    effectivePrice: money(raw.effectivePrice),
+    discountAmount: money(raw.discountAmount),
+    currency: text(raw.currency),
+    appliedPromotions: appliedPromotions(raw),
+    pricingAsOf: text(raw.pricingAsOf) || null,
+  };
 }
 
 function summary(raw: RawCatalogItem): CatalogItemSummary {
@@ -76,7 +119,8 @@ function summary(raw: RawCatalogItem): CatalogItemSummary {
     presentation: text(raw.presentation),
     coldChainRequirement: text(raw.coldChainRequirement),
     image: media(raw.image),
-    unitPrice: price(raw),
+    unitPrice: unitPrice(raw),
+    ...pricing(raw),
     availabilityStatus: catalogAvailabilityFromValue(raw.availabilityStatus),
     promotionLabel: text(raw.promotionLabel) || null,
   };

@@ -19,6 +19,12 @@ function item(availabilityStatus: CatalogItemSummary['availabilityStatus'], cata
     coldChainRequirement: 'REFRIGERATED',
     image: null,
     unitPrice: { amount: '17.30', currency: 'PEN' },
+    basePrice: { amount: '20.00', currency: 'PEN' },
+    effectivePrice: { amount: '17.30', currency: 'PEN' },
+    discountAmount: { amount: '2.70', currency: 'PEN' },
+    currency: 'PEN',
+    appliedPromotions: [],
+    pricingAsOf: '2026-08-02T12:30:00Z',
     availabilityStatus,
     promotionLabel: null,
   };

@@ -13,12 +13,11 @@ import {
   StatusTone,
 } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
 import {
   CatalogAvailabilityStatus,
-  CatalogPrice,
   catalogQueryFromParams,
   catalogQueryToParams,
-  formatCatalogPrice,
 } from '../../domain/catalog.models';
 
 @Component({
@@ -27,6 +26,7 @@ import {
     ColdChainBadgeComponent,
     ErrorStateComponent,
     LoadingStateComponent,
+    CatalogPricingSummaryComponent,
     RouterLink,
     StatusBadgeComponent,
     TranslatePipe,
@@ -80,10 +80,6 @@ export class CatalogDetailPageComponent {
       default:
         return 'neutral';
     }
-  }
-
-  priceLabel(price: CatalogPrice | null): string {
-    return formatCatalogPrice(price);
   }
 
   backToCatalog(): void {

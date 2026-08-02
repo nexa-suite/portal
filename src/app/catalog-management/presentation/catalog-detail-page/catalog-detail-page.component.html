@@ -37,12 +37,6 @@
             <p class="catalog-brand">
               {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
             </p>
-            @if (item.unitPrice; as price) {
-              <div class="effective-price">
-                <span>{{ 'catalog.effectivePrice' | translate }}</span>
-                <strong>{{ priceLabel(price) }}</strong>
-              </div>
-            }
             <div class="detail-statuses">
               <nexa-status-badge
                 [label]="('availability.status.' + item.availabilityStatus) | translate"
@@ -53,12 +47,7 @@
               }
             </div>
             <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
-            @if (item.promotionLabel) {
-              <section class="promotion-detail" aria-labelledby="promotion-title">
-                <span class="promotion-heading" id="promotion-title">{{ 'catalog.promotionDetail' | translate }}</span>
-                <p>{{ item.promotionLabel }}</p>
-              </section>
-            }
+            <nexa-catalog-pricing-summary [pricing]="item" />
             @if (item.coldChainRequirement) {
               <nexa-cold-chain-badge
                 [label]="item.coldChainRequirement"

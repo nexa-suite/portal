@@ -23,14 +23,13 @@ import {
   StatusTone,
 } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
 import {
   catalogItemsWithOutOfStockLast,
   catalogQueryFromParams,
   catalogQueryToParams,
   CatalogQuery,
   CatalogAvailabilityStatus,
-  CatalogPrice,
-  formatCatalogPrice,
   isCatalogOutOfStock,
 } from '../../domain/catalog.models';
 
@@ -42,6 +41,7 @@ import {
     ErrorStateComponent,
     LoadingStateComponent,
     PageHeaderComponent,
+    CatalogPricingSummaryComponent,
     RouterLink,
     StatusBadgeComponent,
     TranslatePipe,
@@ -120,10 +120,6 @@ export class CatalogListPageComponent {
       default:
         return 'neutral';
     }
-  }
-
-  priceLabel(price: CatalogPrice | null): string {
-    return formatCatalogPrice(price);
   }
 
   isOutOfStock(status: CatalogAvailabilityStatus): boolean {

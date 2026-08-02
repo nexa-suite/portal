@@ -120,12 +120,7 @@
                     <nexa-status-badge [label]="item.promotionLabel" tone="accent" />
                   }
                 </div>
-                @if (item.unitPrice; as price) {
-                  <div class="price-block">
-                    <span class="price-label">{{ 'catalog.effectivePrice' | translate }}</span>
-                    <strong>{{ priceLabel(price) }}</strong>
-                  </div>
-                }
+                <nexa-catalog-pricing-summary [pricing]="item" />
                 <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
                 @if (item.coldChainRequirement) {
                   <nexa-cold-chain-badge

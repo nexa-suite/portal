@@ -11,6 +11,13 @@ export interface CatalogPrice {
   readonly currency: string;
 }
 
+export interface CatalogAppliedPromotion {
+  readonly id: string;
+  readonly name: string;
+  readonly discountType: string;
+  readonly discountAmount: string;
+}
+
 export interface CatalogQuery {
   readonly q: string;
   readonly brand: string;
@@ -37,6 +44,12 @@ export interface CatalogItemSummary {
   readonly coldChainRequirement: string;
   readonly image: CatalogMedia | null;
   readonly unitPrice: CatalogPrice | null;
+  readonly basePrice: CatalogPrice | null;
+  readonly effectivePrice: CatalogPrice | null;
+  readonly discountAmount: CatalogPrice | null;
+  readonly currency: string;
+  readonly appliedPromotions: readonly CatalogAppliedPromotion[];
+  readonly pricingAsOf: string | null;
   readonly availabilityStatus: CatalogAvailabilityStatus;
   readonly promotionLabel: string | null;
 }
@@ -53,6 +66,16 @@ export interface CatalogPage {
   readonly totalPages: number;
   readonly sort: { readonly field: string; readonly direction: string };
 }
+
+export type CatalogPricingItem = Pick<
+  CatalogItemSummary,
+  | 'basePrice'
+  | 'effectivePrice'
+  | 'discountAmount'
+  | 'currency'
+  | 'appliedPromotions'
+  | 'pricingAsOf'
+>;
 
 export const DEFAULT_CATALOG_QUERY: CatalogQuery = {
   q: '',
