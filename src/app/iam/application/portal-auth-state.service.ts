@@ -27,7 +27,7 @@ export class PortalAuthStateService {
     () => this.statusState() === 'authenticated' && this.tokenState() !== null,
   );
   readonly canAccessBuyerPortal = computed(
-    () => this.isAuthenticated() && this.identityState()?.role === 'BUYER' && this.hasPermission('catalog:read'),
+    () => this.isAuthenticated() && this.identityState()?.roles.includes('BUYER') === true && this.hasPermission('catalog:read'),
   );
   hasPermission(permission: string): boolean { return this.identityState()?.permissions?.includes(permission.toLowerCase()) ?? false; }
 
