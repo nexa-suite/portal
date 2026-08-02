@@ -24,7 +24,7 @@ describe('PortalAuthStateService', () => {
         id: 1,
         email: 'buyer@icisa.example',
         fullName: 'Buyer',
-        role: 'BUYER',
+        roles: ['BUYER'],
         accessToken: 'token',
       }),
     );
@@ -36,7 +36,7 @@ describe('PortalAuthStateService', () => {
 
     expect(service.isAuthenticated()).toBe(true);
     expect(service.accessToken()).toBe('token');
-    expect(service.identity()?.role).toBe('BUYER');
+    expect(service.identity()?.roles).toContain('BUYER');
   });
 
   it('shares one refresh request between concurrent 401 recoveries', () => {
@@ -45,7 +45,7 @@ describe('PortalAuthStateService', () => {
         id: 1,
         email: 'buyer@icisa.example',
         fullName: 'Buyer',
-        role: 'BUYER',
+        roles: ['BUYER'],
         accessToken: 'old-token',
       }),
     );
@@ -54,7 +54,7 @@ describe('PortalAuthStateService', () => {
         id: 1,
         email: 'buyer@icisa.example',
         fullName: 'Buyer',
-        role: 'BUYER',
+        roles: ['BUYER'],
         accessToken: 'new-token',
       }),
     );

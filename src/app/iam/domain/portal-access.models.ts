@@ -14,7 +14,7 @@ export interface PortalIdentity {
   readonly id: string;
   readonly email: string;
   readonly displayName: string;
-  readonly role: PortalRole;
+  readonly roles: readonly PortalRole[];
   readonly workspaceSlug: string | null;
   readonly clientAccountId: number | null;
   readonly membershipStatus: string | null;
@@ -90,12 +90,11 @@ function firstNumber(...values: unknown[]): number | null {
   return Number.isFinite(number) ? number : null;
 }
 
-function normalizeRole(...values: unknown[]): PortalRole {
-  const normalized =
-    firstString(...values)
-      ?.toUpperCase()
-      .replace(/[\s_-]+/g, '') ?? '';
-  if (normalized === 'BUYER' || normalized === 'B2BBUYER') return BUYER_ROLE;
+function normalizeRoles(...values: unknown[]): readonly PortalRole[] {
+  const candidates = values.flatMap((value) => Array.isArray(value) ? value : []);
+  const normalized = candidates.map((value) => typeof value === 'string' ? value.toUpperCase().replace(/[\s_-]+/g, '') : '')
+    .filter((value) => value === 'BUYER' || value === 'B2BBUYER');
+  if (normalized.includes('BUYER') || normalized.includes('B2BBUYER')) return [BUYER_ROLE];
   throw new PortalAccessDeniedError();
 }
 
@@ -137,27 +136,16 @@ function identityFromResponse(
     property(session, 'displayName'),
     email,
   );
-  const role = normalizeRole(
-    property(membership, 'role'),
-    property(membership, 'Role'),
-    property(membership, 'roleKey'),
-    property(membership, 'RoleKey'),
-    property(membership, 'roleName'),
-    property(membership, 'RoleName'),
-    property(user, 'role'),
-    property(user, 'Role'),
-    property(user, 'roleName'),
-    property(user, 'RoleName'),
-    property(response, 'role'),
-    property(response, 'Role'),
-    property(response, 'roleName'),
-    property(response, 'RoleName'),
-    property(session, 'role'),
-    previousIdentity?.role,
+  const roles = normalizeRoles(
+    property(membership, 'roles'), property(membership, 'Roles'),
+    property(user, 'roles'), property(user, 'Roles'),
+    property(response, 'roles'), property(response, 'Roles'),
+    property(session, 'roles'), property(session, 'Roles'),
+    previousIdentity?.roles,
   );
 
   if (!id || !email || !displayName) {
-    if (previousIdentity) return { ...previousIdentity, role };
+    if (previousIdentity) return { ...previousIdentity, roles };
     throw new InvalidPortalSessionError();
   }
 
@@ -165,7 +153,7 @@ function identityFromResponse(
     id,
     email,
     displayName,
-    role,
+    roles,
     workspaceSlug: firstString(
       property(membership, 'workspaceSlug'),
       property(membership, 'WorkspaceSlug'),
@@ -190,6 +178,7 @@ function identityFromResponse(
     ),
     permissions: Array.from(new Set([
       ...(Array.isArray(property(membership, 'permissions')) ? property(membership, 'permissions') as unknown[] : []),
+      ...(Array.isArray(property(response, 'permissions')) ? property(response, 'permissions') as unknown[] : []),
       ...(previousIdentity?.permissions ?? []),
     ].filter((value): value is string => typeof value === 'string').map((value) => value.toLowerCase()))),
   };
