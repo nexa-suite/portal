@@ -16,7 +16,7 @@ export interface SalesOrder {
   readonly id: string;
   readonly number: string;
   readonly status: SalesOrderStatus;
-  readonly purchaseRequestId: string;
+  readonly purchaseRequestId: string | null;
   readonly purchaseRequestCode: string | null;
   readonly clientAccountId: string;
   readonly currency: string;

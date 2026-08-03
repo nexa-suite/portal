@@ -1,0 +1,19 @@
+<section class="notifications-page">
+  <nexa-page-header [eyebrow]="'notifications.eyebrow' | translate" [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate" />
+  @if (facade.state() === 'loading') { <nexa-loading-state [lines]="5" [label]="'notifications.loading' | translate" /> }
+  @if (facade.state() === 'error') { <nexa-error-state [title]="'notifications.errorTitle' | translate" [retryLabel]="'notifications.retry' | translate" (retry)="facade.load()" /> }
+  @if (facade.state() === 'success') {
+    <div class="actions"><span class="unread-count">{{ 'notifications.unreadCount' | translate:{ count: facade.page().unreadCount } }}</span><button mat-stroked-button type="button" [disabled]="facade.page().unreadCount === 0" (click)="facade.markAllRead()">{{ 'notifications.markAll' | translate }}</button></div>
+    <div class="notification-list">
+      @for (item of facade.page().items; track item.id) {
+        <mat-card class="notification-card" [class.unread]="!item.readAt">
+          <mat-card-content>
+            <div class="notification-head"><strong>{{ item.title }}</strong><time [attr.datetime]="item.createdAt">{{ item.createdAt | date:'medium' }}</time></div>
+            <p>{{ item.message }}</p>
+            <div class="notification-actions"><span>{{ item.category }}</span>@if (item.deepLink?.startsWith('/portal/')) { <button mat-button type="button" (click)="open(item)">{{ 'notifications.open' | translate }}</button> } @else if (!item.readAt) { <button mat-button type="button" (click)="facade.markRead(item)">{{ 'notifications.markRead' | translate }}</button> }</div>
+          </mat-card-content>
+        </mat-card>
+      } @empty { <p class="empty">{{ 'notifications.empty' | translate }}</p> }
+    </div>
+  }
+</section>

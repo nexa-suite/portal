@@ -1,0 +1,176 @@
+export type BuyerPaymentOption =
+  | 'CREDIT_LINE'
+  | 'BANK_TRANSFER'
+  | 'CASH'
+  | 'CASH_ON_DELIVERY';
+
+export interface PeruReferenceOption {
+  readonly id: number;
+  readonly code: string;
+  readonly label: string;
+  readonly parentCode: string | null;
+  readonly active: boolean;
+}
+
+export interface BuyerWarehouse {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly address: string;
+  readonly operatingHoursStart: string | null;
+  readonly operatingHoursEnd: string | null;
+  readonly serviceable: boolean;
+  readonly version: number;
+}
+
+export interface DeliveryAddressInput {
+  readonly addressType: string;
+  readonly line: string;
+  readonly reference: string;
+  readonly countryCode: 'PE';
+  readonly departmentCode: string;
+  readonly provinceCode: string;
+  readonly districtCode: string;
+}
+
+export interface ClientAccountAddress extends DeliveryAddressInput {
+  readonly id: string;
+  readonly clientAccountId: string;
+  readonly label: string;
+  readonly defaultAddress: boolean;
+  readonly active: boolean;
+  readonly version: number;
+  readonly etag: string;
+}
+
+export interface CreateClientAccountAddressInput {
+  readonly label: string;
+  readonly address: DeliveryAddressInput;
+  readonly defaultAddress: boolean;
+}
+
+export interface UpdateClientAccountAddressInput {
+  readonly label: string;
+  readonly address: DeliveryAddressInput;
+}
+
+export interface BuyerRequestLineInput {
+  readonly catalogItemId: string;
+  readonly quantity: number;
+  readonly unit: string;
+  readonly notes: string;
+}
+
+export interface BuyerRequestCommand {
+  readonly clientAccountId: string | null;
+  readonly addressId: string | null;
+  readonly manualAddress: DeliveryAddressInput | null;
+  readonly requestedDeliveryDate: string;
+  readonly deliveryNotes: string;
+  readonly warehouseId: string | null;
+  readonly paymentOption: BuyerPaymentOption;
+  readonly comments: string;
+  readonly lines: readonly BuyerRequestLineInput[];
+}
+
+export interface BuyerRequestAddressSnapshot {
+  readonly id: string | null;
+  readonly label: string | null;
+  readonly addressType: string | null;
+  readonly line: string;
+  readonly reference: string | null;
+  readonly countryCode: string;
+  readonly departmentCode: string;
+  readonly provinceCode: string;
+  readonly districtCode: string;
+  readonly defaultAddress: boolean;
+}
+
+export interface BuyerRequestRouteSnapshot {
+  readonly provider: string | null;
+  readonly reference: string | null;
+  readonly originLabel: string | null;
+  readonly destinationLabel: string | null;
+  readonly distanceMeters: number | null;
+  readonly durationSeconds: number | null;
+  readonly previewUrl: string | null;
+}
+
+export interface BuyerRequestWarehouseSnapshot {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly address: string;
+}
+
+export interface BuyerRequestDeliverySnapshot {
+  readonly requestedDate: string | null;
+  readonly notes: string | null;
+  readonly address: BuyerRequestAddressSnapshot | null;
+  readonly warehouse: BuyerRequestWarehouseSnapshot | null;
+  readonly route: BuyerRequestRouteSnapshot | null;
+}
+
+export interface BuyerRequestCommercialSnapshot {
+  readonly clientAccountId: string | null;
+  readonly businessName: string | null;
+  readonly commercialName: string | null;
+  readonly taxType: string | null;
+  readonly taxValue: string | null;
+  readonly segment: string | null;
+  readonly paymentCondition: string | null;
+}
+
+export interface BuyerRequestSnapshot {
+  readonly delivery: BuyerRequestDeliverySnapshot | null;
+  readonly commercial: BuyerRequestCommercialSnapshot | null;
+  readonly paymentOption: string | null;
+  readonly comments: string | null;
+  readonly capturedAt: string | null;
+}
+
+export interface BuyerRequestLineView extends BuyerRequestLineInput {
+  readonly id: string;
+  readonly itemName: string;
+  readonly presentation: string;
+  readonly unitPriceAmount: number | null;
+  readonly unitPriceCurrency: string | null;
+}
+
+export interface BuyerRequestView {
+  readonly id: string;
+  readonly code: string;
+  readonly tenantId: string | null;
+  readonly workspaceId: string | null;
+  readonly clientAccountId: string | null;
+  readonly buyerMembershipId: string | null;
+  readonly status: string;
+  readonly snapshot: BuyerRequestSnapshot | null;
+  readonly lines: readonly BuyerRequestLineView[];
+  readonly version: number;
+}
+
+export function todayInputValue(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function addressDisplay(
+  address: Pick<DeliveryAddressInput, 'line' | 'reference' | 'departmentCode' | 'provinceCode' | 'districtCode'>,
+  labelFor: (code: string) => string = (code) => code,
+): string {
+  return [
+    address.line,
+    address.reference,
+    labelFor(address.districtCode),
+    labelFor(address.provinceCode),
+    labelFor(address.departmentCode),
+  ].filter((value) => value.trim().length > 0).join(', ');
+}
+
+export function directionsUrl(origin: string, destination: string): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+}

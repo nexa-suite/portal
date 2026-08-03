@@ -10,7 +10,10 @@ describe('Portal routes', () => {
     const portal = routes.find((route) => route.path === 'portal');
     const children = portal?.children ?? [];
     expect(children.some((route) => route.path === 'home')).toBe(true);
+    expect(children.some((route) => route.path === 'account')).toBe(true);
+    expect(children.some((route) => route.path === 'notifications')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
+    expect(children.some((route) => route.path === 'request-builder')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
     expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(true);
     expect(children.some((route) => route.path === 'sales-orders')).toBe(true);

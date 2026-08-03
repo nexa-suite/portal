@@ -16,7 +16,7 @@ export interface PortalIdentity {
   readonly displayName: string;
   readonly roles: readonly PortalRole[];
   readonly workspaceSlug: string | null;
-  readonly clientAccountId: number | null;
+  readonly clientAccountId: string | null;
   readonly membershipStatus: string | null;
   readonly permissions?: readonly string[];
 }
@@ -79,15 +79,12 @@ function firstString(...values: unknown[]): string | null {
   );
 }
 
-function firstNumber(...values: unknown[]): number | null {
-  const value = values.find(
-    (candidate) =>
-      typeof candidate === 'number' ||
-      (typeof candidate === 'string' && candidate.trim().length > 0),
-  );
-  if (value === undefined) return null;
-  const number = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(number) ? number : null;
+function firstIdentifier(...values: unknown[]): string | null {
+  const value = values.find((candidate) => {
+    if (typeof candidate === 'string') return candidate.trim().length > 0;
+    return typeof candidate === 'number' && Number.isFinite(candidate);
+  });
+  return value === undefined ? null : String(value).trim() || null;
 }
 
 function normalizeRoles(...values: unknown[]): readonly PortalRole[] {
@@ -162,7 +159,7 @@ function identityFromResponse(
       property(session, 'workspaceSlug'),
       previousIdentity?.workspaceSlug,
     ),
-    clientAccountId: firstNumber(
+    clientAccountId: firstIdentifier(
       property(membership, 'clientAccountId'),
       property(membership, 'ClientAccountId'),
       property(response, 'clientAccountId'),
