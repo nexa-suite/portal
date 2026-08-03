@@ -40,6 +40,26 @@ export class SalesOrderSelfServiceFacade {
   confirm(): void { this.action((order) => this.api.confirm(order), 'SALES_ORDER_CONFIRM_FAILED'); }
   reject(reason: string): void { this.action((order) => this.api.reject(order, reason), 'SALES_ORDER_REJECT_FAILED'); }
   cancel(): void { this.action((order) => this.api.cancel(order), 'SALES_ORDER_CANCEL_FAILED'); }
+  downloadSummary(format: 'PDF' | 'CSV'): void {
+    const order = this.detailState().item;
+    if (!order) return;
+    this.api.summary(order.id, format).subscribe({
+      next: (response) => {
+        if (!response.body) return;
+        const disposition = response.headers.get('Content-Disposition') ?? '';
+        const match = /filename="?([^";]+)"?/i.exec(disposition);
+        const fallback = `nexa-order-summary-${order.number || order.id}.${format.toLowerCase()}`;
+        const filename = (match?.[1] ?? fallback).replace(/[\\/]/g, '-');
+        const url = URL.createObjectURL(response.body);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.detailState.update((state) => ({ ...state, message: 'SALES_ORDER_SUMMARY_EXPORT_FAILED' })),
+    });
+  }
   reloadCurrent(): void { const id = this.detailState().item?.id; if (id) this.loadDetail(id); }
 
   private action(action: (order: SalesOrder) => ReturnType<SalesOrderApiClient['confirm']>, fallback: string): void {

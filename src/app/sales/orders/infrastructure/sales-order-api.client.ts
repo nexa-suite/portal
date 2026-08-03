@@ -38,7 +38,7 @@ function mapOrder(value: unknown, etag?: string): SalesOrder {
     id: text(raw['id']),
     number: text(raw['number'] ?? raw['orderNumber']),
     status: text(raw['status']).toUpperCase() as SalesOrder['status'],
-    purchaseRequestId: text(raw['purchaseRequestId'] ?? record(raw['purchaseRequest'])['id']),
+    purchaseRequestId: nullableText(raw['purchaseRequestId'] ?? raw['sourcePurchaseRequestId'] ?? record(raw['purchaseRequest'])['id']),
     purchaseRequestCode: nullableText(raw['purchaseRequestCode'] ?? record(raw['purchaseRequest'])['code']),
     clientAccountId: text(raw['clientAccountId'] ?? record(raw['client'])['id']),
     currency: text(raw['currency'] ?? raw['totalCurrency']),
@@ -96,6 +96,15 @@ export class SalesOrderApiClient {
         return { id: text(item['id'] ?? item['eventId']) || `${text(item['eventType'])}:${occurredAt}`, type: text(item['type'] ?? item['eventType']), occurredAt, detail: nullableText(item['detail'] ?? item['description'] ?? item['reason'] ?? item['toStatus']) };
       });
     }));
+  }
+
+  summary(id: string, format: 'PDF' | 'CSV'): Observable<HttpResponse<Blob>> {
+    return this.http.get(this.api(`/${encodeURIComponent(id)}/summary`), {
+      observe: 'response',
+      responseType: 'blob',
+      withCredentials: true,
+      params: { format },
+    });
   }
 
   private action(order: SalesOrder, action: string, body: unknown): Observable<SalesOrder> {
