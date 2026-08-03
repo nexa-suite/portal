@@ -1,10 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, forkJoin, finalize, map, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, forkJoin, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
 import {
   BuyerRequestCommand,
   BuyerRequestSnapshot,
   BuyerRequestView,
-  BuyerWarehouse,
+  BuyerClientAccount,
   ClientAccountAddress,
   CreateClientAccountAddressInput,
   PeruReferenceOption,
@@ -20,25 +20,31 @@ function errorCode(error: unknown, fallback: string): string {
 @Injectable({ providedIn: 'root' })
 export class BuyerRequestBuilderFacade {
   private readonly api = inject(BuyerRequestApiClient);
-  readonly warehouses = signal<readonly BuyerWarehouse[]>([]);
   readonly addresses = signal<readonly ClientAccountAddress[]>([]);
+  readonly clientAccount = signal<BuyerClientAccount | null>(null);
   readonly departments = signal<readonly PeruReferenceOption[]>([]);
   readonly provinces = signal<readonly PeruReferenceOption[]>([]);
   readonly districts = signal<readonly PeruReferenceOption[]>([]);
+  readonly roadTypes = signal<readonly PeruReferenceOption[]>([]);
   readonly previewState = signal<{ readonly status: 'idle' | 'loading' | 'success' | 'error'; readonly snapshot: BuyerRequestSnapshot | null; readonly message: string | null }>({ status: 'idle', snapshot: null, message: null });
   readonly busy = signal(false);
   readonly message = signal<string | null>(null);
 
   loadInitial(clientAccountId: string | null): Observable<void> {
-    const addresses$ = clientAccountId ? this.api.addresses(clientAccountId) : of<readonly ClientAccountAddress[]>([]);
+    const resolvedAccountId$ = clientAccountId
+      ? of(clientAccountId)
+      : this.api.clientAccount().pipe(tap((account) => this.clientAccount.set(account)), map((account) => account.id));
     return this.run(() => forkJoin({
-      warehouses: this.api.warehouses(),
       departments: this.api.reference('departments'),
-      addresses: addresses$,
+      roadTypes: this.api.reference('road-types'),
+      clientAccountId: resolvedAccountId$,
     }).pipe(
-      tap(({ warehouses, departments, addresses }) => {
-        this.warehouses.set(warehouses);
+      switchMap(({ departments, roadTypes, clientAccountId: resolvedId }) => this.api.addresses(resolvedId).pipe(
+        map((addresses) => ({ departments, roadTypes, addresses })),
+      )),
+      tap(({ departments, roadTypes, addresses }) => {
         this.departments.set(departments);
+        this.roadTypes.set(roadTypes);
         this.addresses.set(addresses);
       }),
       map(() => undefined),
@@ -73,6 +79,11 @@ export class BuyerRequestBuilderFacade {
   setDefaultAddress(clientAccountId: string, addressId: string, etag: string): Observable<ClientAccountAddress> {
     return this.run(() => this.api.setDefaultAddress(clientAccountId, addressId, etag), 'BUYER_ACCOUNT_ADDRESS_DEFAULT_FAILED')
       .pipe(tap((item) => this.addresses.update((items) => items.map((current) => ({ ...current, defaultAddress: current.id === item.id })) )));
+  }
+
+  deactivateAddress(clientAccountId: string, addressId: string, etag: string): Observable<ClientAccountAddress> {
+    return this.run(() => this.api.deactivateAddress(clientAccountId, addressId, etag), 'BUYER_ACCOUNT_ADDRESS_DEACTIVATE_FAILED')
+      .pipe(tap((item) => this.addresses.update((items) => items.map((current) => current.id === item.id ? item : current))));
   }
 
   preview(command: BuyerRequestCommand): Observable<BuyerRequestSnapshot | null> {

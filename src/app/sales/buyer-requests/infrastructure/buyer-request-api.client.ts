@@ -12,6 +12,7 @@ import {
   BuyerRequestView,
   BuyerRequestWarehouseSnapshot,
   BuyerWarehouse,
+  BuyerClientAccount,
   ClientAccountAddress,
   CreateClientAccountAddressInput,
   PeruReferenceOption,
@@ -70,6 +71,41 @@ function address(value: unknown, etag?: string): ClientAccountAddress {
     active: item['active'] !== false,
     version,
     etag: etag ?? `"${version}"`,
+    recipientName: nullableText(item['recipientName']),
+    recipientPhone: nullableText(item['recipientPhone']),
+    roadType: nullableText(item['roadType']),
+    streetName: nullableText(item['streetName']),
+    streetNumber: nullableText(item['streetNumber']),
+    interior: nullableText(item['interior']),
+    postalCode: nullableText(item['postalCode']),
+    receivingInstructions: nullableText(item['receivingInstructions']),
+    receivingHours: nullableText(item['receivingHours']),
+    latitude: item['latitude'] == null ? null : Number(item['latitude']),
+    longitude: item['longitude'] == null ? null : Number(item['longitude']),
+    placeId: nullableText(item['placeId']),
+    source: nullableText(item['source']),
+  };
+}
+
+function clientAccount(value: unknown): BuyerClientAccount {
+  const item = raw(value);
+  return {
+    id: text(item['id']),
+    code: text(item['code']),
+    businessName: text(item['businessName']),
+    commercialName: text(item['commercialName']),
+    countryCode: text(item['countryCode']) || 'PE',
+    taxType: text(item['taxType']),
+    taxValue: text(item['taxValue']),
+    segment: text(item['segment']),
+    contactPerson: text(item['contactPerson']),
+    contactEmail: text(item['contactEmail']),
+    phone: text(item['phone']),
+    deliveryProfile: text(item['deliveryProfile']),
+    paymentCondition: text(item['paymentCondition']),
+    status: text(item['status']).toUpperCase(),
+    buyerMembershipId: nullableText(item['buyerMembershipId']),
+    version: number(item['version']),
   };
 }
 
@@ -84,6 +120,13 @@ function route(value: unknown): BuyerRequestRouteSnapshot | null {
     distanceMeters: nullableNumber(item['distanceMeters']),
     durationSeconds: nullableNumber(item['durationSeconds']),
     previewUrl: nullableText(item['previewUrl']),
+    originLatitude: item['originLatitude'] == null ? null : Number(item['originLatitude']),
+    originLongitude: item['originLongitude'] == null ? null : Number(item['originLongitude']),
+    destinationLatitude: item['destinationLatitude'] == null ? null : Number(item['destinationLatitude']),
+    destinationLongitude: item['destinationLongitude'] == null ? null : Number(item['destinationLongitude']),
+    calculatedAt: nullableText(item['calculatedAt']),
+    mode: nullableText(item['mode']),
+    path: nullableText(item['path']),
   };
 }
 
@@ -189,7 +232,12 @@ export class BuyerRequestApiClient {
       .pipe(map((value) => Array.isArray(value) ? value.map(warehouse) : []));
   }
 
-  reference(resource: 'departments' | 'provinces' | 'districts', parentCode?: string): Observable<readonly PeruReferenceOption[]> {
+  clientAccount(): Observable<BuyerClientAccount> {
+    return this.http.get<unknown>(this.api('/client-accounts/me'), { withCredentials: true })
+      .pipe(map(clientAccount));
+  }
+
+  reference(resource: 'departments' | 'provinces' | 'districts' | 'road-types', parentCode?: string): Observable<readonly PeruReferenceOption[]> {
     let params = new HttpParams();
     if (parentCode) params = params.set('parentCode', parentCode);
     return this.http.get<unknown>(this.api(`/reference/${resource}`), { params, withCredentials: true })
@@ -221,6 +269,12 @@ export class BuyerRequestApiClient {
       observe: 'response',
       withCredentials: true,
       headers: new HttpHeaders({ 'If-Match': etag }),
+    }).pipe(map((response) => address(response.body, response.headers.get('ETag') ?? undefined)));
+  }
+
+  deactivateAddress(clientAccountId: string, addressId: string, etag: string): Observable<ClientAccountAddress> {
+    return this.http.delete<unknown>(this.api(`/client-accounts/${encodeURIComponent(clientAccountId)}/addresses/${encodeURIComponent(addressId)}`), {
+      observe: 'response', withCredentials: true, headers: new HttpHeaders({ 'If-Match': etag }),
     }).pipe(map((response) => address(response.body, response.headers.get('ETag') ?? undefined)));
   }
 
