@@ -40,8 +40,11 @@ function mockCatalog(status: CatalogDetailStatus) {
   return {
     detailStatus: signal(status),
     detail: signal<CatalogItemDetail | null>(null),
+    previewStatus: signal('idle'),
+    pricingPreview: signal(null),
     loadDetail: vi.fn(),
     retryDetail: vi.fn(),
+    previewPricing: vi.fn(),
   };
 }
 

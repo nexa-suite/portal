@@ -75,6 +75,7 @@
     "appliedPromotions": "Promociones aplicadas",
     "noPromotions": "Ninguna",
     "pricingAsOf": "Precios al: {{value}}",
+    "quantityPreview": { "title": "Vista previa por cantidad", "description": "Solicita un precio calculado por servidor antes de crear una solicitud.", "quantity": "Cantidad", "action": "Previsualizar precio", "invalid": "Ingresa una cantidad mayor que cero.", "loading": "Calculando precio…", "error": "No se pudo consultar el precio. Inténtalo nuevamente.", "baseUnitPrice": "Precio unitario base", "effectiveUnitPrice": "Precio unitario efectivo", "discount": "Descuento", "lineTotal": "Total de línea", "applied": "Promoción aplicada: {{value}}", "none": "No aplica promoción para esta cantidad." },
     "promotionDetail": "Detalle de promoción",
     "productCode": "Código de producto",
     "catalogItemCode": "Ítem de catálogo",

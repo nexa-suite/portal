@@ -6,7 +6,7 @@ const API_URL = process.env.NEXA_API_URL ?? 'http://localhost:8080';
 const ORIGIN = 'http://localhost:4300';
 
 async function apiSignIn(api: APIRequestContext, identifier: string, password: string): Promise<string> {
-  const response = await api.post('/api/v1/authentication/sign-in', { data: { identifier, password, workspaceSlug: process.env.NEXA_E2E_WORKSPACE ?? 'icisa', surface: 'PORTAL' } });
+  const response = await api.post('/api/v1/authentication/sign-in', { data: { identifier, password, workspaceSlug: process.env.NEXA_E2E_WORKSPACE ?? process.env.NEXA_DEV_WORKSPACE_SLUG ?? 'icisa', surface: 'PORTAL' } });
   expect(response.status()).toBe(200);
   const body = await response.json() as { accessToken: string };
   expect(body.accessToken).toBeTruthy();
@@ -24,8 +24,8 @@ function collectBrowserErrors(page: Page): string[] {
 test('Buyer password recovery proves old-password rejection, session invalidation and generic unknown-account response', async ({ page }) => {
   requiresBuyerCredentials();
   const errors = collectBrowserErrors(page);
-  const email = process.env.NEXA_E2E_BUYER_EMAIL!;
-  const password = process.env.NEXA_E2E_BUYER_PASSWORD!;
+  const email = process.env.NEXA_E2E_BUYER_EMAIL ?? process.env.NEXA_DEV_BUYER_EMAIL!;
+  const password = process.env.NEXA_E2E_BUYER_PASSWORD ?? process.env.NEXA_DEV_BUYER_PASSWORD!;
   const nextPassword = `NexaReset!${Date.now()}`;
   const api = await playwrightRequest.newContext({ baseURL: API_URL, extraHTTPHeaders: { Origin: ORIGIN } });
   try {
@@ -42,7 +42,7 @@ test('Buyer password recovery proves old-password rejection, session invalidatio
     await page.locator('input[formcontrolname="newPassword"]').fill(nextPassword);
     await page.getByRole('button', { name: /save|guardar/i }).click();
     await expect(page.getByRole('status')).toBeVisible();
-    const oldLogin = await api.post('/api/v1/authentication/sign-in', { data: { identifier: email, password, workspaceSlug: process.env.NEXA_E2E_WORKSPACE ?? 'icisa', surface: 'PORTAL' } });
+    const oldLogin = await api.post('/api/v1/authentication/sign-in', { data: { identifier: email, password, workspaceSlug: process.env.NEXA_E2E_WORKSPACE ?? process.env.NEXA_DEV_WORKSPACE_SLUG ?? 'icisa', surface: 'PORTAL' } });
     expect(oldLogin.status()).toBe(401);
     const nextToken = await apiSignIn(api, email, nextPassword);
     const priorSession = await api.get('/api/v1/session', { headers: { Authorization: `Bearer ${priorToken}` } });
@@ -64,8 +64,8 @@ test('Buyer password recovery proves old-password rejection, session invalidatio
 
 test('Buyer session page proves A/B isolation, other-session revocation and current-session revocation', async ({ page }) => {
   requiresBuyerCredentials();
-  const email = process.env.NEXA_E2E_BUYER_EMAIL!;
-  const password = process.env.NEXA_E2E_BUYER_PASSWORD!;
+  const email = process.env.NEXA_E2E_BUYER_EMAIL ?? process.env.NEXA_DEV_BUYER_EMAIL!;
+  const password = process.env.NEXA_E2E_BUYER_PASSWORD ?? process.env.NEXA_DEV_BUYER_PASSWORD!;
   const api = await playwrightRequest.newContext({ baseURL: API_URL, extraHTTPHeaders: { Origin: ORIGIN } });
   try {
     await signInBuyer(page);

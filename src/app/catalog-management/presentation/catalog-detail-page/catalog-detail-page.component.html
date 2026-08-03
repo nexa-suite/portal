@@ -48,6 +48,46 @@
             </div>
             <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
             <nexa-catalog-pricing-summary [pricing]="item" />
+            <section class="quantity-preview" [attr.aria-label]="'catalog.quantityPreview.title' | translate">
+              <h2>{{ 'catalog.quantityPreview.title' | translate }}</h2>
+              <p>{{ 'catalog.quantityPreview.description' | translate }}</p>
+              <form (submit)="$event.preventDefault(); previewPrice()">
+                <label>
+                  <span>{{ 'catalog.quantityPreview.quantity' | translate }}</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    [value]="previewQuantity()"
+                    (input)="previewQuantity.set($any($event.target).value)"
+                    [attr.aria-invalid]="previewQuantityInvalid()"
+                  />
+                </label>
+                <button type="submit">{{ 'catalog.quantityPreview.action' | translate }}</button>
+              </form>
+              @if (previewQuantityInvalid()) {
+                <p class="preview-message error" role="alert">{{ 'catalog.quantityPreview.invalid' | translate }}</p>
+              }
+              @if (catalog.previewStatus() === 'loading') {
+                <p class="preview-message" role="status">{{ 'catalog.quantityPreview.loading' | translate }}</p>
+              } @else if (catalog.previewStatus() === 'error') {
+                <p class="preview-message error" role="alert">{{ 'catalog.quantityPreview.error' | translate }}</p>
+              } @else if (catalog.pricingPreview(); as preview) {
+                @for (line of preview.items; track line.productId) {
+                  <dl class="preview-result">
+                    <div><dt>{{ 'catalog.quantityPreview.baseUnitPrice' | translate }}</dt><dd>{{ line.baseUnitPrice ? (line.baseUnitPrice.currency + ' ' + line.baseUnitPrice.amount) : '—' }}</dd></div>
+                    <div><dt>{{ 'catalog.quantityPreview.effectiveUnitPrice' | translate }}</dt><dd>{{ line.effectiveUnitPrice ? (line.effectiveUnitPrice.currency + ' ' + line.effectiveUnitPrice.amount) : '—' }}</dd></div>
+                    <div><dt>{{ 'catalog.quantityPreview.discount' | translate }}</dt><dd>{{ line.discountAmount ? (line.discountAmount.currency + ' ' + line.discountAmount.amount) : '—' }}</dd></div>
+                    <div><dt>{{ 'catalog.quantityPreview.lineTotal' | translate }}</dt><dd>{{ line.lineEffectiveTotal ? (line.lineEffectiveTotal.currency + ' ' + line.lineEffectiveTotal.amount) : '—' }}</dd></div>
+                  </dl>
+                  @if (line.appliedPromotions.length) {
+                    <p class="preview-promotion" role="status">{{ 'catalog.quantityPreview.applied' | translate: { value: line.appliedPromotions[0].name } }}</p>
+                  } @else {
+                    <p class="preview-message" role="status">{{ 'catalog.quantityPreview.none' | translate }}</p>
+                  }
+                }
+              }
+            </section>
             @if (item.coldChainRequirement) {
               <nexa-cold-chain-badge
                 [label]="item.coldChainRequirement"

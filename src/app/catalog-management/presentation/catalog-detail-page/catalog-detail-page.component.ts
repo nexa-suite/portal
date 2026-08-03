@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -49,6 +49,8 @@ export class CatalogDetailPageComponent {
   readonly backQueryParams = computed(() =>
     catalogQueryToParams(catalogQueryFromParams(this.queryParams())),
   );
+  readonly previewQuantity = signal('1');
+  readonly previewQuantityInvalid = signal(false);
 
   constructor() {
     effect(() => {
@@ -84,5 +86,13 @@ export class CatalogDetailPageComponent {
 
   backToCatalog(): void {
     void this.router.navigate(['/portal/product-catalog'], { queryParams: this.backQueryParams() });
+  }
+
+  previewPrice(): void {
+    const quantity = Number(this.previewQuantity().trim());
+    const productId = this.catalog.detail()?.productId ?? '';
+    const valid = Number.isFinite(quantity) && quantity > 0;
+    this.previewQuantityInvalid.set(!valid);
+    if (valid) this.catalog.previewPricing(productId, quantity);
   }
 }

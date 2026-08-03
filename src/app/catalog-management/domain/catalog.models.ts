@@ -77,6 +77,24 @@ export type CatalogPricingItem = Pick<
   | 'pricingAsOf'
 >;
 
+export interface CatalogPricingPreviewRequest {
+  readonly items: readonly { readonly productId: string; readonly quantity: number }[];
+  readonly asOf?: string;
+}
+
+export interface CatalogPricingPreviewItem extends CatalogPricingItem {
+  readonly productId: string;
+  readonly quantity: number;
+  readonly baseUnitPrice: CatalogPrice | null;
+  readonly effectiveUnitPrice: CatalogPrice | null;
+  readonly lineBaseTotal: CatalogPrice | null;
+  readonly lineEffectiveTotal: CatalogPrice | null;
+}
+
+export interface CatalogPricingPreview {
+  readonly items: readonly CatalogPricingPreviewItem[];
+}
+
 export const DEFAULT_CATALOG_QUERY: CatalogQuery = {
   q: '',
   brand: '',

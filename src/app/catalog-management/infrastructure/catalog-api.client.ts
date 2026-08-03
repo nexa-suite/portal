@@ -10,6 +10,9 @@ import {
   CatalogItemSummary,
   CatalogMedia,
   CatalogPage,
+  CatalogPricingPreview,
+  CatalogPricingPreviewItem,
+  CatalogPricingPreviewRequest,
   CatalogQuery,
 } from '../domain/catalog.models';
 
@@ -58,6 +61,25 @@ interface RawCatalogPage {
   readonly sort?: { readonly field?: unknown; readonly direction?: unknown };
 }
 
+interface RawCatalogPricingPreviewItem {
+  readonly productId?: unknown;
+  readonly quantity?: unknown;
+  readonly baseUnitPrice?: RawCatalogPrice | null;
+  readonly effectiveUnitPrice?: RawCatalogPrice | null;
+  readonly lineBaseTotal?: RawCatalogPrice | null;
+  readonly lineEffectiveTotal?: RawCatalogPrice | null;
+  readonly basePrice?: RawCatalogPrice | null;
+  readonly effectivePrice?: RawCatalogPrice | null;
+  readonly discountAmount?: RawCatalogPrice | null;
+  readonly currency?: unknown;
+  readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null;
+  readonly pricingAsOf?: unknown;
+}
+
+interface RawCatalogPricingPreview {
+  readonly items?: readonly RawCatalogPricingPreviewItem[];
+}
+
 function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -74,9 +96,14 @@ function media(raw: RawCatalogMedia | undefined): CatalogMedia | null {
 }
 
 function money(raw: RawCatalogPrice | null | undefined): CatalogPrice | null {
-  const amount = text(raw?.amount);
+  const amount = moneyAmount(raw?.amount);
   const currency = text(raw?.currency);
   return amount || currency ? { amount, currency } : null;
+}
+
+function moneyAmount(value: unknown): string {
+  if (typeof value === 'number') return Number.isFinite(value) ? value.toFixed(2) : '';
+  return text(value);
 }
 
 function unitPrice(raw: RawCatalogItem): CatalogPrice | null {
@@ -88,7 +115,7 @@ function decimalText(value: unknown): string {
   return text(value);
 }
 
-function appliedPromotions(raw: RawCatalogItem): readonly CatalogAppliedPromotion[] {
+function appliedPromotions(raw: { readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null }): readonly CatalogAppliedPromotion[] {
   if (!Array.isArray(raw.appliedPromotions)) return [];
   return raw.appliedPromotions.map((promotion) => ({
     id: text(promotion.id),
@@ -104,6 +131,25 @@ function pricing(raw: RawCatalogItem) {
     effectivePrice: money(raw.effectivePrice),
     discountAmount: money(raw.discountAmount),
     currency: text(raw.currency),
+    appliedPromotions: appliedPromotions(raw),
+    pricingAsOf: text(raw.pricingAsOf) || null,
+  };
+}
+
+function previewItem(raw: RawCatalogPricingPreviewItem): CatalogPricingPreviewItem {
+  const baseUnitPrice = money(raw.baseUnitPrice) ?? money(raw.basePrice);
+  const effectiveUnitPrice = money(raw.effectiveUnitPrice) ?? money(raw.effectivePrice);
+  return {
+    productId: text(raw.productId),
+    quantity: typeof raw.quantity === 'number' ? raw.quantity : Number(raw.quantity ?? 0),
+    baseUnitPrice,
+    effectiveUnitPrice,
+    lineBaseTotal: money(raw.lineBaseTotal),
+    lineEffectiveTotal: money(raw.lineEffectiveTotal),
+    basePrice: baseUnitPrice,
+    effectivePrice: effectiveUnitPrice,
+    discountAmount: money(raw.discountAmount),
+    currency: text(raw.currency) || baseUnitPrice?.currency || effectiveUnitPrice?.currency || '',
     appliedPromotions: appliedPromotions(raw),
     pricingAsOf: text(raw.pricingAsOf) || null,
   };
@@ -168,5 +214,12 @@ export class CatalogApiClient {
     return this.http
       .get<RawCatalogItem>(portalApiUrl(this.config, path), { withCredentials: true })
       .pipe(map(detail));
+  }
+
+  previewPricing(request: CatalogPricingPreviewRequest): Observable<CatalogPricingPreview> {
+    const path = this.config.pricingPreviewPath ?? '/api/v1/catalog/pricing-preview';
+    return this.http
+      .post<RawCatalogPricingPreview>(portalApiUrl(this.config, path), request, { withCredentials: true })
+      .pipe(map((raw) => ({ items: (raw.items ?? []).map(previewItem) })));
   }
 }

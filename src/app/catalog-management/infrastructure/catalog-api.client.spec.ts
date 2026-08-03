@@ -140,4 +140,34 @@ describe('CatalogApiClient', () => {
       promotionLabel: 'Volume promotion',
     });
   });
+
+  it('posts quantity pricing previews and maps unit and line totals', () => {
+    client.previewPricing({ items: [{ productId: 'PRODUCT-1', quantity: 5 }] }).subscribe((preview) => {
+      expect(preview.items[0]).toMatchObject({
+        productId: 'PRODUCT-1',
+        quantity: 5,
+        baseUnitPrice: { amount: '390.00', currency: 'PEN' },
+        effectiveUnitPrice: { amount: '351.00', currency: 'PEN' },
+        lineBaseTotal: { amount: '1950.00', currency: 'PEN' },
+        lineEffectiveTotal: { amount: '1755.00', currency: 'PEN' },
+        discountAmount: { amount: '195.00', currency: 'PEN' },
+        appliedPromotions: [{ name: '10% volume', discountType: 'PERCENTAGE' }],
+      });
+    });
+
+    const request = http.expectOne('http://api.local/api/v1/catalog/pricing-preview');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ items: [{ productId: 'PRODUCT-1', quantity: 5 }] });
+    expect(request.request.withCredentials).toBe(true);
+    request.flush({ items: [{
+      productId: 'PRODUCT-1', quantity: 5,
+      baseUnitPrice: { amount: 390, currency: 'PEN' },
+      effectiveUnitPrice: { amount: 351, currency: 'PEN' },
+      lineBaseTotal: { amount: 1950, currency: 'PEN' },
+      lineEffectiveTotal: { amount: 1755, currency: 'PEN' },
+      discountAmount: { amount: 195, currency: 'PEN' }, currency: 'PEN',
+      appliedPromotions: [{ id: 'promo-1', name: '10% volume', discountType: 'PERCENTAGE', discountAmount: '39.00' }],
+      pricingAsOf: '2026-08-02T12:30:00Z',
+    }] });
+  });
 });
