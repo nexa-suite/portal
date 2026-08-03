@@ -31,6 +31,19 @@ export interface DeliveryAddressInput {
   readonly departmentCode: string;
   readonly provinceCode: string;
   readonly districtCode: string;
+  readonly recipientName?: string | null;
+  readonly recipientPhone?: string | null;
+  readonly roadType?: string | null;
+  readonly streetName?: string | null;
+  readonly streetNumber?: string | null;
+  readonly interior?: string | null;
+  readonly postalCode?: string | null;
+  readonly receivingInstructions?: string | null;
+  readonly receivingHours?: string | null;
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
+  readonly placeId?: string | null;
+  readonly source?: string | null;
 }
 
 export interface ClientAccountAddress extends DeliveryAddressInput {
@@ -41,6 +54,25 @@ export interface ClientAccountAddress extends DeliveryAddressInput {
   readonly active: boolean;
   readonly version: number;
   readonly etag: string;
+}
+
+export interface BuyerClientAccount {
+  readonly id: string;
+  readonly code: string;
+  readonly businessName: string;
+  readonly commercialName: string;
+  readonly countryCode: string;
+  readonly taxType: string;
+  readonly taxValue: string;
+  readonly segment: string;
+  readonly contactPerson: string;
+  readonly contactEmail: string;
+  readonly phone: string;
+  readonly deliveryProfile: string;
+  readonly paymentCondition: string;
+  readonly status: string;
+  readonly buyerMembershipId: string | null;
+  readonly version: number;
 }
 
 export interface CreateClientAccountAddressInput {
@@ -94,6 +126,13 @@ export interface BuyerRequestRouteSnapshot {
   readonly distanceMeters: number | null;
   readonly durationSeconds: number | null;
   readonly previewUrl: string | null;
+  readonly originLatitude?: number | null;
+  readonly originLongitude?: number | null;
+  readonly destinationLatitude?: number | null;
+  readonly destinationLongitude?: number | null;
+  readonly calculatedAt?: string | null;
+  readonly mode?: string | null;
+  readonly path?: string | null;
 }
 
 export interface BuyerRequestWarehouseSnapshot {

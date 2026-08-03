@@ -37,6 +37,13 @@ describe('BuyerRequestApiClient', () => {
     provinces.flush([{ id: 1, code: 'LIM-01', label: 'Lima', parentCode: 'LIM', active: true }]);
   });
 
+  it('resolves the Buyer client account through the safe self-service contract', () => {
+    client.clientAccount().subscribe((account) => expect(account.id).toBe('client-1'));
+    const request = http.expectOne('http://api.local/api/v1/client-accounts/me');
+    expect(request.request.method).toBe('GET');
+    request.flush({ id: 'client-1', code: 'CLI-001', businessName: 'ICISA', status: 'ACTIVE', version: 3 });
+  });
+
   it('sends a real saved-address request with an If-Match precondition', () => {
     client.setDefaultAddress('client-1', 'address-1', '"3"').subscribe();
     const request = http.expectOne('http://api.local/api/v1/client-accounts/client-1/addresses/address-1/default');
