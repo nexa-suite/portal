@@ -4,11 +4,15 @@ import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
 import {
   catalogAvailabilityFromValue,
+  CatalogAppliedPromotion,
   CatalogPrice,
   CatalogItemDetail,
   CatalogItemSummary,
   CatalogMedia,
   CatalogPage,
+  CatalogPricingPreview,
+  CatalogPricingPreviewItem,
+  CatalogPricingPreviewRequest,
   CatalogQuery,
 } from '../domain/catalog.models';
 
@@ -19,6 +23,12 @@ interface RawCatalogMedia {
 interface RawCatalogPrice {
   readonly amount?: unknown;
   readonly currency?: unknown;
+}
+interface RawCatalogAppliedPromotion {
+  readonly id?: unknown;
+  readonly name?: unknown;
+  readonly discountType?: unknown;
+  readonly discountAmount?: unknown;
 }
 interface RawCatalogItem {
   readonly catalogItemId?: unknown;
@@ -33,6 +43,12 @@ interface RawCatalogItem {
   readonly unitPrice?: RawCatalogPrice | null;
   readonly unitPriceAmount?: unknown;
   readonly unitPriceCurrency?: unknown;
+  readonly basePrice?: RawCatalogPrice | null;
+  readonly effectivePrice?: RawCatalogPrice | null;
+  readonly discountAmount?: RawCatalogPrice | null;
+  readonly currency?: unknown;
+  readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null;
+  readonly pricingAsOf?: unknown;
   readonly availabilityStatus?: unknown;
   readonly promotionLabel?: unknown;
 }
@@ -43,6 +59,25 @@ interface RawCatalogPage {
   readonly totalItems?: unknown;
   readonly totalPages?: unknown;
   readonly sort?: { readonly field?: unknown; readonly direction?: unknown };
+}
+
+interface RawCatalogPricingPreviewItem {
+  readonly productId?: unknown;
+  readonly quantity?: unknown;
+  readonly baseUnitPrice?: RawCatalogPrice | null;
+  readonly effectiveUnitPrice?: RawCatalogPrice | null;
+  readonly lineBaseTotal?: RawCatalogPrice | null;
+  readonly lineEffectiveTotal?: RawCatalogPrice | null;
+  readonly basePrice?: RawCatalogPrice | null;
+  readonly effectivePrice?: RawCatalogPrice | null;
+  readonly discountAmount?: RawCatalogPrice | null;
+  readonly currency?: unknown;
+  readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null;
+  readonly pricingAsOf?: unknown;
+}
+
+interface RawCatalogPricingPreview {
+  readonly items?: readonly RawCatalogPricingPreviewItem[];
 }
 
 function text(value: unknown): string {
@@ -60,10 +95,64 @@ function media(raw: RawCatalogMedia | undefined): CatalogMedia | null {
   return url || fileName ? { url, fileName } : null;
 }
 
-function price(raw: RawCatalogItem): CatalogPrice | null {
-  const amount = text(raw.unitPrice?.amount ?? raw.unitPriceAmount);
-  const currency = text(raw.unitPrice?.currency ?? raw.unitPriceCurrency);
+function money(raw: RawCatalogPrice | null | undefined): CatalogPrice | null {
+  const amount = moneyAmount(raw?.amount);
+  const currency = text(raw?.currency);
   return amount || currency ? { amount, currency } : null;
+}
+
+function moneyAmount(value: unknown): string {
+  if (typeof value === 'number') return Number.isFinite(value) ? value.toFixed(2) : '';
+  return text(value);
+}
+
+function unitPrice(raw: RawCatalogItem): CatalogPrice | null {
+  return money(raw.unitPrice) ?? money({ amount: raw.unitPriceAmount, currency: raw.unitPriceCurrency });
+}
+
+function decimalText(value: unknown): string {
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
+  return text(value);
+}
+
+function appliedPromotions(raw: { readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null }): readonly CatalogAppliedPromotion[] {
+  if (!Array.isArray(raw.appliedPromotions)) return [];
+  return raw.appliedPromotions.map((promotion) => ({
+    id: text(promotion.id),
+    name: text(promotion.name),
+    discountType: text(promotion.discountType),
+    discountAmount: decimalText(promotion.discountAmount),
+  }));
+}
+
+function pricing(raw: RawCatalogItem) {
+  return {
+    basePrice: money(raw.basePrice),
+    effectivePrice: money(raw.effectivePrice),
+    discountAmount: money(raw.discountAmount),
+    currency: text(raw.currency),
+    appliedPromotions: appliedPromotions(raw),
+    pricingAsOf: text(raw.pricingAsOf) || null,
+  };
+}
+
+function previewItem(raw: RawCatalogPricingPreviewItem): CatalogPricingPreviewItem {
+  const baseUnitPrice = money(raw.baseUnitPrice) ?? money(raw.basePrice);
+  const effectiveUnitPrice = money(raw.effectiveUnitPrice) ?? money(raw.effectivePrice);
+  return {
+    productId: text(raw.productId),
+    quantity: typeof raw.quantity === 'number' ? raw.quantity : Number(raw.quantity ?? 0),
+    baseUnitPrice,
+    effectiveUnitPrice,
+    lineBaseTotal: money(raw.lineBaseTotal),
+    lineEffectiveTotal: money(raw.lineEffectiveTotal),
+    basePrice: baseUnitPrice,
+    effectivePrice: effectiveUnitPrice,
+    discountAmount: money(raw.discountAmount),
+    currency: text(raw.currency) || baseUnitPrice?.currency || effectiveUnitPrice?.currency || '',
+    appliedPromotions: appliedPromotions(raw),
+    pricingAsOf: text(raw.pricingAsOf) || null,
+  };
 }
 
 function summary(raw: RawCatalogItem): CatalogItemSummary {
@@ -76,7 +165,8 @@ function summary(raw: RawCatalogItem): CatalogItemSummary {
     presentation: text(raw.presentation),
     coldChainRequirement: text(raw.coldChainRequirement),
     image: media(raw.image),
-    unitPrice: price(raw),
+    unitPrice: unitPrice(raw),
+    ...pricing(raw),
     availabilityStatus: catalogAvailabilityFromValue(raw.availabilityStatus),
     promotionLabel: text(raw.promotionLabel) || null,
   };
@@ -124,5 +214,12 @@ export class CatalogApiClient {
     return this.http
       .get<RawCatalogItem>(portalApiUrl(this.config, path), { withCredentials: true })
       .pipe(map(detail));
+  }
+
+  previewPricing(request: CatalogPricingPreviewRequest): Observable<CatalogPricingPreview> {
+    const path = this.config.pricingPreviewPath ?? '/api/v1/catalog/pricing-preview';
+    return this.http
+      .post<RawCatalogPricingPreview>(portalApiUrl(this.config, path), request, { withCredentials: true })
+      .pipe(map((raw) => ({ items: (raw.items ?? []).map(previewItem) })));
   }
 }

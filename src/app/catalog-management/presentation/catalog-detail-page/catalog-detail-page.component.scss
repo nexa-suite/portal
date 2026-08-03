@@ -5,6 +5,80 @@
   display: grid;
   gap: var(--nexa-space-6);
 }
+
+.quantity-preview {
+  display: grid;
+  gap: var(--nexa-space-3);
+  margin-top: var(--nexa-space-4);
+  padding: var(--nexa-space-4);
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-md);
+  background: var(--nexa-surface-inset);
+}
+
+.quantity-preview h2,
+.quantity-preview p {
+  margin: 0;
+}
+
+.quantity-preview h2 {
+  font-size: var(--nexa-font-size-sm);
+}
+
+.quantity-preview form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--nexa-space-3);
+}
+
+.quantity-preview label {
+  display: grid;
+  gap: var(--nexa-space-1);
+  min-width: 10rem;
+}
+
+.quantity-preview input,
+.quantity-preview button {
+  min-height: 2.75rem;
+  padding: 0 var(--nexa-space-3);
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-sm);
+}
+
+.quantity-preview button {
+  color: var(--nexa-color-text-inverse);
+  background: var(--nexa-color-primary-700);
+  cursor: pointer;
+}
+
+.preview-result {
+  display: grid;
+  gap: var(--nexa-space-2);
+  margin: 0;
+}
+
+.preview-result div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--nexa-space-3);
+}
+
+.preview-result dt,
+.preview-message,
+.preview-promotion {
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-xs);
+}
+
+.preview-result dd {
+  margin: 0;
+  font-weight: var(--nexa-font-weight-bold);
+}
+
+.preview-message.error {
+  color: var(--nexa-color-danger-700);
+}
 .back-link {
   width: fit-content;
   color: var(--nexa-color-primary-700);
@@ -71,28 +145,6 @@ h1 {
   font-size: var(--nexa-font-size-lg);
   line-height: var(--nexa-line-height-relaxed);
 }
-.effective-price {
-  display: grid;
-  gap: var(--nexa-space-1);
-  width: fit-content;
-  padding: var(--nexa-space-3) var(--nexa-space-4);
-  border: 1px solid var(--nexa-color-primary-100);
-  border-radius: var(--nexa-radius-md);
-  background: var(--nexa-color-primary-50);
-}
-.effective-price span,
-.promotion-heading {
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-xs);
-  font-weight: var(--nexa-font-weight-bold);
-  letter-spacing: var(--nexa-letter-spacing-wide);
-  text-transform: uppercase;
-}
-.effective-price strong {
-  color: var(--nexa-color-primary-700);
-  font-family: var(--nexa-font-family-display);
-  font-size: var(--nexa-font-size-2xl);
-}
 .detail-statuses {
   display: flex;
   flex-wrap: wrap;
@@ -102,42 +154,6 @@ h1 {
   margin: calc(var(--nexa-space-3) * -1) 0 0;
   color: var(--nexa-color-text-secondary);
   font-size: var(--nexa-font-size-sm);
-}
-.promotion-detail {
-  display: grid;
-  gap: var(--nexa-space-2);
-  padding: var(--nexa-space-4);
-  border-left: 3px solid var(--nexa-color-cold-refrigerated);
-  background: var(--nexa-color-cold-refrigerated-soft);
-}
-.promotion-detail p {
-  margin: 0;
-  color: var(--nexa-color-text-primary);
-  line-height: var(--nexa-line-height-relaxed);
-}
-.detail-meta {
-  display: grid;
-  gap: var(--nexa-space-3);
-  margin: var(--nexa-space-2) 0 0;
-}
-.detail-meta div {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--nexa-space-4);
-  padding-bottom: var(--nexa-space-3);
-  border-bottom: 1px solid var(--nexa-color-border-default);
-}
-.detail-meta dt {
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-sm);
-}
-.detail-meta dd {
-  margin: 0;
-  color: var(--nexa-color-text-primary);
-  font-family: var(--nexa-font-family-display);
-  font-size: var(--nexa-font-size-sm);
-  font-weight: var(--nexa-font-weight-bold);
-  text-align: right;
 }
 .back-button {
   width: fit-content;

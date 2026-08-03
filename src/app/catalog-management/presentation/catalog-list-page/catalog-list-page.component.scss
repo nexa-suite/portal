@@ -166,21 +166,6 @@
   align-items: center;
   gap: var(--nexa-space-2);
 }
-.price-block {
-  display: grid;
-  gap: var(--nexa-space-1);
-  margin-top: var(--nexa-space-1);
-}
-.price-label {
-  color: var(--nexa-color-text-secondary);
-  font-size: var(--nexa-font-size-xs);
-  font-weight: var(--nexa-font-weight-semibold);
-}
-.price-block strong {
-  color: var(--nexa-color-text-primary);
-  font-family: var(--nexa-font-family-display);
-  font-size: var(--nexa-font-size-xl);
-}
 .availability-note {
   margin: calc(var(--nexa-space-2) * -1) 0 0;
   color: var(--nexa-color-text-secondary);

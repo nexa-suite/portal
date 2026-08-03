@@ -7,6 +7,7 @@ export interface PortalRuntimeConfig {
   readonly refreshPath: string;
   readonly signOutPath: string;
   readonly catalogPath: string;
+  readonly pricingPreviewPath?: string;
   readonly surface: PortalSurface;
 }
 
@@ -16,6 +17,7 @@ const DEFAULT_RUNTIME_CONFIG: PortalRuntimeConfig = {
   refreshPath: '/api/v1/authentication/refresh',
   signOutPath: '/api/v1/authentication/sign-out',
   catalogPath: '/api/v1/catalog-items',
+  pricingPreviewPath: '/api/v1/catalog/pricing-preview',
   surface: PORTAL_SURFACE,
 };
 

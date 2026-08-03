@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -13,12 +13,11 @@ import {
   StatusTone,
 } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
 import {
   CatalogAvailabilityStatus,
-  CatalogPrice,
   catalogQueryFromParams,
   catalogQueryToParams,
-  formatCatalogPrice,
 } from '../../domain/catalog.models';
 
 @Component({
@@ -27,6 +26,7 @@ import {
     ColdChainBadgeComponent,
     ErrorStateComponent,
     LoadingStateComponent,
+    CatalogPricingSummaryComponent,
     RouterLink,
     StatusBadgeComponent,
     TranslatePipe,
@@ -49,6 +49,8 @@ export class CatalogDetailPageComponent {
   readonly backQueryParams = computed(() =>
     catalogQueryToParams(catalogQueryFromParams(this.queryParams())),
   );
+  readonly previewQuantity = signal('1');
+  readonly previewQuantityInvalid = signal(false);
 
   constructor() {
     effect(() => {
@@ -82,11 +84,15 @@ export class CatalogDetailPageComponent {
     }
   }
 
-  priceLabel(price: CatalogPrice | null): string {
-    return formatCatalogPrice(price);
-  }
-
   backToCatalog(): void {
     void this.router.navigate(['/portal/product-catalog'], { queryParams: this.backQueryParams() });
+  }
+
+  previewPrice(): void {
+    const quantity = Number(this.previewQuantity().trim());
+    const productId = this.catalog.detail()?.productId ?? '';
+    const valid = Number.isFinite(quantity) && quantity > 0;
+    this.previewQuantityInvalid.set(!valid);
+    if (valid) this.catalog.previewPricing(productId, quantity);
   }
 }
