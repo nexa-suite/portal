@@ -6,9 +6,9 @@
     "buyerDescription": "Descubre productos autorizados, gestiona solicitudes de compra, revisa órdenes y sigue tus entregas.",
     "language": "Idioma",
     "skipToContent": "Saltar al contenido",
-    "navigation": { "home": "Inicio", "catalog": "Catálogo de productos", "requestBuilder": "Crear solicitud", "requests": "Mis solicitudes", "orders": "Mis órdenes", "deliveries": "Mis entregas", "account": "Cuenta comercial", "notifications": "Notificaciones" },
+    "navigation": { "home": "Inicio", "catalog": "Catálogo de productos", "requestBuilder": "Crear solicitud", "requests": "Mis solicitudes", "orders": "Mis órdenes", "deliveries": "Mis entregas", "documents": "Documentos", "receivables": "Cuentas por cobrar", "paymentMethods": "Métodos de pago", "account": "Cuenta comercial", "support": "Soporte", "legal": "Legal y privacidad", "notifications": "Notificaciones" },
     "menu": "Menú",
-    "workArea": { "home": "Espacio comprador", "catalog": "Catálogo", "sales": "Compras", "orders": "Órdenes", "logistics": "Logística", "account": "Cuenta" },
+    "workArea": { "home": "Espacio comprador", "catalog": "Catálogo", "sales": "Compras", "orders": "Órdenes", "logistics": "Logística", "payments": "Pagos", "documents": "Documentos", "account": "Cuenta" },
     "signOut": "Cerrar sesión"
   },
   "notifications": { "button": "Avisos", "eyebrow": "Centro de actividad", "title": "Notificaciones", "subtitle": "Actualizaciones de tus solicitudes, órdenes y entregas.", "viewAll": "Ver todas", "loading": "Cargando notificaciones", "errorTitle": "Notificaciones no disponibles", "retry": "Reintentar", "empty": "No tienes notificaciones pendientes.", "unreadCount": "{{count}} sin leer", "markAll": "Marcar todo como leído", "markRead": "Marcar como leído", "open": "Abrir" },
