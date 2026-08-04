@@ -81,7 +81,7 @@ export class BuyerRequestBuilderPageComponent {
     districtCode: this.fb.control(''),
     requestedDeliveryDate: this.fb.control(this.minimumDate, Validators.required),
     deliveryNotes: this.fb.control(''),
-    paymentOption: this.fb.control<BuyerPaymentOption>('CASH_ON_DELIVERY', Validators.required),
+    paymentOption: this.fb.control<BuyerPaymentOption>('CARD_STRIPE', Validators.required),
     comments: this.fb.control(''),
   });
   readonly selectedWarehouse = computed(() => this.facade.previewState().snapshot?.delivery?.warehouse ?? null);
@@ -115,7 +115,7 @@ export class BuyerRequestBuilderPageComponent {
       this.message.set('REQUEST_LINE_DUPLICATE');
       return;
     }
-    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
+    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, skuId: item.productId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
     this.catalogSelection.setValue('');
     this.quantity.setValue(1);
     this.message.set(null);
@@ -265,7 +265,7 @@ export class BuyerRequestBuilderPageComponent {
       warehouseId: null,
       paymentOption: value.paymentOption,
       comments: value.comments,
-      lines: this.lines().map(({ catalogItemId, quantity, unit, notes }) => ({ catalogItemId, quantity, unit, notes })),
+      lines: this.lines().map(({ catalogItemId, skuId, quantity, unit, notes }) => ({ catalogItemId, skuId, quantity, unit, notes })),
     };
   }
 }

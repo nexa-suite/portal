@@ -1,6 +1,7 @@
 export type BuyerPaymentOption =
   | 'CREDIT_LINE'
   | 'BANK_TRANSFER'
+  | 'CARD_STRIPE'
   | 'CASH'
   | 'CASH_ON_DELIVERY';
 
@@ -88,6 +89,7 @@ export interface UpdateClientAccountAddressInput {
 
 export interface BuyerRequestLineInput {
   readonly catalogItemId: string;
+  readonly skuId?: string;
   readonly quantity: number;
   readonly unit: string;
   readonly notes: string;

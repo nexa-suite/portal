@@ -12,6 +12,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class PortalAuthStateService {
+  private static readonly SESSION_MARKER = 'nexa.portal.session.active';
   private readonly api = inject(PortalAuthApiClient);
   private readonly tokenState = signal<string | null>(null);
   private readonly identityState = signal<PortalIdentity | null>(null);
@@ -54,6 +55,10 @@ export class PortalAuthStateService {
   }
 
   restore(): Observable<void> {
+    if (!this.hasSessionMarker()) {
+      this.clearSession();
+      return of(undefined);
+    }
     this.statusState.set('refreshing');
     this.errorState.set(null);
     return this.api.refresh().pipe(
@@ -125,6 +130,7 @@ export class PortalAuthStateService {
   }
 
   clearSession(): void {
+    this.setSessionMarker(false);
     this.tokenState.set(null);
     this.identityState.set(null);
     this.statusState.set('signed-out');
@@ -133,9 +139,21 @@ export class PortalAuthStateService {
   }
 
   private acceptSession(session: PortalSession): void {
+    this.setSessionMarker(true);
     this.tokenState.set(session.accessToken);
     this.identityState.set(session.identity);
     this.statusState.set('authenticated');
     this.errorState.set(null);
+  }
+
+  private hasSessionMarker(): boolean {
+    return typeof sessionStorage !== 'undefined'
+      && sessionStorage.getItem(PortalAuthStateService.SESSION_MARKER) === 'true';
+  }
+
+  private setSessionMarker(active: boolean): void {
+    if (typeof sessionStorage === 'undefined') return;
+    if (active) sessionStorage.setItem(PortalAuthStateService.SESSION_MARKER, 'true');
+    else sessionStorage.removeItem(PortalAuthStateService.SESSION_MARKER);
   }
 }

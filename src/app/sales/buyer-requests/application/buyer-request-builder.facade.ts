@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, forkJoin, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
+import { Observable, catchError, defer, forkJoin, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
 import {
   BuyerRequestCommand,
   BuyerRequestSnapshot,
@@ -11,15 +11,30 @@ import {
   UpdateClientAccountAddressInput,
 } from '../domain/buyer-request.models';
 import { BuyerRequestApiClient } from '../infrastructure/buyer-request-api.client';
+import { CanonicalDraftView, CanonicalPurchaseRequestDraftApiClient } from '../infrastructure/canonical-purchase-request-draft-api.client';
 
 function errorCode(error: unknown, fallback: string): string {
   const status = (error as { readonly status?: unknown })?.status;
-  return status === 409 ? 'BUYER_REQUEST_STALE' : fallback;
+  return status === 409 || status === 412 ? 'BUYER_REQUEST_STALE' : fallback;
 }
+
+function object(value: unknown): Record<string, unknown> {
+  if (typeof value === 'string') {
+    try { return object(JSON.parse(value)); } catch { return {}; }
+  }
+  return value !== null && typeof value === 'object' ? value as Record<string, unknown> : {};
+}
+
+function text(value: unknown): string { return typeof value === 'string' ? value : ''; }
+function number(value: unknown): number { const result = typeof value === 'number' ? value : Number(value); return Number.isFinite(result) ? result : 0; }
 
 @Injectable({ providedIn: 'root' })
 export class BuyerRequestBuilderFacade {
   private readonly api = inject(BuyerRequestApiClient);
+  private readonly canonical = inject(CanonicalPurchaseRequestDraftApiClient);
+  private readonly canonicalDraft = signal<CanonicalDraftView | null>(null);
+  private canonicalCommandSignature: string | null = null;
+  private canonicalIdempotencyKey: string | null = null;
   readonly addresses = signal<readonly ClientAccountAddress[]>([]);
   readonly clientAccount = signal<BuyerClientAccount | null>(null);
   readonly departments = signal<readonly PeruReferenceOption[]>([]);
@@ -88,7 +103,7 @@ export class BuyerRequestBuilderFacade {
 
   preview(command: BuyerRequestCommand): Observable<BuyerRequestSnapshot | null> {
     this.previewState.set({ status: 'loading', snapshot: null, message: null });
-    return this.run(() => this.api.preview(command), 'BUYER_REQUEST_PREVIEW_FAILED').pipe(
+    return this.run(() => this.prepareCanonical(command).pipe(map((draft) => this.snapshotFromDraft(draft, command))), 'BUYER_REQUEST_PREVIEW_FAILED').pipe(
       tap((snapshot) => this.previewState.set({ status: 'success', snapshot, message: null })),
       catchError((error: unknown) => {
         this.previewState.set({ status: 'error', snapshot: null, message: errorCode(error, 'BUYER_REQUEST_PREVIEW_FAILED') });
@@ -98,8 +113,133 @@ export class BuyerRequestBuilderFacade {
   }
 
   create(command: BuyerRequestCommand): Observable<BuyerRequestView> {
-    return this.run(() => this.api.create(command), 'BUYER_REQUEST_CREATE_FAILED');
+    return this.run(() => {
+      const signature = this.commandSignature(command);
+      const prepared = this.canonicalDraft() && this.canonicalCommandSignature === signature
+        ? of(this.canonicalDraft() as CanonicalDraftView)
+        : this.prepareCanonical(command);
+      return prepared.pipe(
+        switchMap((draft) => this.canonical.submit(draft.id, draft.etag, this.canonicalIdempotencyKey ?? this.newIdempotencyKey())),
+        tap((draft) => { this.canonicalDraft.set(draft); this.canonicalCommandSignature = signature; }),
+        map((draft) => this.requestFromDraft(draft, command)),
+      );
+    }, 'BUYER_REQUEST_CREATE_FAILED');
   }
+
+  private prepareCanonical(command: BuyerRequestCommand): Observable<CanonicalDraftView> {
+    return defer(() => {
+      if (!command.clientAccountId || !command.requestedDeliveryDate || command.lines.length === 0) throw new Error('Canonical purchase request draft input is incomplete');
+      const lines = command.lines.map((line) => ({ skuId: line.skuId?.trim() || line.catalogItemId.trim(), quantity: line.quantity, unit: line.unit, notes: line.notes }));
+      if (lines.some((line) => !line.skuId)) throw new Error('Canonical purchase request draft requires SKU ids');
+      return this.resolveDestination(command).pipe(
+        switchMap((addressId) => this.canonical.create(command.clientAccountId as string, command.requestedDeliveryDate).pipe(
+          switchMap((draft) => this.canonical.replaceLines(draft.id, draft.etag, lines)),
+          switchMap((draft) => this.canonical.setDestination(draft.id, draft.etag, addressId)),
+          switchMap((draft) => this.canonical.previewRoute(draft.id, draft.etag)),
+          switchMap((draft) => this.canonical.setPreferences(draft.id, draft.etag, command.paymentOption, command.requestedDeliveryDate)),
+        )),
+      );
+    }).pipe(
+      tap((draft) => {
+        this.canonicalDraft.set(draft);
+        this.canonicalCommandSignature = this.commandSignature(command);
+        this.canonicalIdempotencyKey = this.canonicalIdempotencyKey ?? this.newIdempotencyKey();
+      }),
+    );
+  }
+
+  private resolveDestination(command: BuyerRequestCommand): Observable<string> {
+    if (command.addressId) return of(command.addressId);
+    if (!command.clientAccountId || !command.manualAddress) return throwError(() => new Error('Canonical purchase request draft requires a saved destination'));
+    const input: CreateClientAccountAddressInput = { label: 'Purchase request destination', address: command.manualAddress, defaultAddress: false };
+    return this.api.createAddress(command.clientAccountId, input).pipe(
+      tap((address) => this.addresses.update((items) => [...items, address])),
+      map((address) => address.id),
+    );
+  }
+
+  private snapshotFromDraft(draft: CanonicalDraftView, command: BuyerRequestCommand): BuyerRequestSnapshot {
+    const destination = object(draft.destination?.['snapshot']);
+    const route = object(draft.route?.['snapshot']);
+    const selection = object(draft.warehouseSelection?.['snapshot']);
+    const street = [text(destination['roadType']), text(destination['street']), text(destination['number']), text(destination['interior'])].filter(Boolean).join(' ');
+    return {
+      delivery: {
+        requestedDate: draft.requestedDeliveryDate,
+        notes: command.deliveryNotes,
+        address: street ? {
+          id: text(destination['addressId']) || null,
+          label: null,
+          addressType: text(destination['roadType']) || null,
+          line: street,
+          reference: text(destination['reference']) || null,
+          countryCode: text(destination['countryCode']) || 'PE',
+          departmentCode: text(destination['department']) || '',
+          provinceCode: text(destination['province']) || '',
+          districtCode: text(destination['district']) || '',
+          defaultAddress: false,
+        } : null,
+        warehouse: text(selection['warehouseId']) ? { id: text(selection['warehouseId']), code: '', name: '', address: '' } : null,
+        route: Object.keys(route).length > 0 ? {
+          provider: text(route['provider']) || draft.routeProvider,
+          reference: null,
+          originLabel: null,
+          destinationLabel: null,
+          distanceMeters: number(route['distanceKm']) * 1000,
+          durationSeconds: number(route['durationSeconds']),
+          previewUrl: null,
+          originLatitude: null,
+          originLongitude: null,
+          destinationLatitude: route['destinationLatitude'] == null ? null : number(route['destinationLatitude']),
+          destinationLongitude: route['destinationLongitude'] == null ? null : number(route['destinationLongitude']),
+          calculatedAt: text(draft.route?.['calculatedAt']) || null,
+          mode: null,
+          path: null,
+        } : null,
+      },
+      commercial: this.clientAccount() ? {
+        clientAccountId: this.clientAccount()?.id ?? null,
+        businessName: this.clientAccount()?.businessName ?? null,
+        commercialName: this.clientAccount()?.commercialName ?? null,
+        taxType: this.clientAccount()?.taxType ?? null,
+        taxValue: this.clientAccount()?.taxValue ?? null,
+        segment: this.clientAccount()?.segment ?? null,
+        paymentCondition: this.clientAccount()?.paymentCondition ?? null,
+      } : null,
+      paymentOption: command.paymentOption,
+      comments: command.comments,
+      capturedAt: draft.updatedAt,
+    };
+  }
+
+  private requestFromDraft(draft: CanonicalDraftView, command: BuyerRequestCommand): BuyerRequestView {
+    return {
+      id: draft.id,
+      code: `PR-${draft.id.slice(0, 8).toUpperCase()}`,
+      tenantId: null,
+      workspaceId: null,
+      clientAccountId: draft.clientAccountId,
+      buyerMembershipId: draft.buyerMembershipId,
+      status: draft.status,
+      snapshot: this.snapshotFromDraft(draft, command),
+      lines: draft.lines.map((item) => ({
+        id: text(item['id']),
+        catalogItemId: text(item['skuCode']) || text(item['skuId']),
+        skuId: text(item['skuId']),
+        itemName: text(item['presentation']),
+        presentation: text(item['presentation']),
+        quantity: number(item['quantity']),
+        unit: text(item['unit']) || 'unit',
+        notes: text(item['notes']),
+        unitPriceAmount: number(item['effectiveUnitPrice']),
+        unitPriceCurrency: text(item['currency']) || null,
+      })),
+      version: draft.version,
+    };
+  }
+
+  private commandSignature(command: BuyerRequestCommand): string { return JSON.stringify(command); }
+  private newIdempotencyKey(): string { return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `buyer-request-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
 
   private run<T>(factory: () => Observable<T>, fallback: string): Observable<T> {
     this.busy.set(true);

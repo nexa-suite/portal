@@ -59,7 +59,7 @@ function purchaseRequest(rawValue: unknown, etag?: string): PurchaseRequest {
     priority: (priority === 'HIGH' || priority === 'URGENT' ? priority : 'NORMAL') as PurchaseRequest['priority'],
     requestedDeliveryDate: nullableText(raw['requestedDeliveryDate']),
     deliveryProfileSnapshot: nullableText(raw['deliveryProfileSnapshot']),
-    paymentOption: ['CREDIT_LINE', 'BANK_TRANSFER', 'CASH', 'CASH_ON_DELIVERY'].includes(payment)
+    paymentOption: ['CREDIT_LINE', 'BANK_TRANSFER', 'CARD_STRIPE', 'CASH', 'CASH_ON_DELIVERY'].includes(payment)
       ? (payment as PurchaseRequest['paymentOption'])
       : null,
     comment: nullableText(raw['comment']),
