@@ -51,7 +51,9 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   await page.getByRole('button', { name: /search|buscar/i }).click();
   const productSelect = page.getByRole('combobox', { name: /item|ítem/i });
   await expect(productSelect.locator('option').nth(1)).toBeAttached({ timeout: 10_000 });
-  await productSelect.selectOption({ index: 1 });
+  const seededProduct = productSelect.locator('option[value="CAT-0003"]');
+  await expect(seededProduct).toHaveCount(1);
+  await productSelect.selectOption('CAT-0003');
   await page.getByRole('button', { name: /add|agregar/i }).click();
   await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
 
