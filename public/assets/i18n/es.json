@@ -107,7 +107,7 @@
     "detail": { "subtitle": "Tu Client Account activo", "noComment": "Sin comentario", "emptyDraft": "Este borrador aún no tiene líneas. Agrega un ítem del catálogo autorizado antes de enviarlo." },
     "fields": { "priority": "Prioridad", "deliveryDate": "Fecha de entrega solicitada", "deliveryDetails": "Detalles de entrega", "payment": "Opción de pago", "comment": "Comentario" },
     "priority": { "NORMAL": "Normal", "HIGH": "Alta", "URGENT": "Urgente" },
-    "payment": { "CREDIT_LINE": "Línea de crédito", "BANK_TRANSFER": "Transferencia bancaria", "CASH": "Efectivo", "CASH_ON_DELIVERY": "Pago contra entrega" },
+    "payment": { "CREDIT_LINE": "Línea de crédito", "BANK_TRANSFER": "Transferencia bancaria", "CARD_STRIPE": "Tarjeta segura", "CASH": "Efectivo", "CASH_ON_DELIVERY": "Pago contra entrega" },
     "status": { "DRAFT": "Borrador", "SUBMITTED": "Enviada", "IN_REVIEW": "En revisión", "NEEDS_ADJUSTMENT": "Requiere ajustes", "APPROVED": "Aprobada", "REJECTED": "Rechazada", "CANCELLED": "Cancelada", "CONVERTED_TO_ORDER": "Convertida en orden" },
     "catalog": { "search": "Buscar en catálogo autorizado", "searchAction": "Buscar", "item": "Ítem de catálogo", "choose": "Elige un ítem", "quantity": "Cantidad", "add": "Agregar ítem", "remove": "Quitar", "empty": "Este borrador no tiene líneas." },
     "actions": { "save": "Guardar borrador", "submit": "Enviar solicitud", "cancel": "Cancelar solicitud", "edit": "Editar solicitud", "open": "Abrir solicitud", "retry": "Reintentar", "reload": "Recargar" },

@@ -107,7 +107,7 @@
     "detail": { "subtitle": "Your active Client Account", "noComment": "No comment", "emptyDraft": "This draft has no lines yet. Add an authorized catalog item before submitting." },
     "fields": { "priority": "Priority", "deliveryDate": "Requested delivery date", "deliveryDetails": "Delivery details", "payment": "Payment option", "comment": "Comment" },
     "priority": { "NORMAL": "Normal", "HIGH": "High", "URGENT": "Urgent" },
-    "payment": { "CREDIT_LINE": "Credit line", "BANK_TRANSFER": "Bank transfer", "CASH": "Cash", "CASH_ON_DELIVERY": "Cash on delivery" },
+    "payment": { "CREDIT_LINE": "Credit line", "BANK_TRANSFER": "Bank transfer", "CARD_STRIPE": "Secure card", "CASH": "Cash", "CASH_ON_DELIVERY": "Cash on delivery" },
     "status": { "DRAFT": "Draft", "SUBMITTED": "Submitted", "IN_REVIEW": "In review", "NEEDS_ADJUSTMENT": "Needs adjustment", "APPROVED": "Approved", "REJECTED": "Rejected", "CANCELLED": "Cancelled", "CONVERTED_TO_ORDER": "Converted to order" },
     "catalog": { "search": "Search authorized catalog", "searchAction": "Search", "item": "Catalog item", "choose": "Choose an item", "quantity": "Quantity", "add": "Add item", "remove": "Remove", "empty": "No lines in this draft." },
     "actions": { "save": "Save draft", "submit": "Submit request", "cancel": "Cancel request", "edit": "Edit request", "open": "Open request", "retry": "Retry", "reload": "Reload" },
