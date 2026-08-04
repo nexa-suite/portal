@@ -68,4 +68,25 @@ describe('PortalAuthStateService', () => {
     expect(api.refresh).toHaveBeenCalledTimes(1);
     expect(service.accessToken()).toBe('new-token');
   });
+
+  it('revokes the server session and clears the local state on logout', () => {
+    api.signIn.mockReturnValue(
+      of({
+        id: 1,
+        email: 'buyer@icisa.example',
+        fullName: 'Buyer',
+        roles: ['BUYER'],
+        accessToken: 'token',
+      }),
+    );
+    api.signOut.mockReturnValue(of(undefined));
+    const service = TestBed.inject(PortalAuthStateService);
+    service.signIn({ email: 'buyer@icisa.example', password: 'secret', workspaceSlug: 'icisa' }).subscribe();
+
+    service.signOut().subscribe();
+
+    expect(api.signOut).toHaveBeenCalledTimes(1);
+    expect(service.status()).toBe('signed-out');
+    expect(service.accessToken()).toBeNull();
+  });
 });

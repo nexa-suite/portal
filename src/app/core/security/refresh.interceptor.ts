@@ -1,13 +1,11 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { PortalAuthStateService } from '../../iam/application/portal-auth-state.service';
 import { AUTH_RETRY, isPublicIdentityRequest, SKIP_REFRESH } from './http-context.tokens';
 
 export const refreshInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(PortalAuthStateService);
-  const router = inject(Router);
 
   return next(request).pipe(
     catchError((error: unknown) => {
@@ -31,8 +29,7 @@ export const refreshInterceptor: HttpInterceptorFn = (request, next) => {
           ),
         ),
         catchError((refreshError: unknown) => {
-          auth.clearSession();
-          void router.navigateByUrl('/sign-in');
+          auth.expireSession();
           return throwError(() => refreshError);
         }),
       );

@@ -37,10 +37,19 @@ export interface CatalogMedia {
 export interface CatalogItemSummary {
   readonly catalogItemId: string;
   readonly productId: string;
+  readonly productFamilyId?: string;
+  readonly productFamilyCode?: string;
+  readonly productFamilyName?: string;
+  readonly sellableSkuId?: string;
+  readonly skuCode?: string;
   readonly itemName: string;
   readonly brandName: string;
   readonly categoryName: string;
   readonly presentation: string;
+  readonly unitOfMeasure?: string;
+  readonly packagingType?: string;
+  readonly netWeight?: string;
+  readonly grossWeight?: string;
   readonly coldChainRequirement: string;
   readonly image: CatalogMedia | null;
   readonly unitPrice: CatalogPrice | null;
@@ -51,6 +60,7 @@ export interface CatalogItemSummary {
   readonly appliedPromotions: readonly CatalogAppliedPromotion[];
   readonly pricingAsOf: string | null;
   readonly availabilityStatus: CatalogAvailabilityStatus;
+  readonly nearExpiry?: boolean;
   readonly promotionLabel: string | null;
 }
 

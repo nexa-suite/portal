@@ -33,11 +33,20 @@ interface RawCatalogAppliedPromotion {
 interface RawCatalogItem {
   readonly catalogItemId?: unknown;
   readonly productId?: unknown;
+  readonly productFamilyId?: unknown;
+  readonly productFamilyCode?: unknown;
+  readonly productFamilyName?: unknown;
+  readonly sellableSkuId?: unknown;
+  readonly skuCode?: unknown;
   readonly itemName?: unknown;
   readonly brandName?: unknown;
   readonly categoryName?: unknown;
   readonly description?: unknown;
   readonly presentation?: unknown;
+  readonly unitOfMeasure?: unknown;
+  readonly packagingType?: unknown;
+  readonly netWeight?: unknown;
+  readonly grossWeight?: unknown;
   readonly coldChainRequirement?: unknown;
   readonly image?: RawCatalogMedia;
   readonly unitPrice?: RawCatalogPrice | null;
@@ -50,6 +59,7 @@ interface RawCatalogItem {
   readonly appliedPromotions?: readonly RawCatalogAppliedPromotion[] | null;
   readonly pricingAsOf?: unknown;
   readonly availabilityStatus?: unknown;
+  readonly nearExpiry?: unknown;
   readonly promotionLabel?: unknown;
 }
 interface RawCatalogPage {
@@ -159,15 +169,25 @@ function summary(raw: RawCatalogItem): CatalogItemSummary {
   return {
     catalogItemId: text(raw.catalogItemId),
     productId: text(raw.productId),
+    productFamilyId: text(raw.productFamilyId) || undefined,
+    productFamilyCode: text(raw.productFamilyCode) || undefined,
+    productFamilyName: text(raw.productFamilyName) || text(raw.itemName),
+    sellableSkuId: text(raw.sellableSkuId) || text(raw.productId) || undefined,
+    skuCode: text(raw.skuCode) || undefined,
     itemName: text(raw.itemName),
     brandName: text(raw.brandName),
     categoryName: text(raw.categoryName),
     presentation: text(raw.presentation),
+    unitOfMeasure: text(raw.unitOfMeasure) || undefined,
+    packagingType: text(raw.packagingType) || undefined,
+    netWeight: decimalText(raw.netWeight) || undefined,
+    grossWeight: decimalText(raw.grossWeight) || undefined,
     coldChainRequirement: text(raw.coldChainRequirement),
     image: media(raw.image),
     unitPrice: unitPrice(raw),
     ...pricing(raw),
     availabilityStatus: catalogAvailabilityFromValue(raw.availabilityStatus),
+    nearExpiry: raw.nearExpiry === true,
     promotionLabel: text(raw.promotionLabel) || null,
   };
 }

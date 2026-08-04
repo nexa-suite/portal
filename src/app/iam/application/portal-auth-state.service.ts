@@ -9,16 +9,27 @@ import {
   SignInCredentials,
   toPortalSession,
 } from '../domain/portal-access.models';
+import { AuthLifecycleChannel } from '../../core/security/auth-lifecycle.channel';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class PortalAuthStateService {
   private static readonly SESSION_MARKER = 'nexa.portal.session.active';
   private readonly api = inject(PortalAuthApiClient);
+  private readonly lifecycle = inject(AuthLifecycleChannel);
+  private readonly router = inject(Router, { optional: true });
   private readonly tokenState = signal<string | null>(null);
   private readonly identityState = signal<PortalIdentity | null>(null);
   private readonly statusState = signal<PortalAuthStatus>('signed-out');
   private readonly errorState = signal<unknown>(null);
   private refreshInFlight$: Observable<string> | null = null;
+
+  constructor() {
+    this.lifecycle.events.subscribe(() => {
+      this.clearSession();
+      void this.router?.navigateByUrl('/sign-in', { replaceUrl: true });
+    });
+  }
 
   readonly accessToken = this.tokenState.asReadonly();
   readonly identity = this.identityState.asReadonly();
@@ -28,9 +39,15 @@ export class PortalAuthStateService {
     () => this.statusState() === 'authenticated' && this.tokenState() !== null,
   );
   readonly canAccessBuyerPortal = computed(
-    () => this.isAuthenticated() && this.identityState()?.roles.includes('BUYER') === true && this.hasPermission('catalog:read'),
+    () => this.isAuthenticated() && this.hasPermission('catalog:read'),
   );
-  hasPermission(permission: string): boolean { return this.identityState()?.permissions?.includes(permission.toLowerCase()) ?? false; }
+  hasPermission(permission: string): boolean {
+    const required = permission.trim().toLowerCase().replaceAll('.', ':');
+    return this.identityState()?.permissions?.some((candidate) => {
+      const normalized = candidate.trim().toLowerCase().replaceAll('.', ':');
+      return normalized === required;
+    }) ?? false;
+  }
 
   signIn(credentials: SignInCredentials): Observable<void> {
     this.statusState.set('authenticating');
@@ -86,7 +103,7 @@ export class PortalAuthStateService {
       tap((session) => this.acceptSession(session)),
       map((session) => session.accessToken),
       catchError((error: unknown) => {
-        this.clearSession();
+        this.expireSession();
         this.errorState.set(error);
         return throwError(() => error);
       }),
@@ -102,13 +119,17 @@ export class PortalAuthStateService {
   signOut(): Observable<void> {
     if (!this.tokenState()) {
       this.clearSession();
+      this.lifecycle.broadcastLogout();
       return of(undefined);
     }
 
     return this.api.signOut().pipe(
       map(() => undefined),
       catchError(() => of(undefined)),
-      finalize(() => this.clearSession()),
+      finalize(() => {
+        this.clearSession();
+        this.lifecycle.broadcastLogout();
+      }),
     );
   }
 
@@ -122,11 +143,17 @@ export class PortalAuthStateService {
         return true;
       }),
       catchError((error: unknown) => {
-        this.clearSession();
+        this.expireSession();
         this.errorState.set(error);
         return of(false);
       }),
     );
+  }
+
+  expireSession(): void {
+    this.clearSession();
+    this.lifecycle.broadcastLogout();
+    void this.router?.navigateByUrl('/sign-in', { replaceUrl: true });
   }
 
   clearSession(): void {

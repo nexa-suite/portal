@@ -6,9 +6,9 @@
     "buyerDescription": "Discover authorized products, manage purchase requests, review orders and follow deliveries.",
     "language": "Language",
     "skipToContent": "Skip to content",
-    "navigation": { "home": "Home", "catalog": "Product catalog", "requestBuilder": "Request builder", "requests": "My requests", "orders": "My orders", "deliveries": "My deliveries", "account": "Commercial account", "notifications": "Notifications" },
+    "navigation": { "home": "Home", "catalog": "Product catalog", "requestBuilder": "Request builder", "requests": "My requests", "orders": "My orders", "deliveries": "My deliveries", "documents": "Documents", "receivables": "Receivables", "paymentMethods": "Payment methods", "account": "Commercial account", "support": "Support", "legal": "Legal and privacy", "notifications": "Notifications" },
     "menu": "Menu",
-    "workArea": { "home": "Buyer workspace", "catalog": "Catalog", "sales": "Purchasing", "orders": "Orders", "logistics": "Logistics", "account": "Account" },
+    "workArea": { "home": "Buyer workspace", "catalog": "Catalog", "sales": "Purchasing", "orders": "Orders", "logistics": "Logistics", "payments": "Payments", "documents": "Documents", "account": "Account" },
     "signOut": "Sign out"
   },
   "notifications": { "button": "Alerts", "eyebrow": "Activity center", "title": "Notifications", "subtitle": "Updates for your requests, orders and deliveries.", "viewAll": "View all", "loading": "Loading notifications", "errorTitle": "Notifications unavailable", "retry": "Retry", "empty": "You have no pending notifications.", "unreadCount": "{{count}} unread", "markAll": "Mark all as read", "markRead": "Mark as read", "open": "Open" },

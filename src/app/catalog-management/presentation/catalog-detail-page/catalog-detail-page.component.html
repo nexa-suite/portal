@@ -26,16 +26,16 @@
         <article class="catalog-detail-card">
           <div class="detail-visual">
             @if (item.image?.url) {
-              <img [src]="item.image?.url" [alt]="item.itemName" />
+              <img [src]="item.image?.url" [alt]="item.productFamilyName || item.itemName" />
             } @else {
               <span class="image-placeholder" aria-hidden="true">N</span>
             }
           </div>
           <div class="detail-copy">
             <p class="catalog-category">{{ item.categoryName }}</p>
-            <h1>{{ item.itemName }}</h1>
+            <h1>{{ item.productFamilyName || item.itemName }}</h1>
             <p class="catalog-brand">
-              {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.presentation }}
+              {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.skuCode || item.productId }}<span aria-hidden="true"> · </span>{{ item.presentation }}@if (item.unitOfMeasure) {<span aria-hidden="true"> · </span>{{ item.unitOfMeasure }} }
             </p>
             <div class="detail-statuses">
               <nexa-status-badge

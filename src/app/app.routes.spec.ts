@@ -18,6 +18,12 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(false);
     expect(children.some((route) => route.path === 'sales-orders')).toBe(true);
     expect(children.some((route) => route.path === 'sales-orders/:salesOrderId')).toBe(true);
+    expect(children.some((route) => route.path === 'documents')).toBe(true);
+    expect(children.some((route) => route.path === 'receivables')).toBe(true);
+    expect(children.some((route) => route.path === 'receivables/:receivableId')).toBe(true);
+    expect(children.some((route) => route.path === 'payment-methods')).toBe(true);
+    expect(children.some((route) => route.path === 'support')).toBe(true);
+    expect(children.some((route) => route.path === 'legal')).toBe(true);
     expect(children.find((route) => route.path === 'orders')?.redirectTo).toBe('sales-orders');
     expect(children.find((route) => route.path === 'my-orders')?.redirectTo).toBe('sales-orders');
     expect(children.find((route) => route.path === 'catalog')?.redirectTo).toBe('product-catalog');

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { InventoryAvailabilityApiClient } from '../infrastructure/inventory-availability-api.client';
 import { InventoryAvailabilityFacade } from './inventory-availability.facade';
 
@@ -13,5 +13,19 @@ describe('InventoryAvailabilityFacade', () => {
     expect(facade.items()).toEqual([]);
     facade.retry();
     expect(api.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('clears stale buyer availability when the requested item set becomes empty', () => {
+    const api = { list: vi.fn(() => of([{ catalogItemId: 'CAT-1', status: 'AVAILABLE' as const, asOf: '2026-08-04T00:00:00Z' }])) };
+    TestBed.configureTestingModule({ providers: [InventoryAvailabilityFacade, { provide: InventoryAvailabilityApiClient, useValue: api }] });
+    const facade = TestBed.inject(InventoryAvailabilityFacade);
+
+    facade.load(['CAT-1', 'CAT-1']);
+    facade.load([]);
+
+    expect(api.list).toHaveBeenCalledOnce();
+    expect(api.list).toHaveBeenCalledWith(['CAT-1']);
+    expect(facade.items()).toEqual([]);
+    expect(facade.loading()).toBe(false);
   });
 });

@@ -9,6 +9,7 @@ import { PortalAuthApiClient } from '../../infrastructure/portal-auth-api.client
 import { Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { safeReturnUrl } from '../../../core/routing/portal.guards';
 
 @Component({
   selector: 'nexa-sign-in-page',
@@ -77,7 +78,6 @@ export class SignInPageComponent {
   }
 
   private returnUrl(): string {
-    const value = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/portal/home';
-    return value.startsWith('/') && !value.startsWith('//') ? value : '/portal/home';
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
   }
 }

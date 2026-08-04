@@ -11,10 +11,14 @@ export class InventoryAvailabilityFacade {
   readonly error = signal<string | null>(null);
 
   load(ids: readonly string[]): void {
-    const values = ids.filter(Boolean);
-    if (!values.length) return;
+    const values = [...new Set(ids.filter(Boolean))];
     this.lastIds = values;
     this.error.set(null);
+    if (!values.length) {
+      this.items.set([]);
+      this.loading.set(false);
+      return;
+    }
     if (!this.api) { this.items.set(values.map((catalogItemId) => ({ catalogItemId, status: 'UNKNOWN' as const, asOf: new Date().toISOString() }))); return; }
     this.loading.set(true);
     this.api.list(values).subscribe({
