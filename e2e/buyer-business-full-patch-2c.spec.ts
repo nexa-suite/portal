@@ -26,6 +26,8 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   const district = page.getByRole('combobox', { name: /district|distrito/i });
   await expect(district).toHaveValue('');
   await district.selectOption('150101');
+  await page.locator('[formcontrolname="latitude"]').fill('-12.0464');
+  await page.locator('[formcontrolname="longitude"]').fill('-77.0428');
   await page.getByRole('checkbox', { name: /default address|dirección predeterminada/i }).check();
   const addressCreate = page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes('/api/v1/client-accounts/') && response.url().endsWith('/addresses'));
   await page.getByRole('button', { name: /save address|guardar dirección/i }).click();
