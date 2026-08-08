@@ -28,6 +28,7 @@
       "title": "Sign in to Nexa",
       "description": "Use your authorized workspace credentials to access the buyer catalog.",
       "workspace": "Workspace",
+      "workspacePreview": { "label": "Workspace preview", "loading": "Loading workspace preview…", "recognized": "Recognized workspace", "notFound": "Workspace not recognized", "origin": "The workspace preview was rejected by the browser origin policy.", "rateLimited": "Too many workspace checks. Wait a moment and try again.", "server": "The workspace preview service is temporarily unavailable.", "network": "The workspace preview could not reach Nexa.", "timeout": "The workspace preview took too long. Try again.", "invalid": "The workspace preview request was not valid." },
       "email": "Email",
       "password": "Password",
       "submit": "Continue to Portal",

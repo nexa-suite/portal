@@ -40,6 +40,8 @@ export interface CatalogItemSummary {
   readonly productFamilyId?: string;
   readonly productFamilyCode?: string;
   readonly productFamilyName?: string;
+  readonly productVariantName?: string;
+  readonly productVariantCode?: string;
   readonly sellableSkuId?: string;
   readonly skuCode?: string;
   readonly itemName: string;

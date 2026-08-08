@@ -3,7 +3,6 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PORTAL_RUNTIME_CONFIG } from '../../../core/security/runtime-config';
-import { BuyerRequestCommand } from '../domain/buyer-request.models';
 import { BuyerRequestApiClient } from './buyer-request-api.client';
 
 describe('BuyerRequestApiClient', () => {
@@ -32,7 +31,7 @@ describe('BuyerRequestApiClient', () => {
     warehouses.flush([{ id: 'wh-1', code: 'LIM-01', name: 'Cold Hub', address: 'Lima', serviceable: true, version: 2 }]);
 
     client.reference('provinces', 'LIM').subscribe();
-    const provinces = http.expectOne('http://api.local/api/v1/reference/provinces?parentCode=LIM');
+    const provinces = http.expectOne('http://api.local/api/v1/reference/departments/LIM/provinces');
     expect(provinces.request.method).toBe('GET');
     provinces.flush([{ id: 1, code: 'LIM-01', label: 'Lima', parentCode: 'LIM', active: true }]);
   });
@@ -52,22 +51,4 @@ describe('BuyerRequestApiClient', () => {
     request.flush({ id: 'address-1', clientAccountId: 'client-1', label: 'Principal', line: 'Av. Lima 1', countryCode: 'PE', departmentCode: 'LIM', provinceCode: 'LIM-01', districtCode: 'LIM-0101', defaultAddress: true, active: true, version: 4 }, { headers: { ETag: '"4"' } });
   });
 
-  it('posts the buyer builder command without changing the API contract', () => {
-    const command: BuyerRequestCommand = {
-      clientAccountId: 'client-1',
-      addressId: 'address-1',
-      manualAddress: null,
-      requestedDeliveryDate: '2030-01-10',
-      deliveryNotes: 'Gate 2',
-      warehouseId: 'warehouse-1',
-      paymentOption: 'CREDIT_LINE',
-      comments: 'Urgent cold-chain delivery',
-      lines: [{ catalogItemId: 'catalog-1', quantity: 2, unit: 'unit', notes: '' }],
-    };
-    client.create(command).subscribe();
-    const request = http.expectOne('http://api.local/api/v1/buyer-requests');
-    expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual(command);
-    request.flush({ id: 'br-1', code: 'BR-0001', status: 'SUBMITTED', clientAccountId: 'client-1', lines: [], version: 0 });
-  });
 });

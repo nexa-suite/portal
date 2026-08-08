@@ -6,14 +6,16 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { of, switchMap } from 'rxjs';
 import { CatalogApiClient } from '../../../catalog-management/infrastructure/catalog-api.client';
 import { CatalogItemSummary, DEFAULT_CATALOG_QUERY } from '../../../catalog-management/domain/catalog.models';
 import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
 import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
 import { BuyerRequestBuilderFacade } from '../application/buyer-request-builder.facade';
+import { CanonicalDraftView } from '../infrastructure/canonical-purchase-request-draft-api.client';
 import {
   addressDisplay,
   BuyerRequestCommand,
@@ -29,6 +31,13 @@ interface BuilderLine extends BuyerRequestLineInput {
   readonly presentation: string;
 }
 
+function draftText(value: unknown): string { return typeof value === 'string' ? value : ''; }
+function draftNumber(value: unknown): number { const result = typeof value === 'number' ? value : Number(value); return Number.isFinite(result) ? result : 0; }
+function draftObject(value: unknown): Record<string, unknown> {
+  if (typeof value === 'string') { try { return draftObject(JSON.parse(value)); } catch { return {}; } }
+  return value !== null && typeof value === 'object' ? value as Record<string, unknown> : {};
+}
+
 @Component({
   selector: 'nexa-buyer-request-builder-page',
   imports: [DecimalPipe, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, RouterLink, TranslatePipe, PageHeaderComponent],
@@ -39,6 +48,7 @@ interface BuilderLine extends BuyerRequestLineInput {
 export class BuyerRequestBuilderPageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly catalog = inject(CatalogApiClient);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly auth = inject(PortalAuthStateService);
   readonly facade = inject(BuyerRequestBuilderFacade);
@@ -87,12 +97,55 @@ export class BuyerRequestBuilderPageComponent {
   readonly selectedWarehouse = computed(() => this.facade.previewState().snapshot?.delivery?.warehouse ?? null);
 
   constructor() {
-    this.facade.loadInitial(this.accountId()).subscribe({
-      next: () => {
+    const draftId = this.route.snapshot.paramMap.get('purchaseRequestId');
+    this.facade.loadInitial(this.accountId()).pipe(
+      switchMap(() => draftId ? this.facade.loadDraft(draftId) : of(null)),
+    ).subscribe({
+      next: (draft) => {
+        if (draft) { this.hydrateDraft(draft); return; }
         const defaultAddress = this.facade.addresses().find((item) => item.defaultAddress) ?? this.facade.addresses()[0];
         if (defaultAddress) this.form.patchValue({ addressMode: 'saved', addressId: defaultAddress.id });
       },
+      error: () => this.message.set('BUYER_REQUEST_DRAFT_LOAD_FAILED'),
     });
+  }
+
+  private hydrateDraft(draft: CanonicalDraftView): void {
+    const destinationSnapshot = draftObject(draft.destination?.['snapshot']);
+    const addressId = draftText(draft.destination?.['addressId']);
+    const payment = draft.paymentPreference;
+    const paymentOptions: readonly BuyerPaymentOption[] = ['CREDIT_LINE', 'BANK_TRANSFER', 'CARD_STRIPE', 'CASH', 'CASH_ON_DELIVERY'];
+    const lines = draft.lines.map((line, index) => {
+      const skuId = draftText(line['skuId']);
+      const presentation = draftText(line['presentation']) || draftText(line['skuCode']) || skuId;
+      return { id: draftText(line['id']) || `${skuId}-${index}`, catalogItemId: skuId, skuId, itemName: presentation, presentation, quantity: draftNumber(line['quantity']), unit: draftText(line['unit']) || 'unit', notes: draftText(line['notes']) };
+    });
+    this.lines.set(lines);
+    this.form.patchValue({
+      addressMode: addressId ? 'saved' : 'manual',
+      addressId,
+      addressType: draftText(destinationSnapshot['roadType']) || 'Av.',
+      recipientName: draftText(destinationSnapshot['recipient']),
+      recipientPhone: draftText(destinationSnapshot['phone']),
+      roadType: draftText(destinationSnapshot['roadType']),
+      streetName: draftText(destinationSnapshot['street']),
+      streetNumber: draftText(destinationSnapshot['number']),
+      interior: draftText(destinationSnapshot['interior']),
+      postalCode: draftText(destinationSnapshot['postalCode']),
+      addressLine: [draftText(destinationSnapshot['street']), draftText(destinationSnapshot['number'])].filter(Boolean).join(' '),
+      reference: draftText(destinationSnapshot['reference']),
+      receivingHours: draftText(destinationSnapshot['receivingHours']),
+      receivingInstructions: draftText(destinationSnapshot['receivingInstructions']),
+      latitude: destinationSnapshot['latitude'] == null || destinationSnapshot['latitude'] === '' ? null : draftNumber(destinationSnapshot['latitude']),
+      longitude: destinationSnapshot['longitude'] == null || destinationSnapshot['longitude'] === '' ? null : draftNumber(destinationSnapshot['longitude']),
+      source: draftText(destinationSnapshot['source']) || 'MANUAL',
+      departmentCode: draftText(destinationSnapshot['department']),
+      provinceCode: draftText(destinationSnapshot['province']),
+      districtCode: draftText(destinationSnapshot['district']),
+      requestedDeliveryDate: draft.requestedDeliveryDate ?? this.minimumDate,
+      paymentOption: paymentOptions.includes(payment as BuyerPaymentOption) ? payment as BuyerPaymentOption : 'CARD_STRIPE',
+    });
+    this.step.set(lines.length ? 2 : 1);
   }
 
   searchCatalog(): void {

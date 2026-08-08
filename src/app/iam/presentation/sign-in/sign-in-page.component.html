@@ -27,13 +27,16 @@
           required
         />
       </label>
-      <p class="workspace-preview-label">WORKSPACE PREVIEW</p>
-      @if (previewLoading()) { <p role="status">Loading workspace preview…</p> }
-      @if (!previewLoading() && preview(); as workspace) {
+      <p class="workspace-preview-label">{{ 'auth.signIn.workspacePreview.label' | translate }}</p>
+      @if (previewLoading()) { <p role="status">{{ 'auth.signIn.workspacePreview.loading' | translate }}</p> }
+      @if (!previewLoading() && previewError(); as errorCode) {
+        <p class="form-error" role="alert">{{ ('auth.signIn.workspacePreview.' + errorCode) | translate }}</p>
+      }
+      @if (!previewLoading() && !previewError() && preview(); as workspace) {
         <section class="workspace-preview" aria-live="polite">
-          <strong>{{ workspace.displayName ?? 'Workspace not recognized' }}</strong>
+          <strong>{{ workspace.displayName ?? ('auth.signIn.workspacePreview.notFound' | translate) }}</strong>
           @if (workspace.workspaceUrl) { <span>{{ workspace.workspaceUrl }}</span> }
-          <span>{{ workspace.recognized ? 'Recognized' : 'Not recognized' }}</span>
+          <span>{{ workspace.recognized ? ('auth.signIn.workspacePreview.recognized' | translate) : ('auth.signIn.workspacePreview.notFound' | translate) }}</span>
         </section>
       }
       <label>

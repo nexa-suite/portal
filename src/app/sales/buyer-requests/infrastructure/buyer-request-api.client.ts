@@ -1,16 +1,8 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../../core/security/runtime-config';
 import {
-  BuyerRequestCommand,
-  BuyerRequestCommercialSnapshot,
-  BuyerRequestDeliverySnapshot,
-  BuyerRequestLineView,
-  BuyerRequestRouteSnapshot,
-  BuyerRequestSnapshot,
-  BuyerRequestView,
-  BuyerRequestWarehouseSnapshot,
   BuyerWarehouse,
   BuyerClientAccount,
   ClientAccountAddress,
@@ -25,7 +17,6 @@ function raw(value: unknown): Raw { return value !== null && typeof value === 'o
 function text(value: unknown): string { return typeof value === 'string' ? value.trim() : ''; }
 function nullableText(value: unknown): string | null { const valueText = text(value); return valueText || null; }
 function number(value: unknown): number { const result = typeof value === 'number' ? value : Number(value); return Number.isFinite(result) ? result : 0; }
-function nullableNumber(value: unknown): number | null { const result = number(value); return Number.isFinite(result) && result !== 0 ? result : null; }
 function boolean(value: unknown): boolean { return value === true || value === 'true'; }
 
 function reference(value: unknown): PeruReferenceOption {
@@ -109,117 +100,6 @@ function clientAccount(value: unknown): BuyerClientAccount {
   };
 }
 
-function route(value: unknown): BuyerRequestRouteSnapshot | null {
-  const item = raw(value);
-  if (Object.keys(item).length === 0) return null;
-  return {
-    provider: nullableText(item['provider']),
-    reference: nullableText(item['reference']),
-    originLabel: nullableText(item['originLabel']),
-    destinationLabel: nullableText(item['destinationLabel']),
-    distanceMeters: nullableNumber(item['distanceMeters']),
-    durationSeconds: nullableNumber(item['durationSeconds']),
-    previewUrl: nullableText(item['previewUrl']),
-    originLatitude: item['originLatitude'] == null ? null : Number(item['originLatitude']),
-    originLongitude: item['originLongitude'] == null ? null : Number(item['originLongitude']),
-    destinationLatitude: item['destinationLatitude'] == null ? null : Number(item['destinationLatitude']),
-    destinationLongitude: item['destinationLongitude'] == null ? null : Number(item['destinationLongitude']),
-    calculatedAt: nullableText(item['calculatedAt']),
-    mode: nullableText(item['mode']),
-    path: nullableText(item['path']),
-  };
-}
-
-function warehouseSnapshot(value: unknown): BuyerRequestWarehouseSnapshot | null {
-  const item = raw(value);
-  const id = text(item['id']);
-  if (!id) return null;
-  return { id, code: text(item['code']), name: text(item['name']), address: text(item['address']) };
-}
-
-function addressSnapshot(value: unknown): BuyerRequestDeliverySnapshot['address'] {
-  const item = raw(value);
-  if (!text(item['line'])) return null;
-  return {
-    id: nullableText(item['id']),
-    label: nullableText(item['label']),
-    addressType: nullableText(item['addressType']),
-    line: text(item['line']),
-    reference: nullableText(item['reference']),
-    countryCode: text(item['countryCode']) || 'PE',
-    departmentCode: text(item['departmentCode']),
-    provinceCode: text(item['provinceCode']),
-    districtCode: text(item['districtCode']),
-    defaultAddress: boolean(item['defaultAddress']),
-  };
-}
-
-function snapshot(value: unknown): BuyerRequestSnapshot | null {
-  const item = raw(value);
-  if (Object.keys(item).length === 0) return null;
-  const delivery = raw(item['delivery']);
-  const commercial = raw(item['commercial']);
-  const payment = raw(item['payment']);
-  const commercialValue: BuyerRequestCommercialSnapshot | null = Object.keys(commercial).length > 0
-    ? {
-      clientAccountId: nullableText(commercial['clientAccountId']),
-      businessName: nullableText(commercial['businessName']),
-      commercialName: nullableText(commercial['commercialName']),
-      taxType: nullableText(commercial['taxType']),
-      taxValue: nullableText(commercial['taxValue']),
-      segment: nullableText(commercial['segment']),
-      paymentCondition: nullableText(commercial['paymentCondition']),
-    }
-    : null;
-  const deliveryValue: BuyerRequestDeliverySnapshot | null = Object.keys(delivery).length > 0
-    ? {
-      requestedDate: nullableText(delivery['requestedDate'] ?? delivery['requestedDeliveryDate']),
-      notes: nullableText(delivery['notes'] ?? delivery['deliveryNotes']),
-      address: addressSnapshot(delivery['address']),
-      warehouse: warehouseSnapshot(delivery['warehouse']),
-      route: route(delivery['route']),
-    }
-    : null;
-  return {
-    delivery: deliveryValue,
-    commercial: commercialValue,
-    paymentOption: nullableText(item['paymentOption'] ?? payment['option'] ?? payment['method']),
-    comments: nullableText(item['comments'] ?? item['comment']),
-    capturedAt: nullableText(item['capturedAt']),
-  };
-}
-
-function line(value: unknown): BuyerRequestLineView {
-  const item = raw(value);
-  return {
-    id: text(item['id'] ?? item['lineId']),
-    catalogItemId: text(item['catalogItemId']),
-    itemName: text(item['itemName']),
-    presentation: text(item['presentation']),
-    quantity: number(item['quantity']),
-    unit: text(item['unit']) || 'unit',
-    notes: text(item['notes']),
-    unitPriceAmount: nullableNumber(item['unitPriceAmount']),
-    unitPriceCurrency: nullableText(item['unitPriceCurrency'] ?? item['currency']),
-  };
-}
-
-function request(value: unknown): BuyerRequestView {
-  const item = raw(value);
-  return {
-    id: text(item['id']),
-    code: text(item['code']),
-    tenantId: nullableText(item['tenantId']),
-    workspaceId: nullableText(item['workspaceId']),
-    clientAccountId: nullableText(item['clientAccountId']),
-    buyerMembershipId: nullableText(item['buyerMembershipId']),
-    status: text(item['status']).toUpperCase(),
-    snapshot: snapshot(item['snapshot']),
-    lines: Array.isArray(item['lines']) ? item['lines'].map(line) : [],
-    version: number(item['version']),
-  };
-}
-
 @Injectable({ providedIn: 'root' })
 export class BuyerRequestApiClient {
   private readonly http = inject(HttpClient);
@@ -238,9 +118,14 @@ export class BuyerRequestApiClient {
   }
 
   reference(resource: 'departments' | 'provinces' | 'districts' | 'road-types', parentCode?: string): Observable<readonly PeruReferenceOption[]> {
-    let params = new HttpParams();
-    if (parentCode) params = params.set('parentCode', parentCode);
-    return this.http.get<unknown>(this.api(`/reference/${resource}`), { params, withCredentials: true })
+    const path = resource === 'departments'
+      ? '/reference/departments'
+      : resource === 'road-types'
+        ? '/reference/road-types'
+        : resource === 'provinces'
+          ? `/reference/departments/${encodeURIComponent(parentCode ?? '')}/provinces`
+          : `/reference/provinces/${encodeURIComponent(parentCode ?? '')}/districts`;
+    return this.http.get<unknown>(this.api(path), { withCredentials: true })
       .pipe(map((value) => Array.isArray(value) ? value.map(reference) : []));
   }
 
@@ -278,13 +163,4 @@ export class BuyerRequestApiClient {
     }).pipe(map((response) => address(response.body, response.headers.get('ETag') ?? undefined)));
   }
 
-  preview(command: BuyerRequestCommand): Observable<BuyerRequestSnapshot | null> {
-    return this.http.post<unknown>(this.api('/buyer-requests/previews'), command, { withCredentials: true })
-      .pipe(map(snapshot));
-  }
-
-  create(command: BuyerRequestCommand): Observable<BuyerRequestView> {
-    return this.http.post<unknown>(this.api('/buyer-requests'), command, { withCredentials: true })
-      .pipe(map(request));
-  }
 }

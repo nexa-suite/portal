@@ -15,13 +15,16 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
     expect(children.some((route) => route.path === 'request-builder')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
-    expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(false);
+    expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(true);
     expect(children.some((route) => route.path === 'sales-orders')).toBe(true);
     expect(children.some((route) => route.path === 'sales-orders/:salesOrderId')).toBe(true);
     expect(children.some((route) => route.path === 'documents')).toBe(true);
     expect(children.some((route) => route.path === 'receivables')).toBe(true);
     expect(children.some((route) => route.path === 'receivables/:receivableId')).toBe(true);
     expect(children.some((route) => route.path === 'payment-methods')).toBe(true);
+    expect(children.some((route) => route.path === 'purchase-orders')).toBe(true);
+    expect(children.some((route) => route.path === 'purchase-orders/success')).toBe(true);
+    expect(children.some((route) => route.path === 'premium')).toBe(true);
     expect(children.some((route) => route.path === 'support')).toBe(true);
     expect(children.some((route) => route.path === 'legal')).toBe(true);
     expect(children.find((route) => route.path === 'orders')?.redirectTo).toBe('sales-orders');

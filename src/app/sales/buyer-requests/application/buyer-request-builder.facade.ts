@@ -44,6 +44,7 @@ export class BuyerRequestBuilderFacade {
   readonly previewState = signal<{ readonly status: 'idle' | 'loading' | 'success' | 'error'; readonly snapshot: BuyerRequestSnapshot | null; readonly message: string | null }>({ status: 'idle', snapshot: null, message: null });
   readonly busy = signal(false);
   readonly message = signal<string | null>(null);
+  private editingDraftId: string | null = null;
 
   loadInitial(clientAccountId: string | null): Observable<void> {
     const resolvedAccountId$ = clientAccountId
@@ -64,6 +65,17 @@ export class BuyerRequestBuilderFacade {
       }),
       map(() => undefined),
     ), 'BUYER_REQUEST_BUILDER_LOAD_FAILED');
+  }
+
+  loadDraft(draftId: string): Observable<CanonicalDraftView> {
+    return this.run(() => this.canonical.get(draftId), 'BUYER_REQUEST_DRAFT_LOAD_FAILED').pipe(
+      tap((draft) => {
+        this.canonicalDraft.set(draft);
+        this.editingDraftId = draft.id;
+        this.canonicalCommandSignature = null;
+        this.canonicalIdempotencyKey = null;
+      }),
+    );
   }
 
   loadAddresses(clientAccountId: string): Observable<readonly ClientAccountAddress[]> {
@@ -131,6 +143,15 @@ export class BuyerRequestBuilderFacade {
       if (!command.clientAccountId || !command.requestedDeliveryDate || command.lines.length === 0) throw new Error('Canonical purchase request draft input is incomplete');
       const lines = command.lines.map((line) => ({ skuId: line.skuId?.trim() || line.catalogItemId.trim(), quantity: line.quantity, unit: line.unit, notes: line.notes }));
       if (lines.some((line) => !line.skuId)) throw new Error('Canonical purchase request draft requires SKU ids');
+      const existing = this.canonicalDraft();
+      if (existing && this.editingDraftId === existing.id) {
+        return this.resolveDestination(command).pipe(
+          switchMap((addressId) => this.canonical.replaceLines(existing.id, existing.etag, lines).pipe(map((draft) => ({ draft, addressId })))),
+          switchMap(({ draft, addressId }) => this.canonical.setDestination(draft.id, draft.etag, addressId)),
+          switchMap((draft) => this.canonical.previewRoute(draft.id, draft.etag)),
+          switchMap((draft) => this.canonical.setPreferences(draft.id, draft.etag, command.paymentOption, command.requestedDeliveryDate)),
+        );
+      }
       return this.resolveDestination(command).pipe(
         switchMap((addressId) => this.canonical.create(command.clientAccountId as string, command.requestedDeliveryDate).pipe(
           switchMap((draft) => this.canonical.replaceLines(draft.id, draft.etag, lines)),

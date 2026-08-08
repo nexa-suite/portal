@@ -28,6 +28,7 @@
       "title": "Ingresa a Nexa",
       "description": "Usa las credenciales autorizadas de tu workspace para acceder al catálogo comprador.",
       "workspace": "Workspace",
+      "workspacePreview": { "label": "Vista previa del workspace", "loading": "Cargando la vista previa del workspace…", "recognized": "Workspace reconocido", "notFound": "Workspace no reconocido", "origin": "El navegador rechazó la vista previa por la política de origen.", "rateLimited": "Hay demasiadas consultas del workspace. Espera un momento e inténtalo otra vez.", "server": "El servicio de vista previa del workspace no está disponible temporalmente.", "network": "No se pudo conectar con Nexa para consultar el workspace.", "timeout": "La vista previa del workspace tardó demasiado. Inténtalo nuevamente.", "invalid": "La solicitud de vista previa del workspace no es válida." },
       "email": "Correo electrónico",
       "password": "Contraseña",
       "submit": "Continuar al Portal",

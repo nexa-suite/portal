@@ -12,7 +12,10 @@ export interface PortalRuntimeConfig {
 }
 
 const DEFAULT_RUNTIME_CONFIG: PortalRuntimeConfig = {
-  apiBaseUrl: 'http://localhost:8080',
+  // Frontends are served by the same origin as the API proxy in production
+  // and in the local Docker topology. An absolute URL is still supported as
+  // an explicit runtime override for isolated development.
+  apiBaseUrl: '',
   signInPath: '/api/v1/authentication/sign-in',
   refreshPath: '/api/v1/authentication/refresh',
   signOutPath: '/api/v1/authentication/sign-out',

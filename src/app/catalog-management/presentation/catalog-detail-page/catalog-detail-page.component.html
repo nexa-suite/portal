@@ -33,7 +33,7 @@
           </div>
           <div class="detail-copy">
             <p class="catalog-category">{{ item.categoryName }}</p>
-            <h1>{{ item.productFamilyName || item.itemName }}</h1>
+            <h1>{{ item.productFamilyName || item.itemName }}@if (item.productVariantName) { <span aria-hidden="true"> · </span>{{ item.productVariantName }} }</h1>
             <p class="catalog-brand">
               {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.skuCode || item.productId }}<span aria-hidden="true"> · </span>{{ item.presentation }}@if (item.unitOfMeasure) {<span aria-hidden="true"> · </span>{{ item.unitOfMeasure }} }
             </p>
