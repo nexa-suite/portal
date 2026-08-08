@@ -18,6 +18,10 @@
 h1 { margin: 0; font-family: var(--nexa-font-family-display); font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.1; }
 .sign-in-copy > p:last-child { margin: var(--nexa-space-4) 0 0; color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-md); line-height: var(--nexa-line-height-relaxed); }
 .sign-in-form { display: grid; gap: var(--nexa-space-4); }
+.workspace-preview-label { margin: 0; color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); letter-spacing: var(--nexa-letter-spacing-wider); text-transform: uppercase; }
+.workspace-preview { display: grid; gap: var(--nexa-space-1); padding: var(--nexa-space-3) var(--nexa-space-4); border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-md); background: var(--nexa-color-primary-50); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-sm); }
+.workspace-preview strong { color: var(--nexa-color-text-primary); }
+.workspace-preview span { overflow-wrap: anywhere; }
 .sign-in-form label { display: grid; gap: var(--nexa-space-2); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-sm); font-weight: var(--nexa-font-weight-semibold); }
 .sign-in-form input { width: 100%; min-height: 3rem; padding: 0 var(--nexa-space-4); border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-md); background: #fff; color: var(--nexa-color-text-primary); font: inherit; }
 .sign-in-form input:focus-visible { outline: 3px solid var(--nexa-color-primary-100); border-color: var(--nexa-color-primary-600); }

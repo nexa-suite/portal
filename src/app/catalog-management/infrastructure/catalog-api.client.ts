@@ -36,6 +36,8 @@ interface RawCatalogItem {
   readonly productFamilyId?: unknown;
   readonly productFamilyCode?: unknown;
   readonly productFamilyName?: unknown;
+  readonly productVariantName?: unknown;
+  readonly productVariantCode?: unknown;
   readonly sellableSkuId?: unknown;
   readonly skuCode?: unknown;
   readonly itemName?: unknown;
@@ -172,6 +174,8 @@ function summary(raw: RawCatalogItem): CatalogItemSummary {
     productFamilyId: text(raw.productFamilyId) || undefined,
     productFamilyCode: text(raw.productFamilyCode) || undefined,
     productFamilyName: text(raw.productFamilyName) || text(raw.itemName),
+    productVariantName: text(raw.productVariantName) || undefined,
+    productVariantCode: text(raw.productVariantCode) || undefined,
     sellableSkuId: text(raw.sellableSkuId) || text(raw.productId) || undefined,
     skuCode: text(raw.skuCode) || undefined,
     itemName: text(raw.itemName),
