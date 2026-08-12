@@ -61,7 +61,7 @@ The Portal link is the approved secured vertical slice for this release. Mobile 
 |---|---|
 | IAM | Secured client/API slice |
 | Catalog Management | Secured read slice; shared local reference seed |
-| Sales from buyer perspective | Purchase Request builder and self-service lifecycle |
+| Sales from buyer perspective | Purchase Request builder, Sales Order flows and self-service lifecycle in `v0.7.0` |
 | Logistics tracking | Buyer delivery tracking in `v0.7.0` |
 | Invoicing documents and payments | Planned |
 
