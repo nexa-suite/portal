@@ -3,9 +3,11 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
-## [0.7.1] - 2026-08-01
+## Unreleased
 
-### Added
+Current `develop` artifact: `0.7.1`. The following candidate content is an **UNRELEASED DRAFT**; no release number, tag or GitHub Release is established.
+
+### Candidate additions
 
 - Dedicated coarse availability, delivery-tracking and Buyer-safe field coverage.
 
@@ -30,7 +32,9 @@ This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-00
 
 - Buyer delivery reads remain client-account scoped; internal identifiers and operational mutations are not exposed in the Portal.
 
-## [0.6.0] - 2026-07-30
+## Previously unreleased candidate: 0.6.0
+
+This candidate content was later consolidated into published `v0.7.0`; `v0.6.0` has no published tag or GitHub Release.
 
 ### Added
 
