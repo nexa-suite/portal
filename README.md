@@ -1,12 +1,14 @@
 <div align="center">
 
-<img src="./docs/assets/nexa.svg" alt="Nexa" width="220" />
+<br />
+
+<img src="./docs/assets/nexa.svg" alt="Nexa" width="240" />
 
 # Nexa Buyer Portal
 
 **Buyer-facing business experience for reliable B2B purchasing.**
 
-[![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.dev/) [![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Angular Material 22](https://img.shields.io/badge/Angular%20Material-22-757575?style=flat-square&logo=materialdesign&logoColor=white)](https://material.angular.dev/) [![Release](https://img.shields.io/github/v/release/nexa-suite/portal?style=flat-square&label=release)](https://github.com/nexa-suite/portal/releases)
+![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Angular Material](https://img.shields.io/badge/Angular%20Material-22-757575?style=flat-square&logo=materialdesign&logoColor=white) ![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/portal?display_name=tag&sort=semver&style=flat-square&label=release)
 
 [Changelog](./CHANGELOG.md) · [Release notes](./docs/releases/) · [Contributing](./.github/CONTRIBUTING.md) · [Security](./.github/SECURITY.md)
 
@@ -18,7 +20,75 @@
 
 Angular buyer surface for Catalog discovery, product detail, Purchase Requests, Sales Orders and buyer-safe delivery tracking. Portal presents buyer workflows; API owns identity, tenant scope, pricing and business rules.
 
-## Buyer experiences
+## Nexa Product Ecosystem
+
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa Website](https://github.com/nexa-suite/website)
+
+Public product experience and entry point for Nexa.
+
+[Open Repository](https://github.com/nexa-suite/website)
+
+![HTML5](https://img.shields.io/badge/HTML5-static-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-responsive-1572B6?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=flat-square&logo=javascript&logoColor=black) ![Release](https://img.shields.io/github/v/release/nexa-suite/website?display_name=tag&sort=semver&style=flat-square&label=release)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Platform](https://github.com/nexa-suite/platform)
+
+Internal operational workspace for tenant teams, sales, warehouse and logistics.
+
+[Open Repository](https://github.com/nexa-suite/platform)
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Material](https://img.shields.io/badge/Angular%20Material-22-757575?style=flat-square&logo=materialdesign&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/platform?display_name=tag&sort=semver&style=flat-square&label=release)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa Buyer Portal](https://github.com/nexa-suite/portal)
+
+Buyer-facing experience for catalog discovery, purchasing and delivery visibility.
+
+[Open Repository](https://github.com/nexa-suite/portal)
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Material](https://img.shields.io/badge/Angular%20Material-22-757575?style=flat-square&logo=materialdesign&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/portal?display_name=tag&sort=semver&style=flat-square&label=release)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa API](https://github.com/nexa-suite/api)
+
+Business and integration backbone for identity, tenant scope and operational workflows.
+
+[Open Repository](https://github.com/nexa-suite/api)
+
+![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?style=flat-square&logo=springboot&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Flyway](https://img.shields.io/badge/Flyway-migrations-CC0200?style=flat-square&logo=flyway&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/api?display_name=tag&sort=semver&style=flat-square&label=release)
+
+</td>
+</tr>
+<tr>
+<td colspan="2" valign="top">
+
+### [Nexa Mobile](https://github.com/nexa-suite/mobile)
+
+Documentation and native runway for future buyer and cold-chain field experiences. No application framework selected.
+
+[Open Repository](https://github.com/nexa-suite/mobile)
+
+![Status](https://img.shields.io/badge/status-planned-64748B?style=flat-square) ![Documentation](https://img.shields.io/badge/scope-documentation-64748B?style=flat-square) ![Native Runway](https://img.shields.io/badge/native-runway-64748B?style=flat-square)
+
+</td>
+</tr>
+</table>
+
+
+## Buyer Experiences
 
 - Buyer access and session foundations.
 - Catalog browsing and product detail.
@@ -28,23 +98,23 @@ Angular buyer surface for Catalog discovery, product detail, Purchase Requests, 
 
 Portal does not own internal administration, backend business rules or persistence.
 
-## Nexa Product Ecosystem
-
-<table>
-<tr><td><a href="https://github.com/nexa-suite/website"><strong>Nexa Website</strong></a><br />Public product discovery.<br /><img src="https://img.shields.io/github/v/release/nexa-suite/website?style=flat-square&label=release" alt="Website release" /></td><td><a href="https://github.com/nexa-suite/platform"><strong>Nexa Platform</strong></a><br />Internal operational workspace.<br /><img src="https://img.shields.io/github/v/release/nexa-suite/platform?style=flat-square&label=release" alt="Platform release" /></td></tr>
-<tr><td><strong>Nexa Buyer Portal</strong><br />This repository. Buyer-facing business experience.<br /><img src="https://img.shields.io/github/v/release/nexa-suite/portal?style=flat-square&label=release" alt="Portal release" /></td><td><a href="https://github.com/nexa-suite/api"><strong>Nexa API</strong></a><br />Business and integration authority.<br /><img src="https://img.shields.io/github/v/release/nexa-suite/api?style=flat-square&label=release" alt="API release" /></td></tr>
-<tr><td colspan="2"><a href="https://github.com/nexa-suite/mobile"><strong>Nexa Mobile</strong></a><br />Architecture runway for future native clients.<br /><img src="https://img.shields.io/github/v/release/nexa-suite/mobile?style=flat-square&label=release" alt="Mobile release" /></td></tr>
-</table>
-
 ## Architecture
 
 Standalone Angular application. Core routing, shared presentation and application utilities remain separate. Buyer-facing models and API adapters require approved contracts; Portal is not a second business authority.
 
-## Technology
+## Technology Stack
 
-Angular 22, TypeScript strict mode, Angular Material/CDK 22, Signals, RxJS, ngx-translate, SCSS and npm.
+| Concern | Technology |
+| --- | --- |
+| Framework | Angular 22 |
+| Language | TypeScript strict mode |
+| Component system | Angular Material/CDK 22 |
+| State and async | Signals and RxJS |
+| Internationalization | ngx-translate 18 |
+| Styling | SCSS |
+| Package manager | npm |
 
-## Getting started
+## Getting Started
 
     npm ci
     npm start
@@ -57,7 +127,7 @@ Open http://localhost:4300 and navigate to /home.
     npm test
     npm run build
 
-## Repository structure
+## Repository Structure
 
     src/app/core/                         Shell, routes and language service
     src/app/shared/presentation/         Reusable visual components
@@ -72,12 +142,70 @@ Open http://localhost:4300 and navigate to /home.
 - [Release policy](./.github/RELEASE_POLICY.md)
 - [Changelog](./CHANGELOG.md)
 
+
+## Project Lineage
+
+Historical repositories belong to old UPC organization. They are provenance, not current Nexa product surfaces.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### [Legacy Backend](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-platform)
+
+Repository lineage: nexa-platform. Predecessor backend and REST API service layer.
+
+[Open Repository](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-platform)
+
+![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white) ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-REST-0EA5E9?style=flat-square) ![EF Core](https://img.shields.io/badge/EF%20Core-PostgreSQL-512BD4?style=flat-square)
+
+</td>
+<td width="50%" valign="top">
+
+### [Legacy WebApp](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-webapp)
+
+Repository lineage: nexa-webapp. One unified historical application covering workflows now separated between Platform and Buyer Portal.
+
+[Open Repository](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-webapp)
+
+![Vue](https://img.shields.io/badge/Vue-3-35495E?style=flat-square&logo=vuedotjs&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white) ![PrimeVue](https://img.shields.io/badge/PrimeVue-4-0EA5E9?style=flat-square) ![Pinia](https://img.shields.io/badge/Pinia-2-FFD859?style=flat-square)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### [Legacy Website](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-website)
+
+Repository lineage: nexa-website. Previous public Website lineage.
+
+[Open Repository](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-website)
+
+![HTML5](https://img.shields.io/badge/HTML5-static-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-responsive-1572B6?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+
+</td>
+<td width="50%" valign="top">
+
+### [Academic / Historical Reference](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-ecosystem-report)
+
+Repository lineage: nexa-ecosystem-report. Documentation, requirements, project evidence and historical architecture material.
+
+[Open Repository](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-ecosystem-report)
+
+![Scope](https://img.shields.io/badge/scope-documentation-64748B?style=flat-square) ![Role](https://img.shields.io/badge/role-historical%20reference-64748B?style=flat-square)
+
+</td>
+</tr>
+</table>
+
+
+
 ## Security
 
-Do not report vulnerabilities through public issues. Follow the [Security Policy](./.github/SECURITY.md).
+Do not report vulnerabilities through public issues. Follow the repository [Security Policy](./.github/SECURITY.md).
 
 ## Legal
 
 Copyright © 2026 Nexa. All rights reserved. No open-source license is selected by this README.
 
-<div align="center"><br />Nexa · Buyer experience grounded in trusted contracts</div>
+<div align="center"><br />Nexa · Current product, explicit evidence boundaries</div>
