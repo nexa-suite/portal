@@ -5,9 +5,13 @@ The project uses Semantic Versioning.
 
 ## Unreleased
 
-Current `develop` artifact: `0.7.1`. The following candidate content is an **UNRELEASED DRAFT**; no release number, tag or GitHub Release is established.
+No unreleased changes are included in this baseline.
 
-### Candidate additions
+## [0.7.1] - 2026-08-18
+
+Buyer availability and delivery-tracking stabilization.
+
+### Added
 
 - Dedicated coarse availability, delivery-tracking and Buyer-safe field coverage.
 
@@ -15,6 +19,8 @@ Current `develop` artifact: `0.7.1`. The following candidate content is an **UNR
 
 - Delivery i18n and recoverable availability error states are explicit.
 - Duplicate workspace artifacts and generated browser outputs are ignored and removed.
+
+### Boundary
 
 Documents, uploads and payments are not implemented.
 
