@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, defer, forkJoin, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
+import { isStaleApiProblem, readApiProblemDetails } from '../../../core/error/api-problem-details';
 import {
   BuyerRequestCommand,
   BuyerRequestSnapshot,
@@ -14,8 +15,7 @@ import { BuyerRequestApiClient } from '../infrastructure/buyer-request-api.clien
 import { CanonicalDraftView, CanonicalPurchaseRequestDraftApiClient } from '../infrastructure/canonical-purchase-request-draft-api.client';
 
 function errorCode(error: unknown, fallback: string): string {
-  const status = (error as { readonly status?: unknown })?.status;
-  return status === 409 || status === 412 ? 'BUYER_REQUEST_STALE' : fallback;
+  return isStaleApiProblem(error) ? 'BUYER_REQUEST_STALE' : readApiProblemDetails(error)?.code ?? fallback;
 }
 
 function object(value: unknown): Record<string, unknown> {
