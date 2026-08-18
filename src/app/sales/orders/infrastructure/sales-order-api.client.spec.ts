@@ -30,4 +30,12 @@ describe('SalesOrderApiClient', () => {
     expect(request.request.body).toEqual({ reason: 'Buyer declined the commercial terms' });
     request.flush(order, { headers: { ETag: '"4"' } });
   });
+
+  it('requests the buyer-safe PDF/CSV summary endpoint', () => {
+    client.summary('so-1', 'PDF').subscribe();
+    const request = http.expectOne('http://api.local/api/v1/sales-orders/so-1/summary?format=PDF');
+    expect(request.request.method).toBe('GET');
+    expect(request.request.responseType).toBe('blob');
+    request.flush(new Blob(['summary'], { type: 'application/pdf' }), { headers: { 'Content-Disposition': 'attachment; filename="nexa-order-summary-SO-1.pdf"' } });
+  });
 });

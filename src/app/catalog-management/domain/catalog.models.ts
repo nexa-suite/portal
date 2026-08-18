@@ -1,4 +1,22 @@
 export type ColdChainFilter = 'NONE' | 'REFRIGERATED' | 'FROZEN';
+export type CatalogAvailabilityStatus =
+  | 'AVAILABLE'
+  | 'LOW'
+  | 'OUT_OF_STOCK'
+  | 'UNAVAILABLE'
+  | 'UNKNOWN';
+
+export interface CatalogPrice {
+  readonly amount: string;
+  readonly currency: string;
+}
+
+export interface CatalogAppliedPromotion {
+  readonly id: string;
+  readonly name: string;
+  readonly discountType: string;
+  readonly discountAmount: string;
+}
 
 export interface CatalogQuery {
   readonly q: string;
@@ -19,12 +37,33 @@ export interface CatalogMedia {
 export interface CatalogItemSummary {
   readonly catalogItemId: string;
   readonly productId: string;
+  readonly productFamilyId?: string;
+  readonly productFamilyCode?: string;
+  readonly productFamilyName?: string;
+  readonly productVariantName?: string;
+  readonly productVariantCode?: string;
+  readonly sellableSkuId?: string;
+  readonly skuCode?: string;
   readonly itemName: string;
   readonly brandName: string;
   readonly categoryName: string;
   readonly presentation: string;
+  readonly unitOfMeasure?: string;
+  readonly packagingType?: string;
+  readonly netWeight?: string;
+  readonly grossWeight?: string;
   readonly coldChainRequirement: string;
   readonly image: CatalogMedia | null;
+  readonly unitPrice: CatalogPrice | null;
+  readonly basePrice: CatalogPrice | null;
+  readonly effectivePrice: CatalogPrice | null;
+  readonly discountAmount: CatalogPrice | null;
+  readonly currency: string;
+  readonly appliedPromotions: readonly CatalogAppliedPromotion[];
+  readonly pricingAsOf: string | null;
+  readonly availabilityStatus: CatalogAvailabilityStatus;
+  readonly nearExpiry?: boolean;
+  readonly promotionLabel: string | null;
 }
 
 export interface CatalogItemDetail extends CatalogItemSummary {
@@ -38,6 +77,34 @@ export interface CatalogPage {
   readonly totalItems: number;
   readonly totalPages: number;
   readonly sort: { readonly field: string; readonly direction: string };
+}
+
+export type CatalogPricingItem = Pick<
+  CatalogItemSummary,
+  | 'basePrice'
+  | 'effectivePrice'
+  | 'discountAmount'
+  | 'currency'
+  | 'appliedPromotions'
+  | 'pricingAsOf'
+>;
+
+export interface CatalogPricingPreviewRequest {
+  readonly items: readonly { readonly productId: string; readonly quantity: number }[];
+  readonly asOf?: string;
+}
+
+export interface CatalogPricingPreviewItem extends CatalogPricingItem {
+  readonly productId: string;
+  readonly quantity: number;
+  readonly baseUnitPrice: CatalogPrice | null;
+  readonly effectiveUnitPrice: CatalogPrice | null;
+  readonly lineBaseTotal: CatalogPrice | null;
+  readonly lineEffectiveTotal: CatalogPrice | null;
+}
+
+export interface CatalogPricingPreview {
+  readonly items: readonly CatalogPricingPreviewItem[];
 }
 
 export const DEFAULT_CATALOG_QUERY: CatalogQuery = {
@@ -56,6 +123,54 @@ export function coldChainValue(value: string): ColdChainFilter | '' {
   return normalized === 'REFRIGERATED' || normalized === 'FROZEN' || normalized === 'NONE'
     ? normalized
     : '';
+}
+
+export function catalogAvailabilityFromValue(value: unknown): CatalogAvailabilityStatus {
+  const normalized = typeof value === 'string' ? value.trim().toUpperCase().replaceAll('-', '_') : '';
+  switch (normalized) {
+    case 'AVAILABLE':
+      return 'AVAILABLE';
+    case 'LOW':
+      return 'LOW';
+    case 'OUT_OF_STOCK':
+      return 'OUT_OF_STOCK';
+    case 'UNAVAILABLE':
+      return 'UNAVAILABLE';
+    default:
+      return 'UNKNOWN';
+  }
+}
+
+export function isCatalogOutOfStock(status: CatalogAvailabilityStatus): boolean {
+  return status === 'OUT_OF_STOCK' || status === 'UNAVAILABLE';
+}
+
+export function catalogItemsWithOutOfStockLast(
+  items: readonly CatalogItemSummary[],
+): readonly CatalogItemSummary[] {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((left, right) => {
+      const availabilityOrder = (status: CatalogAvailabilityStatus): number => {
+        if (status === 'AVAILABLE') return 0;
+        if (status === 'LOW') return 1;
+        if (isCatalogOutOfStock(status)) return 3;
+        return 2;
+      };
+      return availabilityOrder(left.item.availabilityStatus) - availabilityOrder(right.item.availabilityStatus) ||
+        left.index - right.index;
+    })
+    .map(({ item }) => item);
+}
+
+export function formatCatalogPrice(price: CatalogPrice | null): string {
+  if (!price?.currency || !price.amount.trim()) return '';
+  const amount = Number(price.amount);
+  if (!Number.isFinite(amount)) return '';
+  return `${price.currency} ${new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount)}`;
 }
 
 export function catalogQueryFromParams(params: { get(name: string): string | null }): CatalogQuery {

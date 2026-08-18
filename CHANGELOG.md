@@ -3,6 +3,27 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## Unreleased
+
+No unreleased changes are included in this baseline.
+
+## [0.7.1] - 2026-08-18
+
+Buyer availability and delivery-tracking stabilization.
+
+### Added
+
+- Dedicated coarse availability, delivery-tracking and Buyer-safe field coverage.
+
+### Changed
+
+- Delivery i18n and recoverable availability error states are explicit.
+- Duplicate workspace artifacts and generated browser outputs are ignored and removed.
+
+### Boundary
+
+Documents, uploads and payments are not implemented.
+
 ## [0.7.0] - 2026-07-31
 
 This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-008.6, TASK-NEXA-009, TASK-NEXA-010 and TASK-NEXA-010.5 work.
@@ -17,7 +38,9 @@ This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-00
 
 - Buyer delivery reads remain client-account scoped; internal identifiers and operational mutations are not exposed in the Portal.
 
-## [0.6.0] - 2026-07-30
+## Previously unreleased candidate: 0.6.0
+
+This candidate content was later consolidated into published `v0.7.0`; `v0.6.0` has no published tag or GitHub Release.
 
 ### Added
 

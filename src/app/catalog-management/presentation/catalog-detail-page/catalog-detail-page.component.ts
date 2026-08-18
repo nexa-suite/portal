@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -8,9 +8,17 @@ import {
 } from '../../../shared/presentation/components/cold-chain-badge/cold-chain-badge.component';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
+import {
+  StatusBadgeComponent,
+  StatusTone,
+} from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
-import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
-import { catalogQueryFromParams, catalogQueryToParams } from '../../domain/catalog.models';
+import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
+import {
+  CatalogAvailabilityStatus,
+  catalogQueryFromParams,
+  catalogQueryToParams,
+} from '../../domain/catalog.models';
 
 @Component({
   selector: 'nexa-catalog-detail-page',
@@ -18,7 +26,9 @@ import { catalogQueryFromParams, catalogQueryToParams } from '../../domain/catal
     ColdChainBadgeComponent,
     ErrorStateComponent,
     LoadingStateComponent,
+    CatalogPricingSummaryComponent,
     RouterLink,
+    StatusBadgeComponent,
     TranslatePipe,
   ],
   templateUrl: './catalog-detail-page.component.html',
@@ -29,7 +39,6 @@ export class CatalogDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
-  readonly availability = inject(InventoryAvailabilityFacade);
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -40,12 +49,13 @@ export class CatalogDetailPageComponent {
   readonly backQueryParams = computed(() =>
     catalogQueryToParams(catalogQueryFromParams(this.queryParams())),
   );
+  readonly previewQuantity = signal('1');
+  readonly previewQuantityInvalid = signal(false);
 
   constructor() {
     effect(() => {
       const id = this.catalogItemId();
       if (id) untracked(() => this.catalog.loadDetail(id));
-      if (id) untracked(() => this.availability.load([id]));
     });
   }
 
@@ -60,7 +70,29 @@ export class CatalogDetailPageComponent {
     }
   }
 
+  availabilityTone(status: CatalogAvailabilityStatus): StatusTone {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'success';
+      case 'LOW':
+        return 'warning';
+      case 'OUT_OF_STOCK':
+      case 'UNAVAILABLE':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
+  }
+
   backToCatalog(): void {
     void this.router.navigate(['/portal/product-catalog'], { queryParams: this.backQueryParams() });
+  }
+
+  previewPrice(): void {
+    const quantity = Number(this.previewQuantity().trim());
+    const productId = this.catalog.detail()?.productId ?? '';
+    const valid = Number.isFinite(quantity) && quantity > 0;
+    this.previewQuantityInvalid.set(!valid);
+    if (valid) this.catalog.previewPricing(productId, quantity);
   }
 }

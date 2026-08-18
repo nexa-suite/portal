@@ -1,0 +1,47 @@
+<section class="pricing-summary" [attr.aria-label]="'catalog.pricingDetails' | translate">
+  <h3>{{ 'catalog.pricingDetails' | translate }}</h3>
+
+  <dl class="pricing-fields">
+    <div data-testid="base-price">
+      <dt>{{ 'catalog.basePrice' | translate }}</dt>
+      <dd>{{ priceLabel(pricing().basePrice) || '—' }}</dd>
+    </div>
+    <div data-testid="effective-price">
+      <dt>{{ 'catalog.effectivePrice' | translate }}</dt>
+      <dd>{{ priceLabel(pricing().effectivePrice) || '—' }}</dd>
+    </div>
+    <div data-testid="discount-amount">
+      <dt>{{ 'catalog.discountAmount' | translate }}</dt>
+      <dd>{{ priceLabel(pricing().discountAmount) || '—' }}</dd>
+    </div>
+    <div data-testid="pricing-currency">
+      <dt>{{ 'catalog.currency' | translate }}</dt>
+      <dd>{{ pricing().currency || '—' }}</dd>
+    </div>
+  </dl>
+
+  <div class="promotions" data-testid="applied-promotions">
+    <h4>{{ 'catalog.appliedPromotions' | translate }}</h4>
+    @if (hasPromotions()) {
+      <ul>
+        @for (promotion of pricing().appliedPromotions; track promotion.id || promotion.name) {
+          <li>
+            <strong>{{ promotionName(promotion) }}</strong>
+            @if (promotion.discountType) {
+              <span class="promotion-type">{{ promotion.discountType }}</span>
+            }
+            @if (promotion.discountAmount) {
+              <span class="promotion-discount">{{ promotionDiscountLabel(promotion) || '—' }}</span>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="no-promotions">{{ 'catalog.noPromotions' | translate }}</p>
+    }
+  </div>
+
+  @if (pricing().pricingAsOf; as pricingAsOf) {
+    <p class="pricing-as-of" data-testid="pricing-as-of">{{ 'catalog.pricingAsOf' | translate: { value: pricingAsOf } }}</p>
+  }
+</section>

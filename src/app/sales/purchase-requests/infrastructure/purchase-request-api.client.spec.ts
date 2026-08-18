@@ -27,4 +27,12 @@ describe('PurchaseRequestApiClient', () => {
     const request = http.expectOne('http://api.local/api/v1/purchase-requests/PR-001/submissions');
     expect(request.request.headers.get('If-Match')).toBe('"5"'); expect(request.request.headers.get('Idempotency-Key')).toBe('portal-PR-001-5'); request.flush({});
   });
+
+  it('preserves Stripe card payment option from API details', () => {
+    let result: PurchaseRequest | undefined;
+    client.get('PR-001').subscribe((request) => result = request);
+    const request = http.expectOne('http://api.local/api/v1/purchase-requests/PR-001');
+    request.flush({ id: 'PR-001', code: 'PR-0001', status: 'SUBMITTED', priority: 'NORMAL', paymentOption: 'CARD_STRIPE', version: 1, lines: [] });
+    expect(result?.paymentOption).toBe('CARD_STRIPE');
+  });
 });

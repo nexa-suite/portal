@@ -100,6 +100,12 @@
   background: var(--nexa-surface-card);
   box-shadow: var(--nexa-shadow-sm);
 }
+.catalog-card.out-of-stock {
+  border-color: var(--nexa-color-danger-200);
+}
+.catalog-card.out-of-stock .catalog-card-visual {
+  background: var(--nexa-color-neutral-50);
+}
 .catalog-card-visual {
   display: grid;
   place-items: center;
@@ -153,6 +159,18 @@
   font-family: var(--nexa-font-family-display);
   font-size: var(--nexa-font-size-lg);
   line-height: var(--nexa-line-height-tight);
+}
+.catalog-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nexa-space-2);
+}
+.availability-note {
+  margin: calc(var(--nexa-space-2) * -1) 0 0;
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-xs);
+  line-height: var(--nexa-line-height-normal);
 }
 .detail-link {
   margin-top: var(--nexa-space-2);

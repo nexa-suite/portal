@@ -5,12 +5,14 @@ import {
   CatalogItemDetail,
   CatalogItemSummary,
   CatalogPage,
+  CatalogPricingPreview,
   CatalogQuery,
   DEFAULT_CATALOG_QUERY,
 } from '../domain/catalog.models';
 
 export type CatalogListStatus = 'idle' | 'loading' | 'retrying' | 'success' | 'empty' | 'error';
 export type CatalogDetailStatus = 'idle' | 'loading' | 'retrying' | 'success' | 'error';
+export type CatalogPreviewStatus = 'idle' | 'loading' | 'success' | 'error';
 
 interface CatalogListState {
   readonly status: CatalogListStatus;
@@ -25,6 +27,14 @@ interface CatalogDetailState {
   readonly item: CatalogItemDetail | null;
   readonly error: unknown;
   readonly catalogItemId: string | null;
+}
+
+interface CatalogPreviewState {
+  readonly status: CatalogPreviewStatus;
+  readonly result: CatalogPricingPreview | null;
+  readonly error: unknown;
+  readonly productId: string | null;
+  readonly quantity: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -43,8 +53,16 @@ export class CatalogQueryService {
     error: null,
     catalogItemId: null,
   });
+  private readonly previewState = signal<CatalogPreviewState>({
+    status: 'idle',
+    result: null,
+    error: null,
+    productId: null,
+    quantity: null,
+  });
   private listSubscription: Subscription | null = null;
   private detailSubscription: Subscription | null = null;
+  private previewSubscription: Subscription | null = null;
 
   readonly listStatus = computed(() => this.listState().status);
   readonly items = computed(() => this.listState().items);
@@ -53,6 +71,9 @@ export class CatalogQueryService {
   readonly detailStatus = computed(() => this.detailState().status);
   readonly detail = computed(() => this.detailState().item);
   readonly detailError = computed(() => this.detailState().error);
+  readonly previewStatus = computed(() => this.previewState().status);
+  readonly pricingPreview = computed(() => this.previewState().result);
+  readonly previewError = computed(() => this.previewState().error);
 
   loadList(query: CatalogQuery, retry = false): void {
     this.listSubscription?.unsubscribe();
@@ -99,5 +120,15 @@ export class CatalogQueryService {
   retryDetail(): void {
     const id = this.detailState().catalogItemId;
     if (id) this.loadDetail(id, true);
+  }
+
+  previewPricing(productId: string, quantity: number): void {
+    if (!productId || !Number.isFinite(quantity) || quantity <= 0) return;
+    this.previewSubscription?.unsubscribe();
+    this.previewState.set({ status: 'loading', result: null, error: null, productId, quantity });
+    this.previewSubscription = this.api.previewPricing({ items: [{ productId, quantity }] }).subscribe({
+      next: (result) => this.previewState.set({ status: 'success', result, error: null, productId, quantity }),
+      error: (error: unknown) => this.previewState.set({ status: 'error', result: null, error, productId, quantity }),
+    });
   }
 }

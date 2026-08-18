@@ -1,0 +1,55 @@
+<section class="account-page">
+  <nexa-page-header [eyebrow]="'account.eyebrow' | translate" [title]="'account.title' | translate" [subtitle]="'account.subtitle' | translate" />
+
+  <div class="account-grid">
+    <mat-card>
+      <mat-card-header><mat-card-title>{{ 'account.profileTitle' | translate }}</mat-card-title></mat-card-header>
+      <mat-card-content class="profile-card">
+        <div><span>{{ 'account.fields.name' | translate }}</span><strong>{{ security.profile()?.displayName || auth.identity()?.displayName }}</strong></div>
+        <div><span>{{ 'account.fields.email' | translate }}</span><strong>{{ security.profile()?.email || auth.identity()?.email }}</strong></div>
+        <div><span>{{ 'account.fields.workspace' | translate }}</span><strong>{{ auth.identity()?.workspaceSlug || '—' }}</strong></div>
+        <div><span>{{ 'account.fields.accountId' | translate }}</span><strong>{{ clientAccountId() || ('account.unlinked' | translate) }}</strong></div>
+        <div><span>{{ 'account.fields.membership' | translate }}</span><strong>{{ auth.identity()?.membershipStatus || '—' }}</strong></div>
+      </mat-card-content>
+      <mat-card-actions><a mat-button routerLink="/portal/profile">{{ 'account.editPersonalProfile' | translate }}</a></mat-card-actions>
+    </mat-card>
+
+    <mat-card class="commercial-card">
+      <mat-card-header><mat-card-title>{{ 'account.commercialTitle' | translate }}</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <p>{{ 'account.commercialDescription' | translate }}</p>
+        <p class="notice">{{ 'account.commercialBoundary' | translate }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  @if (!clientAccountId()) { <nexa-error-state [title]="'account.unlinkedTitle' | translate" [description]="'account.unlinkedDescription' | translate" /> }
+  @if (facade.message()) { <p class="message" role="status">{{ ('messages.' + facade.message()) | translate }}</p> }
+
+  <section class="addresses-section" aria-labelledby="addresses-title">
+    <div class="section-head"><div><h2 id="addresses-title">{{ 'account.addressesTitle' | translate }}</h2><p>{{ 'account.addressesSubtitle' | translate }}</p></div><button mat-flat-button color="primary" type="button" [disabled]="!clientAccountId()" (click)="showAddressForm.update((open) => !open)">{{ showAddressForm() ? ('account.cancelAddress' | translate) : ('account.addAddress' | translate) }}</button></div>
+
+    @if (showAddressForm()) {
+      <mat-card class="address-form-card"><mat-card-content><form [formGroup]="form" (ngSubmit)="saveAddress()" class="address-form">
+        <label>{{ 'account.fields.addressLabel' | translate }}<input formControlName="label" autocomplete="shipping street-address"></label>
+        <label>{{ 'account.fields.addressType' | translate }}<select formControlName="addressType">@for (item of facade.roadTypes(); track item.code) { <option [value]="item.code">{{ item.label }}</option> }</select></label>
+        <label class="wide">{{ 'account.fields.addressLine' | translate }}<input formControlName="line" autocomplete="shipping street-address"></label>
+        <label class="wide">{{ 'account.fields.reference' | translate }}<input formControlName="reference"></label>
+        <label>{{ 'account.fields.recipientName' | translate }}<input formControlName="recipientName" autocomplete="shipping name"></label><label>{{ 'account.fields.recipientPhone' | translate }}<input formControlName="recipientPhone" autocomplete="shipping tel"></label><label>{{ 'account.fields.streetName' | translate }}<input formControlName="streetName"></label><label>{{ 'account.fields.streetNumber' | translate }}<input formControlName="streetNumber"></label><label>{{ 'account.fields.interior' | translate }}<input formControlName="interior"></label><label>{{ 'account.fields.postalCode' | translate }}<input formControlName="postalCode"></label>
+        <label class="wide">{{ 'account.fields.receivingHours' | translate }}<input formControlName="receivingHours"></label><label class="wide">{{ 'account.fields.receivingInstructions' | translate }}<textarea rows="2" formControlName="receivingInstructions"></textarea></label>
+        <label>{{ 'account.fields.department' | translate }}<select formControlName="departmentCode" (change)="departmentChanged()"><option value="">{{ 'account.selectOption' | translate }}</option>@for (item of facade.departments(); track item.code) { <option [value]="item.code">{{ item.label }}</option> }</select></label>
+        <label>{{ 'account.fields.province' | translate }}<select formControlName="provinceCode" (change)="provinceChanged()"><option value="">{{ 'account.selectOption' | translate }}</option>@for (item of facade.provinces(); track item.code) { <option [value]="item.code">{{ item.label }}</option> }</select></label>
+        <label>{{ 'account.fields.district' | translate }}<select formControlName="districtCode"><option value="">{{ 'account.selectOption' | translate }}</option>@for (item of facade.districts(); track item.code) { <option [value]="item.code">{{ item.label }}</option> }</select></label>
+        <label>{{ 'account.fields.latitude' | translate }}<input type="number" step="0.000001" formControlName="latitude"></label><label>{{ 'account.fields.longitude' | translate }}<input type="number" step="0.000001" formControlName="longitude"></label><button mat-button type="button" (click)="useCurrentLocation()" [disabled]="locationStatus() === 'requesting'">{{ 'account.fields.useCurrentLocation' | translate }}</button><p class="location-status" role="status">@switch (locationStatus()) { @case ('requesting') { {{ 'account.fields.locationRequesting' | translate }} } @case ('ready') { {{ 'account.fields.locationReady' | translate }} · {{ currentLocation()?.accuracy | number:'1.0-0' }} m } @case ('denied') { {{ 'account.fields.locationDenied' | translate }} } @case ('timeout') { {{ 'account.fields.locationTimeout' | translate }} } @case ('unavailable') { {{ 'account.fields.locationUnavailable' | translate }} } @case ('unsupported') { {{ 'account.fields.locationUnsupported' | translate }} } }</p>
+        <label class="checkbox"><input type="checkbox" formControlName="defaultAddress">{{ 'account.fields.defaultAddress' | translate }}</label>
+        <div class="wide form-actions"><button mat-flat-button color="primary" type="submit" [disabled]="facade.busy()">{{ editingAddressId() ? ('account.updateAddress' | translate) : ('account.saveAddress' | translate) }}</button><button mat-button type="button" (click)="cancelAddress()">{{ 'account.cancelAddress' | translate }}</button></div>
+      </form></mat-card-content></mat-card>
+    }
+
+    <div class="address-list">
+      @for (address of facade.addresses(); track address.id) {
+        <mat-card class="address-card" [class.inactive]="!address.active"><mat-card-content><div class="address-head"><strong>{{ address.label }}</strong>@if (address.defaultAddress) { <span class="default-badge">{{ 'account.defaultAddress' | translate }}</span> }@if (!address.active) { <span class="default-badge">{{ 'account.inactiveAddress' | translate }}</span> }</div><p>{{ display(address) }}</p>@if (address.reference) { <p class="muted">{{ address.reference }}</p> }<div class="address-actions"><a mat-button [href]="maps(address)" target="_blank" rel="noreferrer">{{ 'account.openMap' | translate }}</a>@if (address.active) { <button mat-button type="button" (click)="editAddress(address)">{{ 'account.editAddress' | translate }}</button>@if (!address.defaultAddress) { <button mat-button type="button" (click)="makeDefault(address)">{{ 'account.makeDefault' | translate }}</button> }<button mat-button type="button" (click)="deactivate(address)">{{ 'account.deactivateAddress' | translate }}</button> }</div></mat-card-content></mat-card>
+      } @empty { <p class="empty">{{ 'account.noAddresses' | translate }}</p> }
+    </div>
+  </section>
+</section>

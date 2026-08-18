@@ -1,18 +1,41 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandLogoComponent } from '../../../shared/presentation/components/brand-logo/brand-logo.component';
 import { PortalAuthStateService } from '../../application/portal-auth-state.service';
 import { PortalAccessDeniedError } from '../../domain/portal-access.models';
 import { PortalAuthApiClient } from '../../infrastructure/portal-auth-api.client';
 import { Subject, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, switchMap, timeout } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { safeReturnUrl } from '../../../core/routing/portal.guards';
+
+export type WorkspacePreviewErrorCode =
+  | 'notFound'
+  | 'origin'
+  | 'rateLimited'
+  | 'server'
+  | 'network'
+  | 'timeout'
+  | 'invalid';
+
+export function classifyWorkspacePreviewError(error: unknown): WorkspacePreviewErrorCode {
+  if (error && typeof error === 'object' && 'name' in error && error.name === 'TimeoutError') return 'timeout';
+  if (error instanceof HttpErrorResponse) {
+    if (error.status === 404) return 'notFound';
+    if (error.status === 403) return 'origin';
+    if (error.status === 429) return 'rateLimited';
+    if (error.status >= 500) return 'server';
+    if (error.status === 0) return 'network';
+    return 'invalid';
+  }
+  return 'network';
+}
 
 @Component({
   selector: 'nexa-sign-in-page',
-  imports: [BrandLogoComponent, TranslatePipe],
+  imports: [BrandLogoComponent, RouterLink, TranslatePipe],
   templateUrl: './sign-in-page.component.html',
   styleUrl: './sign-in-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +49,7 @@ export class SignInPageComponent {
   private readonly previewInput = new Subject<string>();
   readonly preview = signal<{ recognized: boolean; displayName: string | null; workspaceUrl: string | null; logoUrl: string | null; loginAvailable: boolean } | null>(null);
   readonly previewLoading = signal(false);
+  readonly previewError = signal<WorkspacePreviewErrorCode | null>(null);
 
   readonly email = signal('');
   readonly password = signal('');
@@ -35,7 +59,10 @@ export class SignInPageComponent {
     () =>
       this.email().trim().length > 0 &&
       this.password().length > 0 &&
-      this.workspaceSlug().trim().length > 0,
+      this.workspaceSlug().trim().length > 0 &&
+      this.preview()?.recognized === true &&
+      this.preview()?.loginAvailable === true &&
+      !this.previewLoading(),
   );
   readonly errorMessage = computed(() => {
     const error = this.auth.error();
@@ -48,17 +75,35 @@ export class SignInPageComponent {
   constructor() {
     this.previewInput.pipe(
       debounceTime(250), distinctUntilChanged(), switchMap((slug) => {
+        this.previewError.set(null);
         this.previewLoading.set(slug.length > 0);
-        return slug.length >= 3 ? this.api.workspacePreview(slug).pipe(catchError(() => of({ recognized: false, displayName: null, workspaceUrl: null, logoUrl: null, loginAvailable: false }))) : of(null);
+        if (slug.length < 3) return of({ kind: 'value' as const, value: null });
+        return this.api.workspacePreview(slug).pipe(
+          timeout({ first: 5000 }),
+          map((value) => ({ kind: 'value' as const, value })),
+          catchError((error: unknown) => of({ kind: 'error' as const, error })),
+        );
       }), takeUntilDestroyed(this.destroyRef),
-    ).subscribe((value) => { this.previewLoading.set(false); this.preview.set(value); });
+    ).subscribe((result) => {
+      this.previewLoading.set(false);
+      if (result.kind === 'error') {
+        this.preview.set(null);
+        this.previewError.set(classifyWorkspacePreviewError(result.error));
+        return;
+      }
+      this.preview.set(result.value);
+    });
     this.previewInput.next(this.workspaceSlug());
   }
 
   onValue(field: 'email' | 'password' | 'workspaceSlug', event: Event): void {
     const value = event.target instanceof HTMLInputElement ? event.target.value : '';
     this[field].set(value);
-    if (field === 'workspaceSlug') this.previewInput.next(value.trim().toLowerCase());
+    if (field === 'workspaceSlug') {
+      this.preview.set(null);
+      this.previewError.set(null);
+      this.previewInput.next(value.trim().toLowerCase());
+    }
   }
 
   submit(): void {
@@ -77,7 +122,6 @@ export class SignInPageComponent {
   }
 
   private returnUrl(): string {
-    const value = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/portal/home';
-    return value.startsWith('/') && !value.startsWith('//') ? value : '/portal/home';
+    return safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
   }
 }

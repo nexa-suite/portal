@@ -9,7 +9,7 @@ export type PurchaseRequestStatus =
   | 'CONVERTED_TO_ORDER';
 
 export type PurchaseRequestPriority = 'NORMAL' | 'HIGH' | 'URGENT';
-export type PaymentOption = 'CREDIT_LINE' | 'BANK_TRANSFER' | 'CASH' | 'CASH_ON_DELIVERY';
+export type PaymentOption = 'CREDIT_LINE' | 'BANK_TRANSFER' | 'CARD_STRIPE' | 'CASH' | 'CASH_ON_DELIVERY';
 
 export interface PurchaseRequestLine {
   readonly id: string;
