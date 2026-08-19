@@ -168,7 +168,7 @@ export class BuyerRequestBuilderPageComponent {
       this.message.set('REQUEST_LINE_DUPLICATE');
       return;
     }
-    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, skuId: item.productId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
+    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, skuId: item.sellableSkuId || item.productId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
     this.catalogSelection.setValue('');
     this.quantity.setValue(1);
     this.message.set(null);
