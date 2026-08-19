@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
-import { ApiPage, PaymentIntent, Receivable } from '../domain/payment.models';
+import { ApiPage, BankTransferPayment, PaymentIntent, Receivable } from '../domain/payment.models';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsApiClient {
@@ -19,5 +19,11 @@ export class PaymentsApiClient {
   createPaymentIntent(receivableId: string, idempotencyKey = crypto.randomUUID()): Observable<PaymentIntent> {
     const headers = new HttpHeaders({ 'Idempotency-Key': idempotencyKey });
     return this.http.post<PaymentIntent>(this.api(`/receivables/${encodeURIComponent(receivableId)}/payment-intents`), {}, { headers, withCredentials: true });
+  }
+
+  createBankTransferPayment(receivableId: string, reference: string, proofEvidenceId?: string, idempotencyKey = crypto.randomUUID()): Observable<BankTransferPayment> {
+    const headers = new HttpHeaders({ 'Idempotency-Key': idempotencyKey });
+    const body = proofEvidenceId ? { reference, proofEvidenceId } : { reference };
+    return this.http.post<BankTransferPayment>(this.api(`/receivables/${encodeURIComponent(receivableId)}/bank-transfer-payments`), body, { headers, withCredentials: true });
   }
 }
