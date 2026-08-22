@@ -42,7 +42,6 @@ function draftObject(value: unknown): Record<string, unknown> {
   selector: 'nexa-buyer-request-builder-page',
   imports: [DecimalPipe, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, RouterLink, TranslatePipe, PageHeaderComponent],
   templateUrl: './buyer-request-builder-page.component.html',
-  styleUrl: './buyer-request-builder-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BuyerRequestBuilderPageComponent {

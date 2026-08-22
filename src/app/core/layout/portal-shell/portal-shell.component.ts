@@ -42,7 +42,6 @@ const PORTAL_NAVIGATION: readonly PortalNavItem[] = [
     TranslatePipe,
   ],
   templateUrl: './portal-shell.component.html',
-  styleUrl: './portal-shell.component.scss',
   host: {
     '(document:keydown.escape)': 'closeTransientPanels()',
   },
