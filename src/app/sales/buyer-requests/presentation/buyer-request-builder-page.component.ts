@@ -235,6 +235,15 @@ export class BuyerRequestBuilderPageComponent {
     this.step.set(Math.min(6, current + 1));
   }
 
+  goToStep(target: number): void {
+    const current = this.step();
+    if (target <= current) {
+      this.step.set(target);
+      return;
+    }
+    if (target === current + 1) this.next();
+  }
+
   previous(): void { this.step.update((value) => Math.max(1, value - 1)); }
 
   preview(): void {
