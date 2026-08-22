@@ -63,6 +63,11 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   await page.locator('.form-actions').getByRole('button', { name: /review|revisar/i }).click();
   const previewResponse = await preview;
   expect(previewResponse.status()).toBe(200);
+  await expect(page.locator('.buyer-map-preview')).toBeVisible();
+  await expect(page.locator('.buyer-map-preview')).toContainText(/Av\. Real 250|E2E 2C/i);
+  await expect(page.locator('.route-card')).toContainText(/LOCAL_DETERMINISTIC|LOCAL_ESTIMATE/i);
+  const mapLink = page.getByRole('link', { name: /open map|abrir mapa/i });
+  if (await mapLink.count()) await expect(mapLink).toHaveAttribute('href', /^https?:\/\//);
   await expect(page.locator('body')).not.toContainText(/warehouseId|reservationId|internal warehouse/i);
   await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
   await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
