@@ -1,0 +1,348 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.portal-shell {
+  min-height: 100dvh;
+  background: var(--nexa-surface-page);
+}
+
+.portal-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--nexa-space-6);
+  min-height: var(--nexa-layout-toolbar-height);
+  padding: var(--nexa-space-2) clamp(var(--nexa-layout-page-gutter), 5vw, var(--nexa-space-10));
+  border-bottom: 1px solid var(--nexa-color-border-default);
+  background: color-mix(in oklab, var(--nexa-surface-card) 96%, transparent);
+  box-shadow: var(--nexa-shadow-xs);
+  backdrop-filter: blur(14px);
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--nexa-space-3);
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-lockup span {
+  padding-left: var(--nexa-space-3);
+  border-left: 1px solid var(--nexa-color-border-default);
+  color: var(--nexa-color-cold-refrigerated);
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+  letter-spacing: var(--nexa-letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.portal-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  gap: var(--nexa-space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.portal-navigation::-webkit-scrollbar {
+  display: none;
+}
+
+.work-area-context {
+  flex: 0 0 auto;
+  padding: var(--nexa-space-2) var(--nexa-space-3);
+  border-radius: var(--nexa-radius-pill);
+  background: var(--nexa-surface-nav-active);
+  color: var(--nexa-color-primary-700);
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+  white-space: nowrap;
+}
+
+.portal-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--nexa-control-height-sm);
+  padding: 0 var(--nexa-space-3);
+  border-radius: var(--nexa-radius-md);
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-sm);
+  font-weight: var(--nexa-font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--nexa-motion-standard), color var(--nexa-motion-standard);
+}
+
+.portal-navigation a:hover {
+  background: var(--nexa-color-neutral-100);
+  color: var(--nexa-color-text-primary);
+}
+
+.portal-navigation a.active {
+  background: var(--nexa-surface-nav-active);
+  color: var(--nexa-color-primary-700);
+}
+
+.portal-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--nexa-space-3);
+}
+
+.navigation-backdrop {
+  display: none;
+}
+
+.menu-toggle,
+.notification-button,
+.sign-out-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--nexa-control-height-md);
+  padding: 0 var(--nexa-space-3);
+  border: 1px solid var(--nexa-color-border-interactive);
+  border-radius: var(--nexa-radius-control);
+  background: var(--nexa-surface-card);
+  color: var(--nexa-color-text-secondary);
+  font: inherit;
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+  cursor: pointer;
+  transition: background var(--nexa-motion-standard), border-color var(--nexa-motion-standard), color var(--nexa-motion-standard), transform var(--nexa-motion-standard);
+}
+
+.menu-toggle:hover,
+.notification-button:hover,
+.sign-out-button:hover {
+  border-color: var(--nexa-color-primary-300);
+  background: var(--nexa-surface-nav-active);
+  color: var(--nexa-color-primary-700);
+}
+
+.menu-toggle:active,
+.notification-button:active,
+.sign-out-button:active {
+  transform: translateY(1px);
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.notification-button {
+  gap: var(--nexa-space-2);
+}
+
+.notification-count {
+  display: grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 var(--nexa-space-1);
+  border-radius: var(--nexa-radius-pill);
+  background: var(--nexa-color-primary-600);
+  color: var(--nexa-color-text-inverse);
+  font-size: var(--nexa-font-size-xs);
+  line-height: 1;
+}
+
+.notifications-popover {
+  position: fixed;
+  z-index: 6;
+  top: calc(var(--nexa-layout-toolbar-height) + var(--nexa-space-2));
+  right: clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10));
+  width: min(380px, calc(100vw - 32px));
+  padding: var(--nexa-space-4);
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-overlay);
+  background: var(--nexa-surface-card);
+  box-shadow: var(--nexa-shadow-overlay);
+}
+
+.popover-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--nexa-space-3);
+  margin-bottom: var(--nexa-space-3);
+}
+
+.popover-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nexa-space-2);
+}
+
+.popover-actions button {
+  display: inline-grid;
+  place-items: center;
+  width: var(--nexa-control-height-md);
+  height: var(--nexa-control-height-md);
+  border: 1px solid var(--nexa-color-border-interactive);
+  border-radius: var(--nexa-radius-control);
+  background: transparent;
+  color: var(--nexa-color-text-secondary);
+  font: inherit;
+  font-size: var(--nexa-font-size-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.popover-actions button:hover {
+  background: var(--nexa-color-neutral-100);
+  color: var(--nexa-color-text-primary);
+}
+
+.popover-head a {
+  color: var(--nexa-color-primary-700);
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-bold);
+}
+
+.notifications-popover > p {
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-sm);
+}
+
+.notification-preview {
+  display: grid;
+  gap: var(--nexa-space-1);
+  width: 100%;
+  min-height: var(--nexa-control-height-lg);
+  padding: var(--nexa-space-3) 0;
+  border: 0;
+  border-top: 1px solid var(--nexa-color-border-default);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-preview span {
+  overflow: hidden;
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-preview.unread strong {
+  color: var(--nexa-color-primary-700);
+}
+
+.sign-out-button {
+  background: transparent;
+}
+
+.portal-content {
+  width: min(100%, var(--nexa-layout-content-max));
+  min-height: calc(100dvh - var(--nexa-layout-toolbar-height));
+  margin: 0 auto;
+  padding: clamp(var(--nexa-space-8), 6vw, var(--nexa-space-12)) var(--nexa-layout-page-gutter);
+}
+
+@media (max-width: 1100px) {
+  .portal-header {
+    gap: var(--nexa-space-4);
+  }
+
+  .portal-navigation a {
+    padding-inline: var(--nexa-space-2);
+  }
+}
+
+@media (max-width: 800px) {
+  .portal-header {
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    gap: var(--nexa-space-4);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .portal-navigation {
+    display: none;
+    grid-column: 1 / -1;
+    order: 3;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-top: var(--nexa-space-3);
+    border-top: 1px solid var(--nexa-color-border-default);
+    overflow: visible;
+  }
+
+  .navigation-backdrop {
+    position: fixed;
+    inset: var(--nexa-layout-toolbar-height) 0 0;
+    z-index: 4;
+    display: block;
+    width: 100%;
+    border: 0;
+    background: var(--nexa-surface-overlay);
+    cursor: pointer;
+  }
+
+  .portal-navigation.open {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    padding: var(--nexa-space-3);
+    border: 1px solid var(--nexa-color-border-default);
+    border-radius: var(--nexa-radius-panel);
+    background: var(--nexa-surface-card);
+  }
+
+  .work-area-context {
+    order: -1;
+    width: 100%;
+  }
+
+  .portal-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: var(--nexa-space-3);
+    border-top: 1px solid var(--nexa-color-border-default);
+  }
+
+  .portal-content {
+    padding-top: var(--nexa-space-8);
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-lockup span {
+    display: none;
+  }
+
+  .portal-actions {
+    justify-content: stretch;
+  }
+
+  .portal-actions > * {
+    flex: 1 1 0;
+  }
+
+  .portal-actions select {
+    width: 100%;
+  }
+
+  .notifications-popover {
+    right: var(--nexa-space-4);
+    left: var(--nexa-space-4);
+    width: auto;
+  }
+}
