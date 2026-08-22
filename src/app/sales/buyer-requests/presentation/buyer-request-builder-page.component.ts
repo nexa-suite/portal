@@ -42,7 +42,6 @@ function draftObject(value: unknown): Record<string, unknown> {
   selector: 'nexa-buyer-request-builder-page',
   imports: [DecimalPipe, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, RouterLink, TranslatePipe, PageHeaderComponent],
   templateUrl: './buyer-request-builder-page.component.html',
-  styleUrl: './buyer-request-builder-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BuyerRequestBuilderPageComponent {
@@ -168,7 +167,7 @@ export class BuyerRequestBuilderPageComponent {
       this.message.set('REQUEST_LINE_DUPLICATE');
       return;
     }
-    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, skuId: item.productId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
+    this.lines.update((lines) => [...lines, { id: item.catalogItemId, catalogItemId: item.catalogItemId, skuId: item.sellableSkuId || item.productId, itemName: item.itemName, presentation: item.presentation, quantity: this.quantity.value, unit: 'unit', notes: '' }]);
     this.catalogSelection.setValue('');
     this.quantity.setValue(1);
     this.message.set(null);
@@ -233,6 +232,15 @@ export class BuyerRequestBuilderPageComponent {
     if (current === 3) { this.preview(); return; }
     this.message.set(null);
     this.step.set(Math.min(6, current + 1));
+  }
+
+  goToStep(target: number): void {
+    const current = this.step();
+    if (target <= current) {
+      this.step.set(target);
+      return;
+    }
+    if (target === current + 1) this.next();
   }
 
   previous(): void { this.step.update((value) => Math.max(1, value - 1)); }

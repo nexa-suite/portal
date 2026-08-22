@@ -3,8 +3,50 @@
   [subtitle]="'shell.buyerDescription' | translate"
   [eyebrow]="'shell.buyerWorkspace' | translate" />
 
-<nexa-section-panel
-  [title]="'home.title' | translate"
-  [description]="'home.description' | translate">
-  <p>{{ 'home.body' | translate }}</p>
-</nexa-section-panel>
+@if (loading()) {
+  <nexa-loading-state [label]="'home.loading' | translate" [lines]="5" />
+} @else if (error(); as message) {
+  <nexa-error-state
+    [title]="'home.errorTitle' | translate"
+    [description]="message"
+    [retryLabel]="'home.retry' | translate"
+    (retry)="load()" />
+} @else {
+  @if (partial()) { <p class="partial-notice" role="status">{{ 'home.partial' | translate }}</p> }
+
+  <section class="metric-grid" [attr.aria-label]="'home.metricsLabel' | translate">
+    <nexa-metric-card [label]="'home.metrics.requests' | translate" [value]="requestItems().length" [hint]="'home.metrics.requestsHint' | translate" tone="info" />
+    <nexa-metric-card [label]="'home.metrics.orders' | translate" [value]="openOrders()" [hint]="'home.metrics.ordersHint' | translate" tone="success" />
+    <nexa-metric-card [label]="'home.metrics.deliveries' | translate" [value]="activeDeliveries()" [hint]="'home.metrics.deliveriesHint' | translate" tone="warning" />
+    <nexa-metric-card [label]="'home.metrics.receivables' | translate" [value]="outstandingReceivables()" [hint]="'home.metrics.receivablesHint' | translate" tone="danger" />
+  </section>
+
+  <div class="home-grid">
+    <nexa-section-panel [title]="'home.actions.title' | translate" [description]="'home.actions.description' | translate">
+      <div class="action-grid">
+        <a class="action-card" routerLink="/portal/product-catalog"><span>{{ 'home.actions.catalog' | translate }}</span><small>{{ catalogTotal() }} {{ 'home.actions.catalogHint' | translate }}</small></a>
+        <a class="action-card primary" routerLink="/portal/request-builder"><span>{{ 'home.actions.request' | translate }}</span><small>{{ 'home.actions.requestHint' | translate }}</small></a>
+        <a class="action-card" routerLink="/portal/purchase-requests"><span>{{ 'home.actions.requests' | translate }}</span><small>{{ 'home.actions.requestsHint' | translate }}</small></a>
+        <a class="action-card" routerLink="/portal/deliveries"><span>{{ 'home.actions.deliveries' | translate }}</span><small>{{ 'home.actions.deliveriesHint' | translate }}</small></a>
+      </div>
+    </nexa-section-panel>
+
+    <nexa-section-panel [title]="'home.recent.title' | translate" [description]="'home.recent.description' | translate">
+      <div class="activity-list">
+        @for (request of requestItems().slice(0, 3); track request.id) {
+          <a class="activity-row" [routerLink]="['/portal/purchase-requests', request.id]"><span><strong>{{ request.code || request.id }}</strong><small>{{ 'home.recent.request' | translate }}</small></span><span class="status-text">{{ request.status }}</span></a>
+        }
+        @for (order of orderItems().slice(0, 3); track order.id) {
+          <a class="activity-row" [routerLink]="['/portal/sales-orders', order.id]"><span><strong>{{ order.number || order.id }}</strong><small>{{ 'home.recent.order' | translate }}</small></span><span class="status-text">{{ order.status }}</span></a>
+        }
+        @if (requestItems().length === 0 && orderItems().length === 0) {
+          <nexa-empty-state [compact]="true" [title]="'home.recent.emptyTitle' | translate" [description]="'home.recent.emptyDescription' | translate" />
+        }
+      </div>
+    </nexa-section-panel>
+  </div>
+
+  <nexa-section-panel [title]="'home.bodyTitle' | translate" [description]="'home.body' | translate" appearance="subtle">
+    <p class="boundary-note">{{ 'home.boundary' | translate }}</p>
+  </nexa-section-panel>
+}
