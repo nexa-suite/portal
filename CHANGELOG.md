@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [1.0.0] - 2026-08-22
+
+V1 functional convergence baseline for the Nexa Buyer Portal.
+
+### Added
+
+- Integrated the current V1 buyer availability, Purchase Request and delivery continuation surface on `develop`.
+- Consolidated the Angular dependency baseline while preserving Buyer-safe boundaries.
+
+### Validation
+
+- Catalog asset validation, tests, production build and CI gates passed.
+
 ## Unreleased
 
 No unreleased changes are included in this baseline.
@@ -110,7 +123,7 @@ This release consolidates previously unreleased Identity, tenant, security and c
 
 - Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
 
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/nexa-suite/portal/compare/v1.0.0...HEAD
 [0.7.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.7.0
 [0.6.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
