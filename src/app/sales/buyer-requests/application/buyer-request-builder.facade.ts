@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, defer, forkJoin, finalize, map, of, switchMap, tap, throwError } from 'rxjs';
+import { isStaleApiProblem, readApiProblemDetails } from '../../../core/error/api-problem-details';
 import {
   BuyerRequestCommand,
   BuyerRequestSnapshot,
@@ -14,8 +15,7 @@ import { BuyerRequestApiClient } from '../infrastructure/buyer-request-api.clien
 import { CanonicalDraftView, CanonicalPurchaseRequestDraftApiClient } from '../infrastructure/canonical-purchase-request-draft-api.client';
 
 function errorCode(error: unknown, fallback: string): string {
-  const status = (error as { readonly status?: unknown })?.status;
-  return status === 409 || status === 412 ? 'BUYER_REQUEST_STALE' : fallback;
+  return isStaleApiProblem(error) ? 'BUYER_REQUEST_STALE' : readApiProblemDetails(error)?.code ?? fallback;
 }
 
 function object(value: unknown): Record<string, unknown> {
@@ -200,22 +200,27 @@ export class BuyerRequestBuilderFacade {
           districtCode: text(destination['district']) || '',
           defaultAddress: false,
         } : null,
-        warehouse: text(selection['warehouseId']) ? { id: text(selection['warehouseId']), code: '', name: '', address: '' } : null,
+        warehouse: text(selection['warehouseId']) ? {
+          id: text(selection['warehouseId']),
+          code: text(selection['code']),
+          name: text(selection['name']),
+          address: text(selection['address']),
+        } : null,
         route: Object.keys(route).length > 0 ? {
           provider: text(route['provider']) || draft.routeProvider,
-          reference: null,
-          originLabel: null,
-          destinationLabel: null,
-          distanceMeters: number(route['distanceKm']) * 1000,
+          reference: text(route['reference']) || null,
+          originLabel: text(route['originLabel']) || null,
+          destinationLabel: text(route['destinationLabel']) || null,
+          distanceMeters: number(route['distanceMeters']) || number(route['distanceKm']) * 1000,
           durationSeconds: number(route['durationSeconds']),
-          previewUrl: null,
-          originLatitude: null,
-          originLongitude: null,
+          previewUrl: text(route['previewUrl']) || null,
+          originLatitude: route['originLatitude'] == null ? null : number(route['originLatitude']),
+          originLongitude: route['originLongitude'] == null ? null : number(route['originLongitude']),
           destinationLatitude: route['destinationLatitude'] == null ? null : number(route['destinationLatitude']),
           destinationLongitude: route['destinationLongitude'] == null ? null : number(route['destinationLongitude']),
-          calculatedAt: text(draft.route?.['calculatedAt']) || null,
-          mode: null,
-          path: null,
+          calculatedAt: text(route['calculatedAt']) || text(draft.route?.['calculatedAt']) || null,
+          mode: text(route['mode']) || null,
+          path: text(route['path']) || null,
         } : null,
       },
       commercial: this.clientAccount() ? {

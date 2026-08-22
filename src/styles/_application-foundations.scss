@@ -1,0 +1,342 @@
+/* Shared buyer-facing composition adapted from the Nexa Design Lab v1
+ * evidence. Feature components own content; this layer owns recurring UI
+ * geometry, feedback and responsive behavior. */
+
+:root {
+  --nexa-z-base: 0;
+  --nexa-z-sticky: 10;
+  --nexa-z-popover: 20;
+  --nexa-z-dialog: 40;
+}
+
+.portal-content {
+  min-width: 0;
+}
+
+.portal-content > * {
+  display: block;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.portal-content .page,
+.portal-content .catalog-page,
+.portal-content .request-page,
+.portal-content .order-page,
+.portal-content .delivery-page,
+.portal-content .account-page,
+.portal-content .payment-page {
+  display: grid;
+  gap: var(--nexa-space-6);
+}
+
+.portal-content .page > h1,
+.portal-content .page > h2 {
+  margin: 0;
+  color: var(--nexa-color-text-primary);
+  font-family: var(--nexa-font-family-display);
+  line-height: var(--nexa-line-height-tight);
+}
+
+.portal-content .page > h1 {
+  font-size: clamp(var(--nexa-font-size-2xl), 3vw, var(--nexa-font-size-3xl));
+}
+
+.portal-content .page > h2 {
+  font-size: var(--nexa-font-size-xl);
+}
+
+.portal-content .page > p,
+.portal-content .page > ul,
+.portal-content .page > ol {
+  margin: 0;
+  color: var(--nexa-color-text-secondary);
+  line-height: var(--nexa-line-height-relaxed);
+}
+
+.portal-content a {
+  color: var(--nexa-color-primary-700);
+  text-underline-offset: 3px;
+}
+
+.portal-content a:hover {
+  color: var(--nexa-color-primary-800);
+}
+
+.portal-content a:focus-visible,
+.portal-content button:focus-visible,
+.portal-content input:focus-visible,
+.portal-content select:focus-visible,
+.portal-content textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--nexa-focus-ring);
+}
+
+.portal-content mat-card,
+.portal-content .surface-card,
+.portal-content .data-card,
+.portal-content .content-card {
+  overflow: hidden;
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-card);
+  background: var(--nexa-surface-card);
+  box-shadow: var(--nexa-shadow-xs);
+}
+
+.portal-content mat-card mat-card-header,
+.portal-content mat-card mat-card-content,
+.portal-content mat-card mat-card-actions {
+  padding-inline: var(--nexa-space-6);
+}
+
+.portal-content mat-card mat-card-header {
+  padding-top: var(--nexa-space-6);
+}
+
+.portal-content mat-card mat-card-content {
+  padding-block: var(--nexa-space-5);
+}
+
+.portal-content mat-card mat-card-actions {
+  min-height: var(--nexa-control-height-lg);
+  padding-bottom: var(--nexa-space-5);
+  gap: var(--nexa-space-2);
+}
+
+.portal-content .metric-grid,
+.portal-content .stats-grid,
+.portal-content .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--nexa-space-4);
+}
+
+.portal-content .panels,
+.portal-content .panel-grid,
+.portal-content .content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--nexa-space-4);
+}
+
+.portal-content .form-grid,
+.portal-content .filters,
+.portal-content .filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  align-items: end;
+  gap: var(--nexa-space-4);
+}
+
+.portal-content .action-row,
+.portal-content .actions,
+.portal-content .toolbar-actions,
+.portal-content .export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nexa-space-2);
+}
+
+.portal-content .action-row {
+  justify-content: flex-end;
+  padding-top: var(--nexa-space-2);
+}
+
+.portal-content form {
+  display: grid;
+  gap: var(--nexa-space-4);
+}
+
+.portal-content label {
+  color: var(--nexa-color-text-primary);
+  font-size: var(--nexa-font-size-sm);
+  font-weight: var(--nexa-font-weight-semibold);
+}
+
+.portal-content input:not([type='checkbox']):not([type='radio']),
+.portal-content select,
+.portal-content textarea {
+  min-height: var(--nexa-control-height-md);
+  border: 1px solid var(--nexa-color-border-interactive);
+  border-radius: var(--nexa-radius-control);
+  padding: 0 var(--nexa-space-3);
+  background: var(--nexa-surface-card);
+  color: var(--nexa-color-text-primary);
+}
+
+.portal-content textarea {
+  min-height: 7rem;
+  padding-block: var(--nexa-space-3);
+  resize: vertical;
+}
+
+.portal-content input::placeholder,
+.portal-content textarea::placeholder {
+  color: var(--nexa-color-text-muted);
+}
+
+.portal-content button:not([mat-icon-button]),
+.portal-content button[mat-button],
+.portal-content button[mat-flat-button],
+.portal-content button[mat-stroked-button],
+.portal-content a[mat-button],
+.portal-content a[mat-flat-button],
+.portal-content a[mat-stroked-button] {
+  min-height: var(--nexa-control-height-md);
+  border-radius: var(--nexa-radius-control);
+  font-weight: var(--nexa-font-weight-semibold);
+}
+
+.portal-content .mat-mdc-form-field {
+  width: 100%;
+}
+
+.portal-content .mdc-text-field--outlined {
+  border-radius: var(--nexa-radius-control);
+}
+
+.portal-content .mat-mdc-text-field-wrapper {
+  background: var(--nexa-surface-card);
+}
+
+.portal-content .mat-mdc-form-field-subscript-wrapper {
+  min-height: var(--nexa-space-4);
+}
+
+.portal-content .mat-mdc-button-base {
+  transition:
+    background-color var(--nexa-motion-standard),
+    border-color var(--nexa-motion-standard),
+    box-shadow var(--nexa-motion-standard),
+    transform var(--nexa-motion-standard);
+}
+
+.portal-content .data-table,
+.portal-content .table-shell,
+.portal-content .table-container {
+  overflow-x: auto;
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-card);
+  background: var(--nexa-surface-card);
+}
+
+.portal-content table,
+.portal-content mat-table {
+  width: 100%;
+  min-width: 42rem;
+}
+
+.portal-content table thead,
+.portal-content mat-header-row {
+  background: var(--nexa-surface-table-header);
+}
+
+.portal-content table th,
+.portal-content table td,
+.portal-content mat-header-cell,
+.portal-content mat-cell {
+  min-height: var(--nexa-component-table-row-height);
+  padding: var(--nexa-space-3) var(--nexa-space-4);
+  border-bottom: 1px solid var(--nexa-color-border-decorative);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.portal-content table th,
+.portal-content mat-header-cell {
+  color: var(--nexa-color-text-secondary);
+  font-size: var(--nexa-font-size-xs);
+  font-weight: var(--nexa-font-weight-extrabold);
+  letter-spacing: var(--nexa-letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.portal-content table tbody tr:hover,
+.portal-content mat-row:hover {
+  background: var(--nexa-color-neutral-50);
+}
+
+.portal-content .timeline,
+.portal-content .events,
+.portal-content .activity-list {
+  display: grid;
+  gap: var(--nexa-space-3);
+}
+
+.portal-content .timeline > *,
+.portal-content .events > *,
+.portal-content .activity-list > * {
+  display: grid;
+  gap: var(--nexa-space-1);
+  padding: var(--nexa-space-3) var(--nexa-space-4);
+  border-left: 3px solid var(--nexa-color-primary-300);
+  border-radius: 0 var(--nexa-radius-control) var(--nexa-radius-control) 0;
+  background: var(--nexa-surface-inset);
+}
+
+.portal-content .notice,
+.portal-content .legal-note,
+.portal-content .message {
+  margin: 0;
+  padding: var(--nexa-space-3) var(--nexa-space-4);
+  border: 1px solid var(--nexa-color-info-standard-border);
+  border-radius: var(--nexa-radius-control);
+  background: var(--nexa-surface-info);
+  color: var(--nexa-color-info-700);
+  line-height: var(--nexa-line-height-relaxed);
+}
+
+.portal-content .empty,
+.portal-content .empty-state {
+  min-height: 12rem;
+}
+
+@media (max-width: 800px) {
+  .portal-content .page,
+  .portal-content .catalog-page,
+  .portal-content .request-page,
+  .portal-content .order-page,
+  .portal-content .delivery-page,
+  .portal-content .account-page,
+  .portal-content .payment-page {
+    gap: var(--nexa-space-5);
+  }
+
+  .portal-content mat-card mat-card-header,
+  .portal-content mat-card mat-card-content,
+  .portal-content mat-card mat-card-actions {
+    padding-inline: var(--nexa-space-4);
+  }
+
+  .portal-content mat-card mat-card-header {
+    padding-top: var(--nexa-space-4);
+  }
+
+  .portal-content mat-card mat-card-content {
+    padding-block: var(--nexa-space-4);
+  }
+}
+
+@media (max-width: 520px) {
+  .portal-content .action-row,
+  .portal-content .export-actions {
+    align-items: stretch;
+  }
+
+  .portal-content .action-row > *,
+  .portal-content .export-actions > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-content *,
+  .portal-content *::before,
+  .portal-content *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

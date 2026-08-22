@@ -6,21 +6,25 @@
       <span>{{ 'shell.portalLabel' | translate }}</span>
     </a>
 
-    <button class="menu-toggle" type="button" [attr.aria-expanded]="menuOpen()" aria-controls="portal-navigation" (click)="toggleMenu()">
+    <button #menuTrigger class="menu-toggle" type="button" [attr.aria-expanded]="menuOpen()" aria-controls="portal-navigation" (click)="toggleMenu()">
       {{ 'shell.menu' | translate }}
     </button>
 
     <nav id="portal-navigation" class="portal-navigation" [class.open]="menuOpen()" aria-label="Buyer portal navigation">
       <span class="work-area-context">{{ 'shell.workArea.' + activeWorkArea() | translate }}</span>
       @for (item of navigation(); track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path.endsWith('/home') }" (click)="closeMenu()">{{ item.labelKey | translate }}</a>
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path.endsWith('/home') }" (click)="closeMenu()">{{ item.labelKey | translate }}</a>
       }
     </nav>
+
+    @if (menuOpen()) {
+      <button class="navigation-backdrop" type="button" [attr.aria-label]="'shell.closeMenu' | translate" (click)="closeMenu(true)"></button>
+    }
 
     <div class="portal-actions">
       <nexa-language-switcher />
       @if (auth.hasPermission('notification.read')) {
-        <button class="notification-button" type="button" [attr.aria-expanded]="notificationsOpen()" aria-haspopup="dialog" (click)="toggleNotifications()">
+        <button class="notification-button" type="button" [attr.aria-expanded]="notificationsOpen()" aria-controls="notifications-panel" aria-haspopup="dialog" (click)="toggleNotifications()">
           {{ 'notifications.button' | translate }} @if (unreadCount() > 0) { <span class="notification-count">{{ unreadCount() }}</span> }
         </button>
       }
@@ -31,8 +35,8 @@
   </header>
 
   @if (notificationsOpen()) {
-    <aside class="notifications-popover" role="dialog" aria-label="{{ 'notifications.title' | translate }}">
-      <div class="popover-head"><strong>{{ 'notifications.title' | translate }}</strong><a routerLink="/portal/notifications" (click)="notificationsOpen.set(false)">{{ 'notifications.viewAll' | translate }}</a></div>
+    <aside id="notifications-panel" class="notifications-popover" role="dialog" aria-labelledby="notifications-title" aria-live="polite">
+      <div class="popover-head"><strong id="notifications-title">{{ 'notifications.title' | translate }}</strong><div class="popover-actions"><a routerLink="/portal/notifications" (click)="notificationsOpen.set(false)">{{ 'notifications.viewAll' | translate }}</a><button type="button" [attr.aria-label]="'notifications.close' | translate" (click)="notificationsOpen.set(false)">×</button></div></div>
       @if (notifications.state() === 'loading') { <p>{{ 'notifications.loading' | translate }}</p> }
       @for (item of notifications.page().items.slice(0, 4); track item.id) {
         <button class="notification-preview" type="button" [class.unread]="!item.readAt" (click)="openNotification(item)"><strong>{{ item.title }}</strong><span>{{ item.message }}</span></button>

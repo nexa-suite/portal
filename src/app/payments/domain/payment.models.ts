@@ -31,3 +31,20 @@ export interface PaymentIntent {
   readonly providerPaymentIntentId: string | null;
   readonly createdAt: string;
 }
+
+export interface BankTransferPayment {
+  readonly id: string;
+  readonly receivableId: string;
+  readonly method: string;
+  readonly status: string;
+  readonly amount: number;
+  readonly currency: string;
+  readonly createdAt: string;
+  readonly completedAt: string | null;
+}
+
+export interface PaymentHistoryItem extends BankTransferPayment {
+  readonly reference: string | null;
+  readonly reviewReason: string | null;
+  readonly receivableNumber: string;
+}

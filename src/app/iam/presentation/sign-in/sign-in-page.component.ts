@@ -98,12 +98,23 @@ export class SignInPageComponent {
 
   onValue(field: 'email' | 'password' | 'workspaceSlug', event: Event): void {
     const value = event.target instanceof HTMLInputElement ? event.target.value : '';
-    this[field].set(value);
     if (field === 'workspaceSlug') {
+      const previousSlug = this.workspaceSlug().trim().toLowerCase();
+      const normalizedSlug = value.trim().toLowerCase();
+      this.workspaceSlug.set(value);
+
+      // Rewriting the same normalized slug (for example, Playwright filling
+      // the default value) must not discard a valid preview. A changed slug
+      // still invalidates the preview and starts a fresh server lookup.
+      if (normalizedSlug === previousSlug
+        && (this.previewLoading() || this.preview()?.recognized === true)) return;
+
       this.preview.set(null);
       this.previewError.set(null);
-      this.previewInput.next(value.trim().toLowerCase());
+      this.previewInput.next(normalizedSlug);
+      return;
     }
+    this[field].set(value);
   }
 
   submit(): void {
