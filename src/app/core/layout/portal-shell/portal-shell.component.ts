@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -43,6 +43,9 @@ const PORTAL_NAVIGATION: readonly PortalNavItem[] = [
   ],
   templateUrl: './portal-shell.component.html',
   styleUrl: './portal-shell.component.scss',
+  host: {
+    '(document:keydown.escape)': 'closeTransientPanels()',
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortalShellComponent {
@@ -51,6 +54,7 @@ export class PortalShellComponent {
   readonly notifications = inject(PortalNotificationsFacade);
   readonly menuOpen = signal(false);
   readonly notificationsOpen = signal(false);
+  readonly menuTrigger = viewChild<ElementRef<HTMLButtonElement>>('menuTrigger');
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -73,14 +77,27 @@ export class PortalShellComponent {
     return 'home';
   });
 
-  toggleMenu(): void { this.menuOpen.update((open) => !open); }
+  toggleMenu(): void {
+    this.notificationsOpen.set(false);
+    this.menuOpen.update((open) => !open);
+  }
 
   toggleNotifications(): void {
+    this.menuOpen.set(false);
     this.notificationsOpen.update((open) => !open);
     if (this.notificationsOpen() && this.notifications.state() === 'idle') this.notifications.load();
   }
 
-  closeMenu(): void { this.menuOpen.set(false); }
+  closeMenu(restoreFocus = false): void {
+    const wasOpen = this.menuOpen();
+    this.menuOpen.set(false);
+    if (restoreFocus && wasOpen) queueMicrotask(() => this.menuTrigger()?.nativeElement.focus());
+  }
+
+  closeTransientPanels(): void {
+    this.notificationsOpen.set(false);
+    this.closeMenu(true);
+  }
 
   openNotification(item: PortalNotification): void {
     this.notifications.markRead(item);

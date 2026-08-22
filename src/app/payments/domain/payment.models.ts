@@ -42,3 +42,9 @@ export interface BankTransferPayment {
   readonly createdAt: string;
   readonly completedAt: string | null;
 }
+
+export interface PaymentHistoryItem extends BankTransferPayment {
+  readonly reference: string | null;
+  readonly reviewReason: string | null;
+  readonly receivableNumber: string;
+}

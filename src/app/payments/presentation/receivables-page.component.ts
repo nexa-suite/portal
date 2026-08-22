@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/presentation/components/page-header/page-header.component';
 import { PaymentsApiClient } from '../infrastructure/payments-api.client';
 import { PaymentElementSession, StripeJsPaymentService } from '../infrastructure/stripe-js-payment.service';
-import { PaymentIntent, Receivable } from '../domain/payment.models';
+import { PaymentHistoryItem, PaymentIntent, Receivable } from '../domain/payment.models';
 
 @Component({
   selector: 'nexa-receivables-page',
@@ -19,6 +19,7 @@ import { PaymentIntent, Receivable } from '../domain/payment.models';
       </nav>
       @if (loading()) { <p role="status">Cargando cuentas por cobrar…</p> }
       @if (error(); as message) { <p role="alert">{{ message }}</p> }
+      @if (bankTransferSuccess(); as message) { <p class="success" role="status">{{ message }}</p> }
       @if (!loading() && !error()) {
         <table>
           <thead><tr><th>Número</th><th>Orden</th><th>Importe</th><th>Saldo</th><th>Vencimiento</th><th>Estado</th><th>Acción</th></tr></thead>
@@ -28,9 +29,13 @@ import { PaymentIntent, Receivable } from '../domain/payment.models';
                 <td>{{ item.number }}</td><td>{{ item.subjectId }}</td><td>{{ item.amount | number:'1.2-2' }} {{ item.currency }}</td><td>{{ item.remaining | number:'1.2-2' }} {{ item.currency }}</td><td>{{ item.dueAt || '—' }}</td><td>{{ item.status }}</td>
                 <td>
                   <button type="button" [disabled]="!payable(item) || creatingFor() === item.id" (click)="createIntent(item)">{{ creatingFor() === item.id ? 'Creando…' : 'Crear Payment Intent de prueba' }}</button>
-                  <button type="button" [disabled]="!payable(item)" (click)="beginBankTransfer(item)">Reportar transferencia</button>
+                  <button type="button" [disabled]="!payable(item) || bankTransferReported(item)" (click)="beginBankTransfer(item)">{{ bankTransferReported(item) ? 'Transferencia reportada' : 'Reportar transferencia' }}</button>
+                  <button type="button" (click)="togglePaymentHistory(item)">{{ paymentHistoryFor() === item.id ? 'Ocultar pagos' : 'Ver pagos' }}</button>
                 </td>
               </tr>
+              @if (paymentHistoryFor() === item.id) {
+                <tr><td colspan="7"><small role="status">{{ paymentHistoryLoading() ? 'Cargando pagos…' : '' }}</small>@if (!paymentHistoryLoading() && paymentHistory().length === 0) { <span>No hay pagos reportados.</span> } @for (payment of paymentHistory(); track payment.id) { <div>{{ payment.method }} · {{ payment.status }} · {{ payment.amount | number:'1.2-2' }} {{ payment.currency }} · {{ payment.reference || 'sin referencia' }}</div> }</td></tr>
+              }
             } @empty { <tr><td colspan="7">No hay cuentas por cobrar autorizadas.</td></tr> }
           </tbody>
         </table>
@@ -44,7 +49,6 @@ import { PaymentIntent, Receivable } from '../domain/payment.models';
             <input [id]="'bank-transfer-reference-' + item.id" type="text" maxlength="160" autocomplete="off" required [value]="bankTransferReference()" (input)="bankTransferReference.set($any($event.target).value)" />
             <p class="hint">El comprobante es opcional; puedes continuar sin adjuntarlo.</p>
             @if (bankTransferError(); as message) { <p role="alert">{{ message }}</p> }
-            @if (bankTransferSuccess(); as message) { <p class="success" role="status">{{ message }}</p> }
             <button type="submit" [disabled]="bankTransferSubmitting()">{{ bankTransferSubmitting() ? 'Registrando…' : 'Registrar transferencia' }}</button>
           </form>
         </section>
@@ -85,6 +89,10 @@ export class ReceivablesPageComponent {
   readonly bankTransferSubmitting = signal(false);
   readonly bankTransferError = signal<string | null>(null);
   readonly bankTransferSuccess = signal<string | null>(null);
+  readonly reportedBankTransferIds = signal<ReadonlySet<string>>(new Set());
+  readonly paymentHistoryFor = signal<string | null>(null);
+  readonly paymentHistory = signal<readonly PaymentHistoryItem[]>([]);
+  readonly paymentHistoryLoading = signal(false);
   private paymentSession: PaymentElementSession | null = null;
   readonly focused = computed(() => this.receivables().find((item) => item.id === this.receivableId()) ?? null);
   readonly bankTransferTarget = computed(() => this.receivables().find((item) => item.id === this.bankTransferFor()) ?? null);
@@ -101,6 +109,22 @@ export class ReceivablesPageComponent {
   }
 
   payable(item: Receivable): boolean { return item.remaining > 0 && ['OPEN', 'PARTIALLY_PAID', 'OVERDUE'].includes(item.status); }
+
+  bankTransferReported(item: Receivable): boolean { return this.reportedBankTransferIds().has(item.id); }
+
+  togglePaymentHistory(item: Receivable): void {
+    if (this.paymentHistoryFor() === item.id) {
+      this.paymentHistoryFor.set(null);
+      return;
+    }
+    this.paymentHistoryFor.set(item.id);
+    this.paymentHistory.set([]);
+    this.paymentHistoryLoading.set(true);
+    this.api.listPaymentsForReceivable(item.id).subscribe({
+      next: (page) => { this.paymentHistory.set(page.items); this.paymentHistoryLoading.set(false); },
+      error: () => { this.paymentHistoryLoading.set(false); },
+    });
+  }
 
   beginBankTransfer(item: Receivable): void {
     if (!this.payable(item)) return;
@@ -124,8 +148,11 @@ export class ReceivablesPageComponent {
     this.api.createBankTransferPayment(item.id, reference).subscribe({
       next: () => {
         this.bankTransferSubmitting.set(false);
+        this.reportedBankTransferIds.update((current) => new Set(current).add(item.id));
         this.bankTransferSuccess.set('Transferencia registrada y pendiente de validación por el equipo financiero.');
         this.bankTransferReference.set('');
+        this.bankTransferFor.set(null);
+        this.load();
       },
       error: () => {
         this.bankTransferSubmitting.set(false);

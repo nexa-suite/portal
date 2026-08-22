@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
-import { ApiPage, BankTransferPayment, PaymentIntent, Receivable } from '../domain/payment.models';
+import { ApiPage, BankTransferPayment, PaymentHistoryItem, PaymentIntent, Receivable } from '../domain/payment.models';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentsApiClient {
@@ -25,5 +25,10 @@ export class PaymentsApiClient {
     const headers = new HttpHeaders({ 'Idempotency-Key': idempotencyKey });
     const body = proofEvidenceId ? { reference, proofEvidenceId } : { reference };
     return this.http.post<BankTransferPayment>(this.api(`/receivables/${encodeURIComponent(receivableId)}/bank-transfer-payments`), body, { headers, withCredentials: true });
+  }
+
+  listPaymentsForReceivable(receivableId: string, page = 0, size = 25): Observable<ApiPage<PaymentHistoryItem>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<ApiPage<PaymentHistoryItem>>(this.api(`/receivables/${encodeURIComponent(receivableId)}/payments`), { params, withCredentials: true });
   }
 }
