@@ -2,8 +2,6 @@
 
 <br />
 
-<img src="./docs/assets/nexa.svg" alt="Nexa" width="240" />
-
 # Nexa Buyer Portal
 
 **Buyer-facing business experience for reliable B2B purchasing.**
