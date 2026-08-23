@@ -4,6 +4,8 @@
 }
 
 .portal-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 100dvh;
   background: var(--nexa-surface-page);
 }
@@ -55,17 +57,6 @@
 
 .portal-navigation::-webkit-scrollbar {
   display: none;
-}
-
-.work-area-context {
-  flex: 0 0 auto;
-  padding: var(--nexa-space-2) var(--nexa-space-3);
-  border-radius: var(--nexa-radius-pill);
-  background: var(--nexa-surface-nav-active);
-  color: var(--nexa-color-primary-700);
-  font-size: var(--nexa-font-size-xs);
-  font-weight: var(--nexa-font-weight-bold);
-  white-space: nowrap;
 }
 
 .portal-navigation a {
@@ -246,9 +237,39 @@
 
 .portal-content {
   width: min(100%, var(--nexa-layout-content-max));
-  min-height: calc(100dvh - var(--nexa-layout-toolbar-height));
   margin: 0 auto;
-  padding: clamp(var(--nexa-space-8), 6vw, var(--nexa-space-12)) var(--nexa-layout-page-gutter);
+  padding: clamp(var(--nexa-space-6), 4vw, var(--nexa-space-10)) var(--nexa-layout-page-gutter);
+}
+
+.portal-footer {
+  display: flex;
+  width: min(100%, var(--nexa-layout-content-max));
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nexa-space-5);
+  margin: 0 auto;
+  padding: var(--nexa-space-5) var(--nexa-layout-page-gutter);
+  border-top: 1px solid var(--nexa-color-border-structural);
+  color: var(--nexa-color-text-muted);
+  font-size: var(--nexa-font-size-xs);
+}
+
+.portal-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--nexa-space-4);
+}
+
+.portal-footer a {
+  color: var(--nexa-color-text-secondary);
+  text-decoration: none;
+}
+
+.portal-footer a:hover {
+  color: var(--nexa-color-primary-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 1100px) {
@@ -305,11 +326,6 @@
     background: var(--nexa-surface-card);
   }
 
-  .work-area-context {
-    order: -1;
-    width: 100%;
-  }
-
   .portal-actions {
     grid-column: 1 / -1;
     width: 100%;
@@ -344,5 +360,14 @@
     right: var(--nexa-space-4);
     left: var(--nexa-space-4);
     width: auto;
+  }
+
+  .portal-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .portal-footer nav {
+    justify-content: flex-start;
   }
 }
