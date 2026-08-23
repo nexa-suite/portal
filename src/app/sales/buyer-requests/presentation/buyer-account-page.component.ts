@@ -147,7 +147,7 @@ export class BuyerAccountPageComponent {
 
   maps(address: ClientAccountAddress): string {
     if (address.latitude != null && address.longitude != null) return `https://www.google.com/maps/search/?api=1&query=${address.latitude},${address.longitude}`;
-    return directionsUrl('Nexa cold-chain warehouse', `${this.display(address)}, Peru`);
+    return directionsUrl('Av. Arnaldo Márquez 1772, Jesús María, Lima, Perú', `${this.display(address)}, Peru`);
   }
 
   labelFor(code: string): string {

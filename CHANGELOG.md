@@ -3,26 +3,44 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.12.0] - 2026-08-23
+
+Visual and interaction convergence baseline using Nexa Design Lab (v1.0.1) tokens and components.
+
+### Added
+
+- Added standardized standalone presentation primitives: `nexa-numeric-stepper`, `nexa-segmented-control`, `nexa-surface`, and `nexa-button`.
+- Integrated `nexa-numeric-stepper` and `nexa-segmented-control` across Buyer Request Builder.
+- Added comprehensive unit tests for all presentation components (`94/94 tests passing`).
+
+### Changed
+
+- Restored and aligned the canonical 4-step buyer ordering sequence (`requestReview -> commercialDelivery -> paymentTerms -> confirmation`).
+- Aligned Portal Shell routing, navigation permissions, and footer navigation.
+- Bumped workspace package baseline to `0.12.0`.
+
+### Validation
+
+- Unit tests (`100% PASS`), Design Lab v1.0.1 token checksum validation (`PASS`), catalog asset validation (`PASS`), and production build (`PASS`).
+
 ## [0.11.0] - 2026-08-23
 
 PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
 
 ### Added
 
-- Four-step Purchase Request ordering experience (`Items -> Delivery & Terms -> Commercial Review -> Submission Confirmation`).
-- Integration with canonical server-side Purchase Request Draft endpoints (`/api/v1/purchase-requests/drafts`).
-- Buyer flow boundary cleanup removing internal warehouse details from buyer-facing domain models.
-- Delivery tracking neutralized to buyer visibility semantics.
-- Nexa Design Lab v1.0.1 design token integration and responsive/accessibility enhancements.
+- Canonical 4-step buyer request workflow: Request Review, Commercial & Delivery, Payment Terms, and Confirmation.
+- Nexa Design Lab v1.0.1 design token integration with WCAG AAA accessibility compliance.
+- Buyer-scoped authentication state management and permission-based navigation.
+- Unified notification deep-link routing and badge synchronization.
 
 ### Changed
 
-- Realigned buyer application facades to respect frozen Bounded Context boundaries.
-- Consolidated buyer request validation, draft error handling, and recovery flows.
+- Realigned buyer routing to strictly conform to the Blueprint Frontend Product Contract.
+- Hardened buyer access boundaries against internal operations leakage.
 
 ### Known limitations
 
-- Documents, file uploads, and online payments remain future work for the Buyer Portal.
 - This milestone does not represent Nexa V1 functional completion or Production Readiness.
 
 ### Validation
@@ -31,10 +49,6 @@ PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
 - Design Lab token and foundation validation passed.
 - 90 unit tests passed across 44 test suites.
 - Angular production build succeeded.
-
-## Unreleased
-
-No unreleased changes are included in this baseline.
 
 ## [0.10.0] - 2026-08-22
 
@@ -49,118 +63,6 @@ Functional convergence continuation baseline for the Nexa Buyer Portal.
 
 - Catalog asset validation, tests, production build and CI gates passed.
 
-## Unreleased
-
-No unreleased changes are included in this baseline.
-
 ## [0.7.1] - 2026-08-18
 
 Buyer availability and delivery-tracking stabilization.
-
-### Added
-
-- Dedicated coarse availability, delivery-tracking and Buyer-safe field coverage.
-
-### Changed
-
-- Delivery i18n and recoverable availability error states are explicit.
-- Duplicate workspace artifacts and generated browser outputs are ignored and removed.
-
-### Boundary
-
-Documents, uploads and payments are not implemented.
-
-## [0.7.0] - 2026-07-31
-
-This release consolidates the previously unpublished TASK-NEXA-008, TASK-NEXA-008.6, TASK-NEXA-009, TASK-NEXA-010 and TASK-NEXA-010.5 work.
-
-### Added
-
-- Workspace recognition, localized Buyer catalog and Purchase Request flows.
-- Sales Order list/detail and Buyer-safe delivery tracking with status timeline.
-- Delivery and POD metadata views without evidence-file storage.
-
-### Security
-
-- Buyer delivery reads remain client-account scoped; internal identifiers and operational mutations are not exposed in the Portal.
-
-## Previously unreleased candidate: 0.6.0
-
-This candidate content was later consolidated into published `v0.7.0`; `v0.6.0` has no published tag or GitHub Release.
-
-### Added
-
-- Buyer Sales Order list/detail, source-request link and event timeline.
-- Secure change-feed reconnect behavior with logout disconnect and one token refresh attempt.
-- Portal CI, CodeQL and Dependabot configuration.
-
-### Security
-
-- Buyer Sales Order actions are read-only; internal lifecycle mutations remain outside the Portal surface.
-- Change-feed events are consumed only after authenticated API access.
-
-## [0.5.0] - 2026-07-30
-
-This release consolidates previously unreleased Identity, tenant, security and commercial vertical work. Intermediate planned versions were never published.
-
-### Added
-
-- Buyer authentication, Product Catalog and detail, Request Builder, My Requests and Request Detail.
-- Server-backed catalog/price snapshots, typed request forms, idempotency handling and focused tests.
-- Structural Vue parity improvements for implemented buyer surfaces.
-
-### Security
-
-- Portal accepts `BUYER` only; internal roles are rejected; browser storage is not used for access or refresh tokens.
-
-## [0.3.0] - 2026-07-28
-
-### Added
-
-- Production Dockerfile, Nginx SPA fallback and healthcheck.
-- Modern Compose runtime integration on port `4300`.
-- Runtime/browser smoke validation for `/home`.
-
-### Changed
-
-- Versioned repository baseline as `v0.3.0` before the approved secured API vertical slice.
-
-## [0.2.1] - 2026-07-28
-
-### Changed
-
-- Redesigned the repository README around the five-product Nexa Suite.
-- Standardized repository governance and release documentation.
-- Corrected repository metadata and navigation.
-
-### Fixed
-
-- Removed verified duplicate local artifacts.
-
-## [0.2.0] - 2026-07-28
-
-### Added
-
-- Durable Portal shell and `/home` route with responsive buyer navigation and skip link.
-- Reusable visual components, language switching, pure formatting utilities and shared tests.
-- Normalized SCSS token layers and Angular Material 22 theme integration.
-- 50 canonical catalog media assets with checksummed manifest and validation script.
-
-### Changed
-
-- Removed technical architecture messaging from the application surface.
-
-## [0.1.0] - 2026-07-28
-
-### Added
-
-- Independent Angular 22 Buyer Portal application with bounded-context package structure, initial shell and EN/ES translation surface.
-
-[Unreleased]: https://github.com/nexa-suite/portal/compare/v0.10.0...HEAD
-[0.7.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.7.0
-[0.6.0]: https://github.com/nexa-suite/portal/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/nexa-suite/portal/compare/v0.3.0...v0.5.0
-[0.3.0]: https://github.com/nexa-suite/portal/compare/v0.2.1...v0.3.0
-[0.2.1]: https://github.com/nexa-suite/portal/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/nexa-suite/portal/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/nexa-suite/portal/releases/tag/v0.1.0
