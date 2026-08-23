@@ -25,11 +25,30 @@ Visual and interaction convergence baseline using Nexa Design Lab (v1.0.1) token
 
 ## [0.11.0] - 2026-08-23
 
-Stabilization and release closure baseline for v0.11.0 milestone.
+PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
 
 ### Added
 
-- Synchronized release governance and release closure metadata.
+- Canonical 4-step buyer request workflow: Request Review, Commercial & Delivery, Payment Terms, and Confirmation.
+- Nexa Design Lab v1.0.1 design token integration with WCAG AAA accessibility compliance.
+- Buyer-scoped authentication state management and permission-based navigation.
+- Unified notification deep-link routing and badge synchronization.
+
+### Changed
+
+- Realigned buyer routing to strictly conform to the Blueprint Frontend Product Contract.
+- Hardened buyer access boundaries against internal operations leakage.
+
+### Known limitations
+
+- This milestone does not represent Nexa V1 functional completion or Production Readiness.
+
+### Validation
+
+- Catalog asset validation passed.
+- Design Lab token and foundation validation passed.
+- 90 unit tests passed across 44 test suites.
+- Angular production build succeeded.
 
 ## [0.10.0] - 2026-08-22
 
