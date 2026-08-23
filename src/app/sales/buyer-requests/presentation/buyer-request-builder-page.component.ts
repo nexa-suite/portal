@@ -135,6 +135,12 @@ export class BuyerRequestBuilderPageComponent {
     comments: this.fb.control(''),
   });
 
+  readonly addressModeOptions = [
+    { value: 'saved', label: 'Saved Address' },
+    { value: 'manual', label: 'Manual Address' },
+    { value: 'current', label: 'Current Location' },
+  ] as const;
+
   constructor() {
     const draftId = this.route.snapshot.paramMap.get('purchaseRequestId');
     this.facade
@@ -142,6 +148,7 @@ export class BuyerRequestBuilderPageComponent {
       .pipe(switchMap(() => (draftId ? this.facade.loadDraft(draftId) : of(null))))
       .subscribe({
         next: (draft) => {
+          this.searchCatalog();
           if (draft) {
             this.hydrateDraft(draft);
             return;
@@ -167,7 +174,7 @@ export class BuyerRequestBuilderPageComponent {
       'CASH',
       'CASH_ON_DELIVERY',
     ];
-    const lines = draft.lines.map((line, index) => {
+    const lines: BuilderLine[] = (draft.lines ?? []).map((line, index) => {
       const skuId = draftText(line['skuId']);
       const presentation = draftText(line['presentation']) || draftText(line['skuCode']) || skuId;
       return {
@@ -176,7 +183,7 @@ export class BuyerRequestBuilderPageComponent {
         skuId,
         itemName: presentation,
         presentation,
-        quantity: draftNumber(line['quantity']),
+        quantity: draftNumber(line['quantity']) || 1,
         unit: draftText(line['unit']) || 'unit',
         notes: draftText(line['notes']),
       };
@@ -219,7 +226,18 @@ export class BuyerRequestBuilderPageComponent {
         ? (payment as BuyerPaymentOption)
         : 'CARD_STRIPE',
     });
-    this.step.set(lines.length ? 2 : 1);
+    if (this.form.controls.departmentCode.value) this.departmentChanged();
+    if (this.form.controls.provinceCode.value) this.provinceChanged();
+    const lat = this.form.controls.latitude.value;
+    const lng = this.form.controls.longitude.value;
+    if (lat != null && lng != null) {
+      this.mapPin.set({ latitude: lat, longitude: lng, accuracy: null });
+      this.mapConfirmed.set(true);
+    }
+  }
+
+  setAddressMode(value: string): void {
+    this.form.controls.addressMode.setValue(value as 'saved' | 'manual' | 'current');
   }
 
   searchCatalog(): void {
@@ -257,6 +275,25 @@ export class BuyerRequestBuilderPageComponent {
     this.catalogSelection.setValue('');
     this.quantity.setValue(1);
     this.message.set(null);
+  }
+
+  selectedCatalogItem(): CatalogItemSummary | null {
+    return this.catalogItems().find((item) => item.catalogItemId === this.catalogSelection.value) ?? null;
+  }
+
+  selectCatalogItem(item: CatalogItemSummary): void {
+    this.catalogSelection.setValue(item.catalogItemId);
+    this.message.set(null);
+  }
+
+  adjustDraftQuantity(delta: number): void {
+    this.quantity.setValue(Math.max(1, this.quantity.value + delta));
+  }
+
+  adjustLineQuantity(line: BuilderLine, delta: number): void {
+    this.lines.update((lines) => lines.map((item) => item.id === line.id
+      ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+      : item));
   }
 
   updateLine(line: BuilderLine, event: Event): void {

@@ -16,8 +16,8 @@
         [attr.aria-label]="index + 1 + '. ' + ('buyerBuilder.steps.' + label | translate)"
         (click)="goToStep(index + 1)"
       >
-        <span aria-hidden="true">{{ index + 1 }}</span
-        >{{ 'buyerBuilder.steps.' + label | translate }}
+        <span aria-hidden="true">{{ index + 1 }}</span>
+        {{ 'buyerBuilder.steps.' + label | translate }}
       </button>
     }
   </nav>
@@ -39,85 +39,103 @@
   >
     @if (step() === 1) {
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.buyer.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.buyer.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.buyer.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.buyer.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="buyer-summary">
-          <div>
-            <span>{{ 'buyerBuilder.buyer.name' | translate }}</span
-            ><strong>{{ auth.identity()?.displayName }}</strong>
+          <div class="buyer-fact">
+            <span class="fact-icon" aria-hidden="true">01</span>
+            <span>{{ 'buyerBuilder.buyer.name' | translate }}</span>
+            <strong>{{ auth.identity()?.displayName }}</strong>
+            <small>{{ auth.identity()?.email }}</small>
           </div>
-          <div>
-            <span>{{ 'buyerBuilder.buyer.email' | translate }}</span
-            ><strong>{{ auth.identity()?.email }}</strong>
+          <div class="buyer-fact">
+            <span class="fact-icon" aria-hidden="true">02</span>
+            <span>{{ 'buyerBuilder.buyer.account' | translate }}</span>
+            <strong>{{ facade.clientAccount()?.businessName || facade.clientAccount()?.commercialName || ('buyerBuilder.sessionResolved' | translate) }}</strong>
+            <small>{{ 'buyerBuilder.buyer.accountValidated' | translate }}</small>
           </div>
-          <div>
-            <span>{{ 'buyerBuilder.buyer.account' | translate }}</span
-            ><strong>{{ accountId() || ('buyerBuilder.sessionResolved' | translate) }}</strong>
+          <div class="buyer-fact warehouse-fact">
+            <span class="fact-icon" aria-hidden="true">03</span>
+            <span>{{ 'buyerBuilder.buyer.origin' | translate }}</span>
+            <strong>Av. Arnaldo Márquez 1772</strong>
+            <small>Jesús María, Lima, Perú</small>
           </div>
         </mat-card-content>
       </mat-card>
 
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.products.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.products.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.products.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.products.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content>
-          <div class="catalog-picker">
-            <label class="field"
-              ><span>{{ 'buyerBuilder.products.search' | translate }}</span
-              ><input [formControl]="catalogSearch" (keyup.enter)="searchCatalog()"
-            /></label>
+          <div class="catalog-toolbar">
+            <label class="field">
+              <span>{{ 'buyerBuilder.products.search' | translate }}</span>
+              <input [formControl]="catalogSearch" (keyup.enter)="searchCatalog()" [placeholder]="'catalog.searchPlaceholder' | translate" />
+            </label>
             <button mat-stroked-button type="button" (click)="searchCatalog()">
               {{ 'buyerBuilder.products.searchAction' | translate }}
             </button>
-            <label class="field product-select"
-              ><span>{{ 'buyerBuilder.products.item' | translate }}</span
-              ><select [formControl]="catalogSelection">
-                <option value="">{{ 'buyerBuilder.products.choose' | translate }}</option>
-                @for (item of catalogItems(); track item.catalogItemId) {
-                  <option [value]="item.catalogItemId">
-                    {{ item.itemName }} · {{ item.presentation }}
-                  </option>
-                }
-              </select></label
-            >
-            <label class="field quantity"
-              ><span>{{ 'buyerBuilder.products.quantity' | translate }}</span
-              ><input type="number" min="0.01" step="0.01" [formControl]="quantity"
-            /></label>
-            <button
-              mat-flat-button
-              color="primary"
-              type="button"
-              [disabled]="!catalogSelection.value"
-              (click)="addCatalogItem()"
-            >
-              {{ 'buyerBuilder.products.add' | translate }}
-            </button>
           </div>
+
+          <div class="catalog-results" [attr.aria-label]="'buyerBuilder.products.choose' | translate">
+            @for (item of catalogItems(); track item.catalogItemId) {
+              <button
+                type="button"
+                class="catalog-result"
+                [class.selected]="catalogSelection.value === item.catalogItemId"
+                [attr.aria-pressed]="catalogSelection.value === item.catalogItemId"
+                (click)="selectCatalogItem(item)">
+                <span class="product-art">
+                  @if (item.image?.url; as imageUrl) { <img [src]="imageUrl" [alt]="item.itemName" /> }
+                  @else { <span aria-hidden="true">N</span> }
+                </span>
+                <span class="product-copy"><strong>{{ item.itemName }}</strong><small>{{ item.brandName }} · {{ item.presentation }}</small><small>{{ ('availability.status.' + item.availabilityStatus) | translate }}</small></span>
+                <span class="product-price">
+                  @if (item.effectivePrice; as price) { {{ price.currency }} {{ price.amount }} }
+                  @else if (item.unitPrice; as price) { {{ price.currency }} {{ price.amount }} }
+                </span>
+              </button>
+            } @empty {
+              <p class="catalog-empty">{{ 'buyerBuilder.products.noResults' | translate }}</p>
+            }
+          </div>
+
+          @if (selectedCatalogItem(); as selected) {
+            <div class="add-selection">
+              <div><span>{{ 'buyerBuilder.products.selected' | translate }}</span><strong>{{ selected.itemName }}</strong></div>
+              <div class="quantity-stepper">
+                <button type="button" [attr.aria-label]="'buyerBuilder.products.decrease' | translate" (click)="adjustDraftQuantity(-1)">−</button>
+                <input type="number" min="1" step="1" [formControl]="quantity" [attr.aria-label]="'buyerBuilder.products.quantity' | translate" />
+                <button type="button" [attr.aria-label]="'buyerBuilder.products.increase' | translate" (click)="adjustDraftQuantity(1)">+</button>
+              </div>
+              <button mat-flat-button color="primary" type="button" (click)="addCatalogItem()">{{ 'buyerBuilder.products.add' | translate }}</button>
+            </div>
+          }
+
           <div class="lines" aria-live="polite">
             @for (line of lines(); track line.id) {
               <div class="line">
-                <div>
-                  <strong>{{ line.itemName }}</strong
-                  ><span>{{ line.presentation }}</span>
+                <span class="line-art" aria-hidden="true">N</span>
+                <div class="line-copy">
+                  <strong>{{ line.itemName }}</strong>
+                  <span>{{ line.presentation }}</span>
                 </div>
                 <div class="line-actions">
+                  <button type="button" [attr.aria-label]="'buyerBuilder.products.decrease' | translate" (click)="adjustLineQuantity(line, -1)">−</button>
                   <input
                     type="number"
-                    min="0.01"
-                    step="0.01"
+                    min="1"
+                    step="1"
                     [value]="line.quantity"
                     (change)="updateLine(line, $event)"
                     [attr.aria-label]="'buyerBuilder.products.quantity' | translate"
-                  /><button mat-button type="button" (click)="removeLine(line)">
+                  />
+                  <button type="button" [attr.aria-label]="'buyerBuilder.products.increase' | translate" (click)="adjustLineQuantity(line, 1)">+</button>
+                  <button class="remove-line" mat-button type="button" (click)="removeLine(line)">
                     {{ 'buyerBuilder.products.remove' | translate }}
                   </button>
                 </div>
@@ -138,25 +156,23 @@
 
     @if (step() === 2) {
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.commercial.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.commercial.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.commercial.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.commercial.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="buyer-summary">
           @if (facade.clientAccount(); as account) {
             <div>
-              <span>{{ 'buyerBuilder.buyer.account' | translate }}</span
-              ><strong>{{ account.businessName || account.commercialName }}</strong>
+              <span>{{ 'buyerBuilder.buyer.account' | translate }}</span>
+              <strong>{{ account.businessName || account.commercialName }}</strong>
             </div>
             <div>
-              <span>{{ 'buyerBuilder.commercial.segment' | translate }}</span
-              ><strong>{{ account.segment || '—' }}</strong>
+              <span>{{ 'buyerBuilder.commercial.segment' | translate }}</span>
+              <strong>{{ account.segment || '—' }}</strong>
             </div>
             <div>
-              <span>{{ 'buyerBuilder.commercial.paymentCondition' | translate }}</span
-              ><strong>{{ account.paymentCondition || '—' }}</strong>
+              <span>{{ 'buyerBuilder.commercial.paymentCondition' | translate }}</span>
+              <strong>{{ account.paymentCondition || '—' }}</strong>
             </div>
           } @else {
             <p class="hint">{{ 'buyerBuilder.confirm.accountSnapshot' | translate }}</p>
@@ -165,36 +181,20 @@
       </mat-card>
 
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.address.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.address.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.address.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.address.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="address-content">
-          <div
-            class="mode-switch"
-            role="radiogroup"
-            [attr.aria-label]="'buyerBuilder.address.choose' | translate"
-          >
-            <label
-              ><input type="radio" formControlName="addressMode" value="saved" />{{
-                'buyerBuilder.address.saved' | translate
-              }}</label
-            ><label
-              ><input type="radio" formControlName="addressMode" value="manual" />{{
-                'buyerBuilder.address.manual' | translate
-              }}</label
-            ><label
-              ><input type="radio" formControlName="addressMode" value="current" />{{
-                'buyerBuilder.address.currentLocation' | translate
-              }}</label
-            >
+          <div class="mode-switch" role="radiogroup" [attr.aria-label]="'buyerBuilder.address.choose' | translate">
+            <label><input type="radio" formControlName="addressMode" value="saved" />{{ 'buyerBuilder.address.saved' | translate }}</label>
+            <label><input type="radio" formControlName="addressMode" value="manual" />{{ 'buyerBuilder.address.manual' | translate }}</label>
+            <label><input type="radio" formControlName="addressMode" value="current" />{{ 'buyerBuilder.address.currentLocation' | translate }}</label>
           </div>
           @if (form.controls.addressMode.value === 'saved') {
-            <label class="field wide"
-              ><span>{{ 'buyerBuilder.address.choose' | translate }}</span
-              ><select
+            <label class="field wide">
+              <span>{{ 'buyerBuilder.address.choose' | translate }}</span>
+              <select
                 formControlName="addressId"
                 [attr.aria-invalid]="!addressValid() && form.controls.addressId.touched"
                 aria-describedby="address-validation"
@@ -208,8 +208,8 @@
                     }
                   </option>
                 }
-              </select></label
-            >
+              </select>
+            </label>
             @if (!addressValid() && form.controls.addressId.touched) {
               <p id="address-validation" class="field-error" role="alert">
                 {{ 'buyerBuilder.validation.address' | translate }}
@@ -224,86 +224,87 @@
             form.controls.addressMode.value === 'current'
           ) {
             <div class="field-grid">
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.type' | translate }}</span
-                ><select formControlName="roadType">
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.type' | translate }}</span>
+                <select formControlName="roadType">
                   <option value="">{{ 'buyerBuilder.address.chooseOption' | translate }}</option>
                   @for (item of facade.roadTypes(); track item.code) {
                     <option [value]="item.code">{{ item.label }}</option>
                   }
-                </select></label
-              >
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.recipientName' | translate }}</span
-                ><input formControlName="recipientName" autocomplete="shipping name"
-              /></label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.recipientPhone' | translate }}</span
-                ><input formControlName="recipientPhone" autocomplete="shipping tel"
-              /></label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.streetName' | translate }}</span
-                ><input formControlName="streetName"
-              /></label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.streetNumber' | translate }}</span
-                ><input formControlName="streetNumber"
-              /></label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.interior' | translate }}</span
-                ><input formControlName="interior"
-              /></label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.postalCode' | translate }}</span
-                ><input formControlName="postalCode"
-              /></label>
-              <label class="field wide-two"
-                ><span>{{ 'buyerBuilder.address.line' | translate }}</span
-                ><input
+                </select>
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.recipientName' | translate }}</span>
+                <input formControlName="recipientName" autocomplete="shipping name" />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.recipientPhone' | translate }}</span>
+                <input formControlName="recipientPhone" autocomplete="shipping tel" />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.streetName' | translate }}</span>
+                <input formControlName="streetName" />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.streetNumber' | translate }}</span>
+                <input formControlName="streetNumber" />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.interior' | translate }}</span>
+                <input formControlName="interior" />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.postalCode' | translate }}</span>
+                <input formControlName="postalCode" />
+              </label>
+              <label class="field wide-two">
+                <span>{{ 'buyerBuilder.address.line' | translate }}</span>
+                <input
                   formControlName="addressLine"
                   autocomplete="shipping street-address"
                   [attr.aria-invalid]="!addressValid() && form.controls.addressLine.touched"
                   aria-describedby="address-validation-manual"
-              /></label>
-              <label class="field wide-two"
-                ><span>{{ 'buyerBuilder.address.reference' | translate }}</span
-                ><input formControlName="reference"
-              /></label>
-              <label class="field wide-two"
-                ><span>{{ 'buyerBuilder.address.receivingHours' | translate }}</span
-                ><input formControlName="receivingHours"
-              /></label>
-              <label class="field wide-two"
-                ><span>{{ 'buyerBuilder.address.receivingInstructions' | translate }}</span
-                ><textarea rows="2" formControlName="receivingInstructions"></textarea>
+                />
               </label>
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.department' | translate }}</span
-                ><select formControlName="departmentCode" (change)="departmentChanged()">
+              <label class="field wide-two">
+                <span>{{ 'buyerBuilder.address.reference' | translate }}</span>
+                <input formControlName="reference" />
+              </label>
+              <label class="field wide-two">
+                <span>{{ 'buyerBuilder.address.receivingHours' | translate }}</span>
+                <input formControlName="receivingHours" />
+              </label>
+              <label class="field wide-two">
+                <span>{{ 'buyerBuilder.address.receivingInstructions' | translate }}</span>
+                <textarea rows="2" formControlName="receivingInstructions"></textarea>
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.department' | translate }}</span>
+                <select formControlName="departmentCode" (change)="departmentChanged()">
                   <option value="">{{ 'buyerBuilder.address.chooseOption' | translate }}</option>
                   @for (item of facade.departments(); track item.code) {
                     <option [value]="item.code">{{ item.label }}</option>
                   }
-                </select></label
-              >
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.province' | translate }}</span
-                ><select formControlName="provinceCode" (change)="provinceChanged()">
+                </select>
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.province' | translate }}</span>
+                <select formControlName="provinceCode" (change)="provinceChanged()">
                   <option value="">{{ 'buyerBuilder.address.chooseOption' | translate }}</option>
                   @for (item of facade.provinces(); track item.code) {
                     <option [value]="item.code">{{ item.label }}</option>
                   }
-                </select></label
-              >
-              <label class="field"
-                ><span>{{ 'buyerBuilder.address.district' | translate }}</span
-                ><select formControlName="districtCode">
+                </select>
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.district' | translate }}</span>
+                <select formControlName="districtCode">
                   <option value="">{{ 'buyerBuilder.address.chooseOption' | translate }}</option>
                   @for (item of facade.districts(); track item.code) {
                     <option [value]="item.code">{{ item.label }}</option>
                   }
-                </select></label
-              >
+                </select>
+              </label>
             </div>
             @if (!addressValid() && form.controls.addressLine.touched) {
               <p id="address-validation-manual" class="field-error" role="alert">
@@ -331,22 +332,27 @@
                 (click)="useCurrentLocation()"
                 [disabled]="locationStatus() === 'requesting'"
               >
-                {{ 'buyerBuilder.address.useCurrentLocation' | translate }}</button
-              ><label class="field"
-                ><span>{{ 'buyerBuilder.address.latitude' | translate }}</span
-                ><input
+                {{ 'buyerBuilder.address.useCurrentLocation' | translate }}
+              </button>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.latitude' | translate }}</span>
+                <input
                   type="number"
                   step="0.000001"
                   [value]="mapPin().latitude"
-                  (change)="updateMapPin('latitude', $event)" /></label
-              ><label class="field"
-                ><span>{{ 'buyerBuilder.address.longitude' | translate }}</span
-                ><input
+                  (change)="updateMapPin('latitude', $event)"
+                />
+              </label>
+              <label class="field">
+                <span>{{ 'buyerBuilder.address.longitude' | translate }}</span>
+                <input
                   type="number"
                   step="0.000001"
                   [value]="mapPin().longitude"
-                  (change)="updateMapPin('longitude', $event)" /></label
-              ><button
+                  (change)="updateMapPin('longitude', $event)"
+                />
+              </label>
+              <button
                 mat-flat-button
                 color="primary"
                 type="button"
@@ -386,16 +392,14 @@
       </mat-card>
 
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.delivery.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.delivery.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.delivery.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.delivery.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="delivery-grid">
-          <label class="field"
-            ><span>{{ 'buyerBuilder.delivery.date' | translate }}</span
-            ><input
+          <label class="field">
+            <span>{{ 'buyerBuilder.delivery.date' | translate }}</span>
+            <input
               type="date"
               [min]="minimumDate"
               formControlName="requestedDeliveryDate"
@@ -403,10 +407,11 @@
                 !form.controls.requestedDeliveryDate.valid &&
                 form.controls.requestedDeliveryDate.touched
               "
-          /></label>
-          <label class="field wide"
-            ><span>{{ 'buyerBuilder.delivery.notes' | translate }}</span
-            ><textarea rows="3" formControlName="deliveryNotes"></textarea>
+            />
+          </label>
+          <label class="field wide">
+            <span>{{ 'buyerBuilder.delivery.notes' | translate }}</span>
+            <textarea rows="3" formControlName="deliveryNotes"></textarea>
           </label>
           @if (facade.previewState().status === 'loading') {
             <p class="state-note wide" role="status" aria-live="polite">
@@ -463,9 +468,9 @@
             >
               <span class="buyer-map-node origin">{{
                 'buyerBuilder.delivery.origin' | translate
-              }}</span
-              ><span class="buyer-map-line" aria-hidden="true"></span
-              ><span class="buyer-map-node destination">{{
+              }}</span>
+              <span class="buyer-map-line" aria-hidden="true"></span>
+              <span class="buyer-map-node destination">{{
                 selectedAddressLabel() || route.destinationLabel || 'Destino'
               }}</span>
             </div>
@@ -482,16 +487,14 @@
 
     @if (step() === 3) {
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.payment.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.payment.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.payment.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.payment.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="payment-content">
-          <label class="field"
-            ><span>{{ 'buyerBuilder.confirm.payment' | translate }}</span
-            ><select
+          <label class="field">
+            <span>{{ 'buyerBuilder.confirm.payment' | translate }}</span>
+            <select
               formControlName="paymentOption"
               [attr.aria-invalid]="!paymentValid() && form.controls.paymentOption.touched"
               aria-describedby="payment-validation"
@@ -509,16 +512,16 @@
               <option value="CASH_ON_DELIVERY">
                 {{ 'purchaseRequests.payment.CASH_ON_DELIVERY' | translate }}
               </option>
-            </select></label
-          >
+            </select>
+          </label>
           @if (!paymentValid() && form.controls.paymentOption.touched) {
             <p id="payment-validation" class="field-error" role="alert">
               {{ 'buyerBuilder.validation.payment' | translate }}
             </p>
           }
-          <label class="field"
-            ><span>{{ 'buyerBuilder.payment.terms' | translate }}</span
-            ><textarea rows="3" formControlName="comments"></textarea>
+          <label class="field">
+            <span>{{ 'buyerBuilder.payment.terms' | translate }}</span>
+            <textarea rows="3" formControlName="comments"></textarea>
           </label>
           @if (facade.previewState().snapshot?.commercial; as commercial) {
             <p class="commercial-snapshot">
@@ -538,39 +541,35 @@
 
     @if (step() === 4) {
       <mat-card>
-        <mat-card-header
-          ><mat-card-title>{{ 'buyerBuilder.confirm.title' | translate }}</mat-card-title
-          ><mat-card-subtitle>{{
-            'buyerBuilder.confirm.subtitle' | translate
-          }}</mat-card-subtitle></mat-card-header
-        >
+        <mat-card-header>
+          <mat-card-title>{{ 'buyerBuilder.confirm.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'buyerBuilder.confirm.subtitle' | translate }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content class="confirmation">
           <div class="summary-grid">
             <div>
-              <span>{{ 'buyerBuilder.buyer.account' | translate }}</span
-              ><strong>{{ accountId() || ('buyerBuilder.sessionResolved' | translate) }}</strong>
+              <span>{{ 'buyerBuilder.buyer.account' | translate }}</span>
+              <strong>{{ facade.clientAccount()?.businessName || facade.clientAccount()?.commercialName || ('buyerBuilder.sessionResolved' | translate) }}</strong>
             </div>
             <div>
-              <span>{{ 'buyerBuilder.confirm.deliveryAddress' | translate }}</span
-              ><strong>{{ selectedAddressLabel() || '—' }}</strong>
+              <span>{{ 'buyerBuilder.confirm.deliveryAddress' | translate }}</span>
+              <strong>{{ selectedAddressLabel() || '—' }}</strong>
             </div>
             <div>
-              <span>{{ 'buyerBuilder.confirm.date' | translate }}</span
-              ><strong>{{ form.controls.requestedDeliveryDate.value }}</strong>
+              <span>{{ 'buyerBuilder.confirm.date' | translate }}</span>
+              <strong>{{ form.controls.requestedDeliveryDate.value }}</strong>
             </div>
             <div>
-              <span>{{ 'buyerBuilder.confirm.payment' | translate }}</span
-              ><strong>{{
-                'purchaseRequests.payment.' + form.controls.paymentOption.value | translate
-              }}</strong>
+              <span>{{ 'buyerBuilder.confirm.payment' | translate }}</span>
+              <strong>{{ 'purchaseRequests.payment.' + form.controls.paymentOption.value | translate }}</strong>
             </div>
           </div>
           <div class="review-lines">
             <h3>{{ 'buyerBuilder.products.title' | translate }}</h3>
             @for (line of lines(); track line.id) {
               <div>
-                <strong>{{ line.itemName }}</strong
-                ><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }}</span>
+                <strong>{{ line.itemName }}</strong>
+                <span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }}</span>
               </div>
             }
           </div>
@@ -609,8 +608,8 @@
     }
 
     <div class="form-actions">
-      <a mat-button routerLink="/portal/home">{{ 'buyerBuilder.actions.cancel' | translate }}</a
-      ><span></span>
+      <a mat-button routerLink="/portal/home">{{ 'buyerBuilder.actions.cancel' | translate }}</a>
+      <span></span>
       @if (step() > 1) {
         <button mat-stroked-button type="button" (click)="previous()">
           {{ 'buyerBuilder.actions.previous' | translate }}
@@ -626,7 +625,9 @@
           [attr.aria-busy]="facade.busy()"
         >
           {{
-            step() === 2
+            step() === 1
+              ? ('buyerBuilder.actions.next' | translate)
+              : step() === 2
               ? ('buyerBuilder.actions.review' | translate)
               : ('buyerBuilder.actions.next' | translate)
           }}
