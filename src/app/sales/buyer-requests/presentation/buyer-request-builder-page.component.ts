@@ -11,11 +11,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { CatalogApiClient } from '../../../catalog-management/infrastructure/catalog-api.client';
 import { CatalogItemSummary, DEFAULT_CATALOG_QUERY } from '../../../catalog-management/domain/catalog.models';
-import { InventoryAvailabilityFacade } from '../../../warehouse/application/inventory-availability.facade';
 import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
-import { BuyerRequestBuilderFacade } from '../application/buyer-request-builder.facade';
-import { CanonicalDraftView } from '../infrastructure/canonical-purchase-request-draft-api.client';
+import { PurchaseRequestBuilderFacade } from '../application/buyer-request-builder.facade';
+import { PurchaseRequestDraftView } from '../infrastructure/canonical-purchase-request-draft-api.client';
 import {
   addressDisplay,
   BuyerRequestCommand,
@@ -50,8 +49,7 @@ export class BuyerRequestBuilderPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly auth = inject(PortalAuthStateService);
-  readonly facade = inject(BuyerRequestBuilderFacade);
-  readonly availability = inject(InventoryAvailabilityFacade);
+  readonly facade = inject(PurchaseRequestBuilderFacade);
   readonly minimumDate = todayInputValue();
   readonly step = signal(1);
   readonly stepLabels = ['buyer', 'products', 'delivery', 'route', 'review', 'submit'] as const;
@@ -93,7 +91,6 @@ export class BuyerRequestBuilderPageComponent {
     paymentOption: this.fb.control<BuyerPaymentOption>('CARD_STRIPE', Validators.required),
     comments: this.fb.control(''),
   });
-  readonly selectedWarehouse = computed(() => this.facade.previewState().snapshot?.delivery?.warehouse ?? null);
 
   constructor() {
     const draftId = this.route.snapshot.paramMap.get('purchaseRequestId');
@@ -109,7 +106,7 @@ export class BuyerRequestBuilderPageComponent {
     });
   }
 
-  private hydrateDraft(draft: CanonicalDraftView): void {
+  private hydrateDraft(draft: PurchaseRequestDraftView): void {
     const destinationSnapshot = draftObject(draft.destination?.['snapshot']);
     const addressId = draftText(draft.destination?.['addressId']);
     const payment = draft.paymentPreference;
@@ -152,7 +149,6 @@ export class BuyerRequestBuilderPageComponent {
     this.catalog.list({ ...DEFAULT_CATALOG_QUERY, q, size: 20 }).subscribe({
       next: (page) => {
         this.catalogItems.set(page.items);
-        this.availability.load(page.items.map((item) => item.catalogItemId));
         this.message.set(null);
       },
       error: () => this.message.set('CATALOG_SELECTION_FAILED'),
@@ -323,7 +319,6 @@ export class BuyerRequestBuilderPageComponent {
       manualAddress,
       requestedDeliveryDate: value.requestedDeliveryDate,
       deliveryNotes: value.deliveryNotes,
-      warehouseId: null,
       paymentOption: value.paymentOption,
       comments: value.comments,
       lines: this.lines().map(({ catalogItemId, skuId, quantity, unit, notes }) => ({ catalogItemId, skuId, quantity, unit, notes })),

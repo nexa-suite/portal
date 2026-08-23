@@ -3,7 +3,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PORTAL_RUNTIME_CONFIG } from '../../../core/security/runtime-config';
-import { BuyerRequestApiClient } from './buyer-request-api.client';
+import { BuyerAccountApiClient, BuyerRequestApiClient } from './buyer-request-api.client';
 
 describe('BuyerRequestApiClient', () => {
   let client: BuyerRequestApiClient;
@@ -12,6 +12,7 @@ describe('BuyerRequestApiClient', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        BuyerAccountApiClient,
         BuyerRequestApiClient,
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -24,12 +25,11 @@ describe('BuyerRequestApiClient', () => {
 
   afterEach(() => http.verify());
 
-  it('uses the Buyer warehouse and Peru reference contracts', () => {
-    client.warehouses().subscribe();
-    const warehouses = http.expectOne('http://api.local/api/v1/buyer/warehouses');
-    expect(warehouses.request.method).toBe('GET');
-    warehouses.flush([{ id: 'wh-1', code: 'LIM-01', name: 'Cold Hub', address: 'Lima', serviceable: true, version: 2 }]);
+  it('keeps the previous client token as a compatibility alias', () => {
+    expect(TestBed.inject(BuyerRequestApiClient)).toBeInstanceOf(BuyerAccountApiClient);
+  });
 
+  it('uses the Buyer-safe Peru reference contract', () => {
     client.reference('provinces', 'LIM').subscribe();
     const provinces = http.expectOne('http://api.local/api/v1/reference/departments/LIM/provinces');
     expect(provinces.request.method).toBe('GET');
