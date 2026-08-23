@@ -25,5 +25,6 @@ describe('PortalShellComponent', () => {
     expect(fixture.nativeElement.querySelector('nexa-language-switcher')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.sign-out-button')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('a[href="/portal/support"]')).toBeNull();
   });
 });

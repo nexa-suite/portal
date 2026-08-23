@@ -13,17 +13,6 @@ export interface PeruReferenceOption {
   readonly active: boolean;
 }
 
-export interface BuyerWarehouse {
-  readonly id: string;
-  readonly code: string;
-  readonly name: string;
-  readonly address: string;
-  readonly operatingHoursStart: string | null;
-  readonly operatingHoursEnd: string | null;
-  readonly serviceable: boolean;
-  readonly version: number;
-}
-
 export interface DeliveryAddressInput {
   readonly addressType: string;
   readonly line: string;
@@ -101,7 +90,6 @@ export interface BuyerRequestCommand {
   readonly manualAddress: DeliveryAddressInput | null;
   readonly requestedDeliveryDate: string;
   readonly deliveryNotes: string;
-  readonly warehouseId: string | null;
   readonly paymentOption: BuyerPaymentOption;
   readonly comments: string;
   readonly lines: readonly BuyerRequestLineInput[];
@@ -123,13 +111,10 @@ export interface BuyerRequestAddressSnapshot {
 export interface BuyerRequestRouteSnapshot {
   readonly provider: string | null;
   readonly reference: string | null;
-  readonly originLabel: string | null;
   readonly destinationLabel: string | null;
   readonly distanceMeters: number | null;
   readonly durationSeconds: number | null;
   readonly previewUrl: string | null;
-  readonly originLatitude?: number | null;
-  readonly originLongitude?: number | null;
   readonly destinationLatitude?: number | null;
   readonly destinationLongitude?: number | null;
   readonly calculatedAt?: string | null;
@@ -137,18 +122,10 @@ export interface BuyerRequestRouteSnapshot {
   readonly path?: string | null;
 }
 
-export interface BuyerRequestWarehouseSnapshot {
-  readonly id: string;
-  readonly code: string;
-  readonly name: string;
-  readonly address: string;
-}
-
 export interface BuyerRequestDeliverySnapshot {
   readonly requestedDate: string | null;
   readonly notes: string | null;
   readonly address: BuyerRequestAddressSnapshot | null;
-  readonly warehouse: BuyerRequestWarehouseSnapshot | null;
   readonly route: BuyerRequestRouteSnapshot | null;
 }
 

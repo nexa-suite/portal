@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../../core/security/runtime-config';
 import {
-  BuyerWarehouse,
   BuyerClientAccount,
   ClientAccountAddress,
   CreateClientAccountAddressInput,
@@ -27,20 +26,6 @@ function reference(value: unknown): PeruReferenceOption {
     label: text(item['label']),
     parentCode: nullableText(item['parentCode']),
     active: item['active'] !== false,
-  };
-}
-
-function warehouse(value: unknown): BuyerWarehouse {
-  const item = raw(value);
-  return {
-    id: text(item['id']),
-    code: text(item['code']),
-    name: text(item['name']),
-    address: text(item['address']),
-    operatingHoursStart: nullableText(item['operatingHoursStart']),
-    operatingHoursEnd: nullableText(item['operatingHoursEnd']),
-    serviceable: item['serviceable'] !== false,
-    version: number(item['version']),
   };
 }
 
@@ -101,16 +86,11 @@ function clientAccount(value: unknown): BuyerClientAccount {
 }
 
 @Injectable({ providedIn: 'root' })
-export class BuyerRequestApiClient {
+export class BuyerAccountApiClient {
   private readonly http = inject(HttpClient);
   private readonly config = inject(PORTAL_RUNTIME_CONFIG);
 
   private api(path: string): string { return portalApiUrl(this.config, `/api/v1${path}`); }
-
-  warehouses(): Observable<readonly BuyerWarehouse[]> {
-    return this.http.get<unknown>(this.api('/buyer/warehouses'), { withCredentials: true })
-      .pipe(map((value) => Array.isArray(value) ? value.map(warehouse) : []));
-  }
 
   clientAccount(): Observable<BuyerClientAccount> {
     return this.http.get<unknown>(this.api('/client-accounts/me'), { withCredentials: true })
@@ -164,3 +144,7 @@ export class BuyerRequestApiClient {
   }
 
 }
+
+/** @deprecated Use BuyerAccountApiClient. Kept as a compatibility alias for existing consumers. */
+@Injectable({ providedIn: 'root' })
+export class BuyerRequestApiClient extends BuyerAccountApiClient {}

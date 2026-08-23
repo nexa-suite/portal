@@ -10,7 +10,7 @@ export interface CanonicalDraftLine {
   readonly notes: string;
 }
 
-export interface CanonicalDraftView {
+export interface PurchaseRequestDraftView {
   readonly id: string;
   readonly clientAccountId: string;
   readonly buyerMembershipId: string;
@@ -36,7 +36,7 @@ function raw(value: unknown): Raw { return value !== null && typeof value === 'o
 function text(value: unknown): string { return typeof value === 'string' ? value.trim() : ''; }
 function number(value: unknown): number { const result = typeof value === 'number' ? value : Number(value); return Number.isFinite(result) ? result : 0; }
 
-function draft(response: HttpResponse<unknown>): CanonicalDraftView {
+function draft(response: HttpResponse<unknown>): PurchaseRequestDraftView {
   const item = raw(response.body);
   const version = number(item['version']);
   return {
@@ -61,43 +61,43 @@ function draft(response: HttpResponse<unknown>): CanonicalDraftView {
 }
 
 @Injectable({ providedIn: 'root' })
-export class CanonicalPurchaseRequestDraftApiClient {
+export class PurchaseRequestDraftApiClient {
   private readonly http = inject(HttpClient);
   private readonly config = inject(PORTAL_RUNTIME_CONFIG);
 
-  create(clientAccountId: string, requestedDeliveryDate: string): Observable<CanonicalDraftView> {
+  create(clientAccountId: string, requestedDeliveryDate: string): Observable<PurchaseRequestDraftView> {
     return this.http.post<unknown>(this.api('/buyer/purchase-request-drafts'), { clientAccountId, requestedDeliveryDate }, { observe: 'response', withCredentials: true })
       .pipe(map(draft));
   }
 
-  get(draftId: string): Observable<CanonicalDraftView> {
+  get(draftId: string): Observable<PurchaseRequestDraftView> {
     return this.http.get<unknown>(this.api(`/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}`), { observe: 'response', withCredentials: true })
       .pipe(map(draft));
   }
 
-  replaceLines(draftId: string, etag: string, lines: readonly CanonicalDraftLine[]): Observable<CanonicalDraftView> {
+  replaceLines(draftId: string, etag: string, lines: readonly CanonicalDraftLine[]): Observable<PurchaseRequestDraftView> {
     return this.mutate('put', `/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/lines`, { lines }, etag);
   }
 
-  setDestination(draftId: string, etag: string, addressId: string): Observable<CanonicalDraftView> {
+  setDestination(draftId: string, etag: string, addressId: string): Observable<PurchaseRequestDraftView> {
     return this.mutate('put', `/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/destination`, { addressId }, etag);
   }
 
-  previewRoute(draftId: string, etag: string): Observable<CanonicalDraftView> {
+  previewRoute(draftId: string, etag: string): Observable<PurchaseRequestDraftView> {
     return this.mutate('post', `/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/route-previews`, { provider: 'LOCAL_ESTIMATE' }, etag);
   }
 
-  setPreferences(draftId: string, etag: string, paymentPreference: string, requestedDeliveryDate: string): Observable<CanonicalDraftView> {
+  setPreferences(draftId: string, etag: string, paymentPreference: string, requestedDeliveryDate: string): Observable<PurchaseRequestDraftView> {
     return this.mutate('put', `/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/preferences`, { paymentPreference, requestedDeliveryDate }, etag);
   }
 
-  submit(draftId: string, etag: string, idempotencyKey: string): Observable<CanonicalDraftView> {
+  submit(draftId: string, etag: string, idempotencyKey: string): Observable<PurchaseRequestDraftView> {
     const headers = new HttpHeaders({ 'If-Match': etag, 'Idempotency-Key': idempotencyKey });
     return this.http.post<unknown>(this.api(`/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/submissions`), null, { observe: 'response', withCredentials: true, headers })
       .pipe(map(draft));
   }
 
-  private mutate(method: 'put' | 'post', path: string, body: unknown, etag: string): Observable<CanonicalDraftView> {
+  private mutate(method: 'put' | 'post', path: string, body: unknown, etag: string): Observable<PurchaseRequestDraftView> {
     const headers = new HttpHeaders({ 'If-Match': etag });
     const options = { observe: 'response' as const, withCredentials: true, headers };
     const request = method === 'put' ? this.http.put<unknown>(this.api(path), body, options) : this.http.post<unknown>(this.api(path), body, options);
@@ -106,3 +106,10 @@ export class CanonicalPurchaseRequestDraftApiClient {
 
   private api(path: string): string { return portalApiUrl(this.config, `/api/v1${path}`); }
 }
+
+/** @deprecated Use PurchaseRequestDraftView. */
+export type CanonicalDraftView = PurchaseRequestDraftView;
+
+/** @deprecated Use PurchaseRequestDraftApiClient. Kept as a compatibility alias for existing consumers. */
+@Injectable({ providedIn: 'root' })
+export class CanonicalPurchaseRequestDraftApiClient extends PurchaseRequestDraftApiClient {}

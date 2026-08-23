@@ -49,8 +49,6 @@ export const routes: Routes = [
       { path: 'receivables', loadComponent: () => import('./payments/presentation/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
       { path: 'receivables/:receivableId', loadComponent: () => import('./payments/presentation/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
       { path: 'payment-methods', loadComponent: () => import('./payments/presentation/payment-methods-page.component').then((module) => module.PaymentMethodsPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
-      { path: 'premium', loadComponent: () => import('./premium/presentation/premium-page.component').then((module) => module.PremiumPageComponent) },
-      { path: 'support', loadComponent: () => import('./support/presentation/support-legal-page.component').then((module) => module.SupportLegalPageComponent) },
       { path: 'legal', loadComponent: () => import('./support/presentation/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
       { path: 'legal/terms', loadComponent: () => import('./support/presentation/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
       { path: 'legal/privacy', loadComponent: () => import('./support/presentation/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
