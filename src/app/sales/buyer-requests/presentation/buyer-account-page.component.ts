@@ -9,7 +9,7 @@ import { SecurityFacade } from '../../../iam/application/security.facade';
 import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
-import { BuyerRequestBuilderFacade } from '../application/buyer-request-builder.facade';
+import { PurchaseRequestBuilderFacade } from '../application/buyer-request-builder.facade';
 import { addressDisplay, CreateClientAccountAddressInput, DeliveryAddressInput, ClientAccountAddress, directionsUrl, UpdateClientAccountAddressInput } from '../domain/buyer-request.models';
 
 @Component({
@@ -23,7 +23,7 @@ export class BuyerAccountPageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   readonly auth = inject(PortalAuthStateService);
   readonly security = inject(SecurityFacade);
-  readonly facade = inject(BuyerRequestBuilderFacade);
+  readonly facade = inject(PurchaseRequestBuilderFacade);
   readonly showAddressForm = signal(false);
   readonly editingAddressId = signal<string | null>(null);
   readonly locationStatus = signal<'idle' | 'requesting' | 'ready' | 'denied' | 'timeout' | 'unavailable' | 'unsupported'>('idle');

@@ -26,7 +26,6 @@ const PORTAL_NAVIGATION: readonly PortalNavItem[] = [
   { path: '/portal/receivables', labelKey: 'shell.navigation.receivables', permission: 'payment.read' },
   { path: '/portal/payment-methods', labelKey: 'shell.navigation.paymentMethods', permission: 'payment.read' },
   { path: '/portal/account', labelKey: 'shell.navigation.account', permission: 'sales:buyer:read' },
-  { path: '/portal/support', labelKey: 'shell.navigation.support' },
   { path: '/portal/legal', labelKey: 'shell.navigation.legal' },
   { path: '/portal/notifications', labelKey: 'shell.navigation.notifications', permission: 'notification.read' },
 ];
@@ -71,7 +70,7 @@ export class PortalShellComponent {
     if (url.includes('/deliveries')) return 'logistics';
     if (url.includes('/receivables') || url.includes('/payment-methods')) return 'payments';
     if (url.includes('/documents')) return 'documents';
-    if (url.includes('/support') || url.includes('/legal')) return 'account';
+    if (url.includes('/legal')) return 'account';
     if (url.includes('/account') || url.includes('/profile')) return 'account';
     return 'home';
   });

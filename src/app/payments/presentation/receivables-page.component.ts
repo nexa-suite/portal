@@ -15,7 +15,6 @@ import { PaymentHistoryItem, PaymentIntent, Receivable } from '../domain/payment
       <p class="context">Área: Buyer · Los importes son de solo lectura y no se reciben desde el navegador.</p>
       <nav class="links" aria-label="Pagos">
         <a routerLink="/portal/payment-methods">Métodos de pago</a>
-        <a routerLink="/portal/support">Soporte</a>
       </nav>
       @if (loading()) { <p role="status">Cargando cuentas por cobrar…</p> }
       @if (error(); as message) { <p role="alert">{{ message }}</p> }

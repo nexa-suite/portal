@@ -11,7 +11,7 @@
 .sign-in-aside footer { color: rgb(255 255 255 / 55%); font-size: var(--nexa-font-size-xs); }
 .sign-in-panel { position: relative; display: grid; align-content: center; width: min(100%, 34rem); margin: 0 auto; padding: clamp(40px, 5vw, 80px); }
 .language-switcher { position: absolute; top: clamp(40px, 5vw, 80px); right: clamp(40px, 5vw, 80px); display: flex; gap: var(--nexa-space-2); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-xs); }
-.language-switcher span { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-full); }
+.language-switcher span { display: grid; place-items: center; width: var(--nexa-target-size-min); height: var(--nexa-target-size-min); border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-full); }
 .language-switcher .active { border-color: var(--nexa-color-primary-100); color: var(--nexa-color-primary-600); background: var(--nexa-color-primary-50); }
 .sign-in-copy { margin-bottom: var(--nexa-space-8); }
 .eyebrow { margin: 0 0 var(--nexa-space-2); color: var(--nexa-color-cold-refrigerated); font-size: var(--nexa-font-size-xs); font-weight: var(--nexa-font-weight-bold); letter-spacing: var(--nexa-letter-spacing-wider); text-transform: uppercase; }

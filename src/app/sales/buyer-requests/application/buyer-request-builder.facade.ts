@@ -11,8 +11,8 @@ import {
   PeruReferenceOption,
   UpdateClientAccountAddressInput,
 } from '../domain/buyer-request.models';
-import { BuyerRequestApiClient } from '../infrastructure/buyer-request-api.client';
-import { CanonicalDraftView, CanonicalPurchaseRequestDraftApiClient } from '../infrastructure/canonical-purchase-request-draft-api.client';
+import { BuyerAccountApiClient } from '../infrastructure/buyer-request-api.client';
+import { PurchaseRequestDraftView, PurchaseRequestDraftApiClient } from '../infrastructure/canonical-purchase-request-draft-api.client';
 
 function errorCode(error: unknown, fallback: string): string {
   return isStaleApiProblem(error) ? 'BUYER_REQUEST_STALE' : readApiProblemDetails(error)?.code ?? fallback;
@@ -29,10 +29,10 @@ function text(value: unknown): string { return typeof value === 'string' ? value
 function number(value: unknown): number { const result = typeof value === 'number' ? value : Number(value); return Number.isFinite(result) ? result : 0; }
 
 @Injectable({ providedIn: 'root' })
-export class BuyerRequestBuilderFacade {
-  private readonly api = inject(BuyerRequestApiClient);
-  private readonly canonical = inject(CanonicalPurchaseRequestDraftApiClient);
-  private readonly canonicalDraft = signal<CanonicalDraftView | null>(null);
+export class PurchaseRequestBuilderFacade {
+  private readonly api = inject(BuyerAccountApiClient);
+  private readonly canonical = inject(PurchaseRequestDraftApiClient);
+  private readonly canonicalDraft = signal<PurchaseRequestDraftView | null>(null);
   private canonicalCommandSignature: string | null = null;
   private canonicalIdempotencyKey: string | null = null;
   readonly addresses = signal<readonly ClientAccountAddress[]>([]);
@@ -67,7 +67,7 @@ export class BuyerRequestBuilderFacade {
     ), 'BUYER_REQUEST_BUILDER_LOAD_FAILED');
   }
 
-  loadDraft(draftId: string): Observable<CanonicalDraftView> {
+  loadDraft(draftId: string): Observable<PurchaseRequestDraftView> {
     return this.run(() => this.canonical.get(draftId), 'BUYER_REQUEST_DRAFT_LOAD_FAILED').pipe(
       tap((draft) => {
         this.canonicalDraft.set(draft);
@@ -128,7 +128,7 @@ export class BuyerRequestBuilderFacade {
     return this.run(() => {
       const signature = this.commandSignature(command);
       const prepared = this.canonicalDraft() && this.canonicalCommandSignature === signature
-        ? of(this.canonicalDraft() as CanonicalDraftView)
+        ? of(this.canonicalDraft() as PurchaseRequestDraftView)
         : this.prepareCanonical(command);
       return prepared.pipe(
         switchMap((draft) => this.canonical.submit(draft.id, draft.etag, this.canonicalIdempotencyKey ?? this.newIdempotencyKey())),
@@ -138,7 +138,7 @@ export class BuyerRequestBuilderFacade {
     }, 'BUYER_REQUEST_CREATE_FAILED');
   }
 
-  private prepareCanonical(command: BuyerRequestCommand): Observable<CanonicalDraftView> {
+  private prepareCanonical(command: BuyerRequestCommand): Observable<PurchaseRequestDraftView> {
     return defer(() => {
       if (!command.clientAccountId || !command.requestedDeliveryDate || command.lines.length === 0) throw new Error('Canonical purchase request draft input is incomplete');
       const lines = command.lines.map((line) => ({ skuId: line.skuId?.trim() || line.catalogItemId.trim(), quantity: line.quantity, unit: line.unit, notes: line.notes }));
@@ -179,10 +179,9 @@ export class BuyerRequestBuilderFacade {
     );
   }
 
-  private snapshotFromDraft(draft: CanonicalDraftView, command: BuyerRequestCommand): BuyerRequestSnapshot {
+  private snapshotFromDraft(draft: PurchaseRequestDraftView, command: BuyerRequestCommand): BuyerRequestSnapshot {
     const destination = object(draft.destination?.['snapshot']);
     const route = object(draft.route?.['snapshot']);
-    const selection = object(draft.warehouseSelection?.['snapshot']);
     const street = [text(destination['roadType']), text(destination['street']), text(destination['number']), text(destination['interior'])].filter(Boolean).join(' ');
     return {
       delivery: {
@@ -200,22 +199,13 @@ export class BuyerRequestBuilderFacade {
           districtCode: text(destination['district']) || '',
           defaultAddress: false,
         } : null,
-        warehouse: text(selection['warehouseId']) ? {
-          id: text(selection['warehouseId']),
-          code: text(selection['code']),
-          name: text(selection['name']),
-          address: text(selection['address']),
-        } : null,
         route: Object.keys(route).length > 0 ? {
           provider: text(route['provider']) || draft.routeProvider,
           reference: text(route['reference']) || null,
-          originLabel: text(route['originLabel']) || null,
           destinationLabel: text(route['destinationLabel']) || null,
           distanceMeters: number(route['distanceMeters']) || number(route['distanceKm']) * 1000,
           durationSeconds: number(route['durationSeconds']),
           previewUrl: text(route['previewUrl']) || null,
-          originLatitude: route['originLatitude'] == null ? null : number(route['originLatitude']),
-          originLongitude: route['originLongitude'] == null ? null : number(route['originLongitude']),
           destinationLatitude: route['destinationLatitude'] == null ? null : number(route['destinationLatitude']),
           destinationLongitude: route['destinationLongitude'] == null ? null : number(route['destinationLongitude']),
           calculatedAt: text(route['calculatedAt']) || text(draft.route?.['calculatedAt']) || null,
@@ -238,7 +228,7 @@ export class BuyerRequestBuilderFacade {
     };
   }
 
-  private requestFromDraft(draft: CanonicalDraftView, command: BuyerRequestCommand): BuyerRequestView {
+  private requestFromDraft(draft: PurchaseRequestDraftView, command: BuyerRequestCommand): BuyerRequestView {
     return {
       id: draft.id,
       code: `PR-${draft.id.slice(0, 8).toUpperCase()}`,
@@ -280,3 +270,7 @@ export class BuyerRequestBuilderFacade {
   }
 
 }
+
+/** @deprecated Use PurchaseRequestBuilderFacade. Kept as a compatibility alias for existing consumers. */
+@Injectable({ providedIn: 'root' })
+export class BuyerRequestBuilderFacade extends PurchaseRequestBuilderFacade {}

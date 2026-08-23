@@ -3,6 +3,39 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.11.0] - 2026-08-23
+
+PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
+
+### Added
+
+- Four-step Purchase Request ordering experience (`Items -> Delivery & Terms -> Commercial Review -> Submission Confirmation`).
+- Integration with canonical server-side Purchase Request Draft endpoints (`/api/v1/purchase-requests/drafts`).
+- Buyer flow boundary cleanup removing internal warehouse details from buyer-facing domain models.
+- Delivery tracking neutralized to buyer visibility semantics.
+- Nexa Design Lab v1.0.1 design token integration and responsive/accessibility enhancements.
+
+### Changed
+
+- Realigned buyer application facades to respect frozen Bounded Context boundaries.
+- Consolidated buyer request validation, draft error handling, and recovery flows.
+
+### Known limitations
+
+- Documents, file uploads, and online payments remain future work for the Buyer Portal.
+- This milestone does not represent Nexa V1 functional completion or Production Readiness.
+
+### Validation
+
+- Catalog asset validation passed.
+- Design Lab token and foundation validation passed.
+- 90 unit tests passed across 44 test suites.
+- Angular production build succeeded.
+
+## Unreleased
+
+No unreleased changes are included in this baseline.
+
 ## [0.10.0] - 2026-08-22
 
 Functional convergence continuation baseline for the Nexa Buyer Portal.
