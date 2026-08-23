@@ -37,15 +37,14 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
 
   await page.goto('/portal/request-builder');
   await expect(page.getByRole('heading', { name: /purchase request|solicitud de compra/i })).toBeVisible();
-  await expect(page.locator('.steps')).toContainText(/buyer|comprador/i);
-
-  const savedAddress = page.locator('select[formcontrolname="addressId"]');
-  const savedAddressOption = savedAddress.locator('option', { hasText: addressLabel });
-  await expect(savedAddressOption).toHaveCount(1);
-  const savedAddressId = await savedAddressOption.getAttribute('value');
-  expect(savedAddressId).toBeTruthy();
-  await savedAddress.selectOption(savedAddressId!);
-  await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
+  const steps = page.locator('.steps button');
+  await expect(steps).toHaveCount(4);
+  await expect(steps).toHaveText([
+    /request review\s*\/\s*cart|revisi[oó]n\s*\/\s*carrito/i,
+    /commercial\s*&\s*delivery|comercial\s+y\s+entrega/i,
+    /payment\s*&\s*terms|pago\s+y\s+t[eé]rminos/i,
+    /confirmation\s*&\s*submission|confirmaci[oó]n\s+y\s+env[ií]o/i,
+  ]);
 
   await page.getByRole('textbox', { name: /search|buscar/i }).fill('');
   await page.getByRole('button', { name: /search|buscar/i }).click();
@@ -57,20 +56,24 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   await page.getByRole('button', { name: /add|agregar/i }).click();
   await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
 
+  const savedAddress = page.locator('select[formcontrolname="addressId"]');
+  const savedAddressOption = savedAddress.locator('option', { hasText: addressLabel });
+  await expect(savedAddressOption).toHaveCount(1);
+  const savedAddressId = await savedAddressOption.getAttribute('value');
+  expect(savedAddressId).toBeTruthy();
+  await savedAddress.selectOption(savedAddressId!);
+
   const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
   await page.locator('input[type="date"]').fill(tomorrow);
   const preview = page.waitForResponse((response) => response.request().method() === 'POST' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/route-previews$/.test(new URL(response.url()).pathname));
   await page.locator('.form-actions').getByRole('button', { name: /review|revisar/i }).click();
   const previewResponse = await preview;
   expect(previewResponse.status()).toBe(200);
-  await expect(page.locator('.buyer-map-preview')).toBeVisible();
-  await expect(page.locator('.buyer-map-preview')).toContainText(/Av\. Real 250|E2E 2C/i);
+  await expect(page.locator('body')).not.toContainText(/warehouseId|reservationId|internal warehouse/i);
+  await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
   await expect(page.locator('.route-card')).toContainText(/LOCAL_DETERMINISTIC|LOCAL_ESTIMATE/i);
   const mapLink = page.getByRole('link', { name: /open map|abrir mapa/i });
   if (await mapLink.count()) await expect(mapLink).toHaveAttribute('href', /^https?:\/\//);
-  await expect(page.locator('body')).not.toContainText(/warehouseId|reservationId|internal warehouse/i);
-  await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
-  await page.getByRole('button', { name: /next|continue|siguiente|continuar/i }).click();
 
   const requestCreate = page.waitForResponse((response) => response.request().method() === 'POST' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/submissions$/.test(new URL(response.url()).pathname));
   await page.locator('.form-actions').getByRole('button', { name: /submit request|enviar solicitud/i }).click();
