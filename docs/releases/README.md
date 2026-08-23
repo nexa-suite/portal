@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Published release | Summary |
 |---|---|
+| [v0.10.0](./v0.10.0.md) | Functional convergence continuation Buyer Portal baseline |
 | [v0.7.1](./v0.7.1.md) | Buyer availability and delivery-tracking stabilization |
 | [v0.7.0](./v0.7.0.md) | Consolidated Buyer commercial and delivery tracking surface |
 | [v0.5.0](./v0.5.0.md) | Buyer access, Catalog and Purchase Request self-service |
@@ -18,4 +19,4 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.7.1`. Structural parity has advanced for implemented surfaces; this does not claim full product migration or pixel-level parity with Vue.
+Current release is `0.10.0`. Structural parity has advanced for implemented surfaces; this does not claim full product migration or pixel-level parity with Vue.
