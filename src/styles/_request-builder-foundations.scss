@@ -7,3 +7,4 @@ nexa-buyer-request-builder-page {
 @media (max-width:600px){.buyer-map-preview{min-height:240px;align-items:flex-start;flex-direction:column}.buyer-map-node{max-width:70%}.buyer-map-node.destination{align-self:flex-end;margin-top:88px}.buyer-map-preview::before{top:46%;right:28%;left:28%;transform:rotate(58deg)}}
 .field-error{margin:var(--nexa-space-2) 0 0;color:var(--nexa-color-danger-700);font-size:var(--nexa-font-size-sm);font-weight:var(--nexa-font-weight-medium)}[aria-invalid="true"]{border-color:var(--nexa-color-danger-500)}
 }
+.steps button,.form-actions button,.form-actions a,.line-actions button{min-height:var(--nexa-target-size-min)}

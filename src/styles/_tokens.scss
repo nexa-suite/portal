@@ -3,19 +3,31 @@
 @use './tokens-components';
 @use './tokens-data-visualization';
 
-/* Portal compatibility aliases. Remove only after every consumer uses v0.10 semantics. */
+/*
+ * Design Lab source of truth: v1.0.1 / main @ d27e158569211a3afec171b1c9606f06906fc99a.
+ * The generated token layers above stay source-aligned; these aliases are
+ * Portal compatibility names and must not become a second token system.
+ */
 :root {
+  --nexa-font-weight-normal: 400;
+  --nexa-color-primary: var(--nexa-color-primary-600);
+  --nexa-color-surface: var(--nexa-surface-card);
   --nexa-color-border: var(--nexa-color-border-default);
+  --nexa-border: var(--nexa-color-border-default);
+  --nexa-muted: var(--nexa-color-text-secondary);
+  --nexa-accent: var(--nexa-color-primary-600);
+  --nexa-color-text-tertiary: var(--nexa-color-text-muted);
   --nexa-color-info-600: var(--nexa-color-primary-600);
   --nexa-color-success-600: var(--nexa-color-success-700);
   --nexa-color-warning-700: var(--nexa-color-warning-text);
   --nexa-color-danger-700: var(--nexa-color-danger-text);
+  --nexa-color-warning-800: var(--nexa-color-warning-text);
   --nexa-color-cold-ambient: var(--nexa-color-sky-600);
   --nexa-color-cold-ambient-soft: var(--nexa-primitive-sky-50);
   --nexa-color-cold-risk: var(--nexa-color-attention-500);
   --nexa-color-cold-risk-soft: var(--nexa-color-attention-surface);
-  --nexa-color-cold-frost: var(--nexa-color-primary-100);
-  --nexa-shadow-md: var(--nexa-shadow-sm);
+  --nexa-color-cold-frost: var(--nexa-color-primary-50);
+  --nexa-shadow-md: var(--nexa-shadow-menu);
   --nexa-letter-spacing-wide: .025em;
   --nexa-letter-spacing-wider: .05em;
 }

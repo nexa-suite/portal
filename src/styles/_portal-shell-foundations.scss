@@ -11,7 +11,7 @@
 .portal-header {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: var(--nexa-z-sticky);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -71,7 +71,7 @@
 .portal-navigation a {
   display: inline-flex;
   align-items: center;
-  min-height: var(--nexa-control-height-sm);
+  min-height: max(var(--nexa-layout-nav-item-height), var(--nexa-target-size-min));
   padding: 0 var(--nexa-space-3);
   border-radius: var(--nexa-radius-md);
   color: var(--nexa-color-text-secondary);
@@ -159,7 +159,7 @@
 
 .notifications-popover {
   position: fixed;
-  z-index: 6;
+  z-index: var(--nexa-z-popover);
   top: calc(var(--nexa-layout-toolbar-height) + var(--nexa-space-2));
   right: clamp(var(--nexa-space-4), 5vw, var(--nexa-space-10));
   width: min(380px, calc(100vw - 32px));
