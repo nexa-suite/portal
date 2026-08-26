@@ -2,7 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
 import { providePortalRuntimeConfig } from '../../security/runtime-config';
+import { PORTAL_SECURITY_BOUNDARY } from '../../security/portal-security.boundary';
+import { NotificationsApiPort } from '../../../notifications/application/ports/notifications-api.port';
 import { PortalShellComponent } from './portal-shell.component';
 
 describe('PortalShellComponent', () => {
@@ -15,6 +18,8 @@ describe('PortalShellComponent', () => {
         providePortalRuntimeConfig(),
         provideRouter([]),
         provideTranslateService(),
+        { provide: PORTAL_SECURITY_BOUNDARY, useValue: { hasPermission: () => true, signOut: () => of(undefined) } },
+        { provide: NotificationsApiPort, useValue: { list: () => of({ items: [], unreadCount: 0, limit: 25 }), unreadCount: () => of(0), markRead: () => of(undefined), markAllRead: () => of(undefined) } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(PortalShellComponent);

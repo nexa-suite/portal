@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { PORTAL_SURFACE } from '../../iam/domain/portal-access.models';
+import { PORTAL_SURFACE } from './portal-security.contract';
 
 export const portalSurfaceInterceptor: HttpInterceptorFn = (request, next) =>
   next(

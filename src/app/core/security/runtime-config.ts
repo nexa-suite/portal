@@ -1,5 +1,6 @@
 import { InjectionToken, Provider } from '@angular/core';
-import { PORTAL_SURFACE, PortalSurface } from '../../iam/domain/portal-access.models';
+import { PORTAL_SURFACE } from './portal-security.contract';
+import type { PortalSurface } from './portal-security.contract';
 
 export interface PortalRuntimeConfig {
   readonly apiBaseUrl: string;

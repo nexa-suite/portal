@@ -5,9 +5,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { of } from 'rxjs';
-import { PortalAuthStateService } from '../../iam/application/portal-auth-state.service';
 import { accessTokenInterceptor } from './access-token.interceptor';
 import { portalSurfaceInterceptor } from './portal-surface.interceptor';
+import { PORTAL_SECURITY_BOUNDARY } from './portal-security.boundary';
 import { refreshInterceptor } from './refresh.interceptor';
 
 describe('Portal HTTP security', () => {
@@ -21,7 +21,7 @@ describe('Portal HTTP security', () => {
     vi.clearAllMocks();
     TestBed.configureTestingModule({
       providers: [
-        { provide: PortalAuthStateService, useValue: auth },
+        { provide: PORTAL_SECURITY_BOUNDARY, useValue: auth },
         provideHttpClient(
           withInterceptors([portalSurfaceInterceptor, accessTokenInterceptor, refreshInterceptor]),
         ),
