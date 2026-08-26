@@ -39,7 +39,7 @@ Portal does not own internal administration, backend business rules or persisten
 
 ## Architecture
 
-Standalone Angular application. Core routing, shared presentation and application utilities remain separate. Buyer-facing models and API adapters require approved contracts; Portal is not a second business authority.
+Standalone Angular application. The frontend follows the canonical 11-context set as API-aligned feature roots directly under [`src/app`](./src/app/README.md); the surface map is [`docs/architecture/bounded-context-map.md`](./docs/architecture/bounded-context-map.md). Core routing, shared presentation and application utilities remain separate. Buyer-facing models and API adapters require approved contracts; Portal is not a second business authority.
 
 ## Technology Stack
 
@@ -63,11 +63,14 @@ Open http://localhost:4300 and navigate to /home.
 ## Validation
 
     npm run validate:catalog-assets
+    npm run validate:architecture
+    npm run validate:bounded-contexts
     npm test
     npm run build
 
 ## Repository Structure
 
+    src/app/<api-context>/                Canonical API-aligned BC feature roots
     src/app/core/                         Shell, routes and language service
     src/app/shared/presentation/         Reusable visual components
     src/app/shared/application/          Pure address, date and number utilities

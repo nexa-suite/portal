@@ -1,11 +1,11 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { PortalAuthStateService } from '../../iam/application/portal-auth-state.service';
 import { AUTH_RETRY, isPublicIdentityRequest, SKIP_REFRESH } from './http-context.tokens';
+import { PORTAL_SECURITY_BOUNDARY } from './portal-security.boundary';
 
 export const refreshInterceptor: HttpInterceptorFn = (request, next) => {
-  const auth = inject(PortalAuthStateService);
+  const auth = inject(PORTAL_SECURITY_BOUNDARY);
 
   return next(request).pipe(
     catchError((error: unknown) => {

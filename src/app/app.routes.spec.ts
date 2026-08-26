@@ -1,9 +1,9 @@
 import { routes } from './app.routes';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Routes } from '@angular/router';
 
 describe('Portal routes', () => {
-  it('exposes public access and protected buyer routes', () => {
+  it('exposes public access and protected buyer routes', async () => {
     expect(routes.find((route) => route.path === '')?.redirectTo).toBe('sign-in');
     expect(routes.some((route) => route.path === 'sign-in')).toBe(true);
     expect(routes.some((route) => route.path === 'forbidden')).toBe(true);
@@ -14,10 +14,7 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'notifications')).toBe(true);
     expect(children.some((route) => route.path === 'product-catalog')).toBe(true);
     expect(children.some((route) => route.path === 'request-builder')).toBe(true);
-    expect(children.some((route) => route.path === 'product-catalog/:catalogItemId')).toBe(true);
-    expect(children.some((route) => route.path === 'request-builder/:purchaseRequestId')).toBe(true);
     expect(children.some((route) => route.path === 'sales-orders')).toBe(true);
-    expect(children.some((route) => route.path === 'sales-orders/:salesOrderId')).toBe(true);
     expect(children.some((route) => route.path === 'documents')).toBe(true);
     expect(children.some((route) => route.path === 'receivables')).toBe(true);
     expect(children.some((route) => route.path === 'receivables/:receivableId')).toBe(true);
@@ -30,6 +27,14 @@ describe('Portal routes', () => {
     for (const path of ['legal', 'legal/terms', 'legal/privacy']) {
       expect(children.find((route) => route.path === path)?.data?.['section']).toBe('legal');
     }
+    const lazyRoutes = async (path: string): Promise<Routes> => {
+      const route = children.find((item) => item.path === path);
+      expect(typeof route?.loadChildren).toBe('function');
+      return (await (route?.loadChildren as () => Promise<Routes>)());
+    };
+    expect((await lazyRoutes('product-catalog')).some((route) => route.path === ':catalogItemId')).toBe(true);
+    expect((await lazyRoutes('request-builder')).some((route) => route.path === ':purchaseRequestId')).toBe(true);
+    expect((await lazyRoutes('sales-orders')).some((route) => route.path === ':salesOrderId')).toBe(true);
     expect(children.find((route) => route.path === 'orders')?.redirectTo).toBe('sales-orders');
     expect(children.find((route) => route.path === 'my-orders')?.redirectTo).toBe('sales-orders');
     expect(children.find((route) => route.path === 'catalog')?.redirectTo).toBe('product-catalog');
