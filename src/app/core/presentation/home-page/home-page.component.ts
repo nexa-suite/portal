@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
-import { CatalogApiClient } from '../../../catalog-management/infrastructure/catalog-api.client';
-import { DEFAULT_CATALOG_QUERY } from '../../../catalog-management/domain/catalog.models';
-import { DeliveryTrackingApiClient } from '../../../logistics/infrastructure/delivery-tracking-api.client';
-import { PaymentsApiClient } from '../../../payments/infrastructure/payments-api.client';
-import { Receivable } from '../../../payments/domain/payment.models';
-import { PurchaseRequest, PurchaseRequestPage } from '../../../sales/purchase-requests/domain/purchase-request.models';
-import { PurchaseRequestApiClient } from '../../../sales/purchase-requests/infrastructure/purchase-request-api.client';
-import { SalesOrder, SalesOrderPage } from '../../../sales/orders/domain/sales-order.models';
-import { SalesOrderApiClient } from '../../../sales/orders/infrastructure/sales-order-api.client';
+import { CatalogApiClient } from '../../../catalogcommercialpolicy/infrastructure/catalog-api.client';
+import { DEFAULT_CATALOG_QUERY } from '../../../catalogcommercialpolicy/domain/catalog.models';
+import { DeliveryTrackingApiClient } from '../../../fulfillmentdelivery/infrastructure/delivery-tracking-api.client';
+import { ReceivablesApiClient } from '../../../creditreceivables/infrastructure/receivables-api.client';
+import { Receivable } from '../../../creditreceivables/domain/receivables.models';
+import { PurchaseRequest, PurchaseRequestPage } from '../../../salescommitment/domain/purchase-requests/purchase-request.models';
+import { PurchaseRequestApiClient } from '../../../salescommitment/infrastructure/purchase-requests/purchase-request-api.client';
+import { SalesOrder, SalesOrderPage } from '../../../salescommitment/domain/orders/sales-order.models';
+import { SalesOrderApiClient } from '../../../salescommitment/infrastructure/orders/sales-order-api.client';
 import { EmptyStateComponent } from '../../../shared/presentation/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
@@ -39,7 +39,7 @@ interface HomeFeed<T> { readonly value: T; readonly failed: boolean; }
 export class HomePageComponent {
   private readonly catalog = inject(CatalogApiClient);
   private readonly deliveries = inject(DeliveryTrackingApiClient);
-  private readonly payments = inject(PaymentsApiClient);
+  private readonly receivables = inject(ReceivablesApiClient);
   private readonly requests = inject(PurchaseRequestApiClient);
   private readonly orders = inject(SalesOrderApiClient);
 
@@ -48,7 +48,7 @@ export class HomePageComponent {
   readonly partial = signal(false);
   readonly requestItems = signal<readonly PurchaseRequest[]>([]);
   readonly orderItems = signal<readonly SalesOrder[]>([]);
-  readonly deliveryItems = signal<readonly import('../../../logistics/domain/delivery.models').Delivery[]>([]);
+  readonly deliveryItems = signal<readonly import('../../../fulfillmentdelivery/domain/delivery.models').Delivery[]>([]);
   readonly receivableItems = signal<readonly Receivable[]>([]);
   readonly catalogTotal = signal(0);
 
@@ -61,7 +61,7 @@ export class HomePageComponent {
       requests: this.safe(this.requests.list(), { items: [], page: 0, size: 50, total: 0 } satisfies PurchaseRequestPage),
       orders: this.safe(this.orders.list(), { items: [], page: 0, size: 50, total: 0 } satisfies SalesOrderPage),
       deliveries: this.safe(this.deliveries.list(), { items: [], page: 0, size: 100, total: 0 }),
-      receivables: this.safe(this.payments.list(), { items: [], page: 0, size: 25, total: 0 }),
+      receivables: this.safe(this.receivables.list(), { items: [], page: 0, size: 25, total: 0 }),
       catalog: this.safe(this.catalog.list({ ...DEFAULT_CATALOG_QUERY, size: 1 }), { ...DEFAULT_CATALOG_QUERY, items: [], totalItems: 0, totalPages: 0, sort: { field: '', direction: '' } }),
     }).subscribe({
       next: (feed) => {

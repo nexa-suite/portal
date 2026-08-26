@@ -3,6 +3,35 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.13.0] - 2026-08-26
+
+Canonical bounded-context layering and Angular composition release for the Nexa Buyer Portal.
+
+### Added
+
+- Canonical direct bounded-context roots aligned with the API vocabulary, each with explicit `application`, `domain`, `infrastructure` and `presentation` layers.
+- Application ports and explicit ACL gateways for cross-context buyer, catalog and delivery collaboration.
+- Executable bounded-context validation for the eleven canonical contexts, layer direction, legacy-root removal and domain isolation.
+
+### Changed
+
+- Reorganized implemented Portal features under their canonical bounded contexts while preserving routes and REST contracts.
+- Moved HTTP adapters behind application-facing ports and kept cross-context translation explicit.
+- Lazy-loaded the home surface and feature-scoped adapter providers so the initial bundle remains below its configured budget.
+- Corrected the translation asset loader path so public routes resolve language files in the browser.
+
+### Validation
+
+- Bounded-context, catalog-asset and Design Lab foundation validators passed.
+- 97 unit tests passed across 51 test files.
+- TypeScript no-emit compilation and Angular production build passed with a `473.24 kB` initial bundle.
+- `git diff --check` passed.
+
+### Boundary
+
+- No API endpoints, API contracts or Blueprint canonical definitions were changed by this release.
+- This remains a PRE-V1 architecture release; it does not claim complete product migration or Production Readiness.
+
 ## [0.12.0] - 2026-08-23
 
 Visual and interaction convergence baseline using Nexa Design Lab (v1.0.1) tokens and components.

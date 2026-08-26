@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { PortalAuthStateService } from '../../iam/application/portal-auth-state.service';
+import { PORTAL_SECURITY_BOUNDARY } from '../security/portal-security.boundary';
 
 export function safeReturnUrl(url: string | null | undefined): string {
   if (typeof url !== 'string') return '/portal/home';
@@ -36,7 +36,7 @@ export function safeReturnUrl(url: string | null | undefined): string {
 }
 
 export const portalAuthGuard: CanActivateFn = (_route, state) => {
-  const auth = inject(PortalAuthStateService);
+  const auth = inject(PORTAL_SECURITY_BOUNDARY);
   const router = inject(Router);
   return auth.isAuthenticated()
     ? true
@@ -44,7 +44,7 @@ export const portalAuthGuard: CanActivateFn = (_route, state) => {
 };
 
 export const buyerRoleGuard: CanActivateFn = (_route, state) => {
-  const auth = inject(PortalAuthStateService);
+  const auth = inject(PORTAL_SECURITY_BOUNDARY);
   const router = inject(Router);
   if (!auth.isAuthenticated()) {
     return router.createUrlTree(['/sign-in'], {
@@ -59,7 +59,7 @@ export const buyerRoleGuard: CanActivateFn = (_route, state) => {
 };
 
 export const publicOnlyGuard: CanActivateFn = (_route, state) => {
-  const auth = inject(PortalAuthStateService);
+  const auth = inject(PORTAL_SECURITY_BOUNDARY);
   const router = inject(Router);
   if (!auth.canAccessBuyerPortal()) return true;
   const returnUrl = state.root.queryParams['returnUrl'];
@@ -71,7 +71,7 @@ export const buyerOnlyGuard = buyerRoleGuard;
 
 export function buyerPermissionGuard(permission: string): CanActivateFn {
   return (_route, state) => {
-    const auth = inject(PortalAuthStateService);
+    const auth = inject(PORTAL_SECURITY_BOUNDARY);
     const router = inject(Router);
     if (!auth.isAuthenticated()) return router.createUrlTree(['/sign-in'], { queryParams: { returnUrl: safeReturnUrl(state.url) } });
     return auth.hasPermission(permission) ? true : router.createUrlTree(['/forbidden'], { queryParams: { returnUrl: safeReturnUrl(state.url) } });
