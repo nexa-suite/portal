@@ -1,7 +1,8 @@
 import { firstValueFrom } from 'rxjs';
 import { effect, Injectable, inject } from '@angular/core';
-import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
+import { PORTAL_SECURITY_BOUNDARY } from '../../security/portal-security.boundary';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../security/runtime-config';
+import { ChangeFeedFetchPort } from '../application/change-feed-fetch.port';
 import { ChangeFeedEvent, ChangeFeedListener } from '../domain/change-feed.models';
 
 function stringValue(value: unknown): string {
@@ -34,8 +35,8 @@ function parseEvent(type: string, id: string, data: string): ChangeFeedEvent | n
 }
 
 @Injectable({ providedIn: 'root' })
-export class ChangeFeedFetchClient {
-  private readonly auth = inject(PortalAuthStateService);
+export class ChangeFeedFetchClient implements ChangeFeedFetchPort {
+  private readonly auth = inject(PORTAL_SECURITY_BOUNDARY);
   private readonly config = inject(PORTAL_RUNTIME_CONFIG);
   private readonly listeners = new Set<ChangeFeedListener>();
   private readonly seenIds = new Set<string>();

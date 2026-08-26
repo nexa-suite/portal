@@ -5,9 +5,9 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { filter, map } from 'rxjs';
 import { BrandLogoComponent } from '../../../shared/presentation/components/brand-logo/brand-logo.component';
 import { LanguageSwitcherComponent } from '../../i18n/language-switcher/language-switcher.component';
-import { PortalAuthStateService } from '../../../iam/application/portal-auth-state.service';
-import { PortalNotificationsFacade } from '../../notifications/application/portal-notifications.facade';
-import { PortalNotification } from '../../notifications/domain/notification.models';
+import { PORTAL_SECURITY_BOUNDARY } from '../../security/portal-security.boundary';
+import { PortalNotificationsFacade } from '../../../notifications/application/portal-notifications.facade';
+import { PortalNotification } from '../../../notifications/domain/notification.models';
 
 interface PortalNavItem {
   readonly path: string;
@@ -48,7 +48,7 @@ const PORTAL_NAVIGATION: readonly PortalNavItem[] = [
 })
 export class PortalShellComponent {
   private readonly router = inject(Router);
-  readonly auth = inject(PortalAuthStateService);
+  readonly auth = inject(PORTAL_SECURITY_BOUNDARY);
   readonly notifications = inject(PortalNotificationsFacade);
   readonly menuOpen = signal(false);
   readonly notificationsOpen = signal(false);
