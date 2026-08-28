@@ -80,8 +80,8 @@
           <div class="review-check ok">
             <nexa-icon name="location_on" />
             <span>
-              <strong>{{ warehouse().name }}</strong>
-              <small>{{ warehouse().address }}</small>
+              <strong>{{ warehouse().name || ('buyerBuilder.delivery.serverSelectionPending' | translate) }}</strong>
+              <small>{{ warehouse().address || ('buyerBuilder.delivery.subtitle' | translate) }}</small>
             </span>
           </div>
           <button
@@ -247,7 +247,7 @@
                   <strong>{{ 'buyerBuilder.address.currentLocation' | translate }}</strong>
                   <small>{{
                     'buyerBuilder.address.currentDescription'
-                      | translate: { warehouse: warehouse().name }
+                      | translate: { warehouse: warehouse().name || ('buyerBuilder.delivery.serverSelectionPending' | translate) }
                   }}</small>
                 </span>
               </button>
@@ -537,7 +537,7 @@
             <div class="route-trace-card">
               <span>{{ 'buyerBuilder.delivery.traceableRoute' | translate }}</span>
               <strong>
-                {{ warehouse().name }} →
+                {{ warehouse().name || warehouse().id || ('buyerBuilder.delivery.serverSelectionPending' | translate) }} →
                 {{ selectedAddressLabel() || ('buyerBuilder.delivery.destinationPending' | translate) }}
               </strong>
             </div>
