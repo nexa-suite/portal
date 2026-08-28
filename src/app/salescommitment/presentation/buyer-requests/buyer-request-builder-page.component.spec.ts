@@ -7,6 +7,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PORTAL_SECURITY_BOUNDARY } from '../../../core/security/portal-security.boundary';
 import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/buyer-request-builder.facade';
 import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
+import { PurchaseRequestDraftSessionPort } from '../../application/ports/purchase-request-draft-session.port';
 import type { SalesCommitmentBuyerAccountReference } from '../../domain/buyer-requests/sales-commitment-buyer-reference.models';
 import {
   BUYER_REQUEST_BUILDER_STEPS,
@@ -27,6 +28,7 @@ describe('BuyerRequestBuilderPageComponent', () => {
     message: signal<string | null>(null),
     loadInitial: vi.fn(() => of(undefined)),
     loadDraft: vi.fn(() => of(null)),
+    startDraftFromCart: vi.fn(() => of(null)),
     loadProvinces: vi.fn(() => of([])),
     loadDistricts: vi.fn(() => of([])),
     preview: vi.fn(() => of(null)),
@@ -68,6 +70,7 @@ describe('BuyerRequestBuilderPageComponent', () => {
         { provide: PurchaseRequestBuilderFacade, useValue: facade },
         { provide: PORTAL_SECURITY_BOUNDARY, useValue: auth },
         { provide: PurchaseRequestCartPort, useValue: cart },
+        { provide: PurchaseRequestDraftSessionPort, useValue: { read: vi.fn(() => null), write: vi.fn(), clear: vi.fn() } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } },
         { provide: Router, useValue: router },
       ],

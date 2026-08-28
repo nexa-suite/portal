@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { PORTAL_RUNTIME_CONFIG, TenantProfile } from '../../../core/security/runtime-config';
 import {
   CanonicalDraftLine,
+  PurchaseRequestDraftReview,
   PurchaseRequestDraftView,
 } from '../../domain/buyer-requests/purchase-request-draft.models';
 import {
@@ -168,6 +169,29 @@ export class MockSalesCommitmentStore {
       requestedDeliveryDate: requestedDeliveryDate || null,
       creditResult: paymentPreference === 'CREDIT_LINE' ? 'APPROVED' : 'NOT_REQUIRED',
     });
+  }
+
+  reviewDraft(draftId: string): PurchaseRequestDraftReview {
+    const draft = this.requireDraft(draftId);
+    const productsComplete = draft.lines.length > 0;
+    const destinationComplete = draft.destination !== null;
+    const routeValidated = draft.route !== null;
+    const commercialReviewComplete = Boolean(draft.paymentPreference && draft.creditResult);
+    const missing = [
+      ...(productsComplete ? [] : ['products']),
+      ...(destinationComplete ? [] : ['destination']),
+      ...(routeValidated ? [] : ['route']),
+      ...(commercialReviewComplete ? [] : ['commercial']),
+    ];
+    return {
+      draft: this.cloneDraft(draft),
+      productsComplete,
+      destinationComplete,
+      routeValidated,
+      commercialReviewComplete,
+      readyToSubmit: missing.length === 0 && draft.status === 'DRAFT',
+      missing,
+    };
   }
 
   submitDraft(

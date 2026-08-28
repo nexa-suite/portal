@@ -3,9 +3,9 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../../core/security/runtime-config';
 import { PurchaseRequestDraftApiPort } from '../../application/ports/purchase-request-draft-api.port';
-import { CanonicalDraftLine, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
+import { CanonicalDraftLine, PurchaseRequestDraftReview, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
 
-export type { CanonicalDraftLine, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
+export type { CanonicalDraftLine, PurchaseRequestDraftReview, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
 
 type Raw = Record<string, unknown>;
 
@@ -15,6 +15,10 @@ function number(value: unknown): number { const result = typeof value === 'numbe
 
 function draft(response: HttpResponse<unknown>): PurchaseRequestDraftView {
   const item = raw(response.body);
+  return draftFromRaw(item, response.headers.get('ETag'));
+}
+
+function draftFromRaw(item: Raw, responseEtag: string | null = null): PurchaseRequestDraftView {
   const version = number(item['version']);
   return {
     id: text(item['id']),
@@ -33,7 +37,22 @@ function draft(response: HttpResponse<unknown>): PurchaseRequestDraftView {
     createdAt: text(item['createdAt']),
     updatedAt: text(item['updatedAt']),
     submittedAt: text(item['submittedAt']) || null,
-    etag: response.headers.get('ETag') ?? `"${version}"`,
+    etag: responseEtag ?? `"${version}"`,
+  };
+}
+
+function review(response: unknown): PurchaseRequestDraftReview {
+  const item = raw(response);
+  return {
+    draft: draftFromRaw(raw(item['draft'])),
+    productsComplete: item['productsComplete'] === true,
+    destinationComplete: item['destinationComplete'] === true,
+    routeValidated: item['routeValidated'] === true,
+    commercialReviewComplete: item['commercialReviewComplete'] === true,
+    readyToSubmit: item['readyToSubmit'] === true,
+    missing: Array.isArray(item['missing'])
+      ? item['missing'].filter((value): value is string => typeof value === 'string')
+      : [],
   };
 }
 
@@ -66,6 +85,11 @@ export class PurchaseRequestDraftApiClient implements PurchaseRequestDraftApiPor
 
   setPreferences(draftId: string, etag: string, paymentPreference: string, requestedDeliveryDate: string): Observable<PurchaseRequestDraftView> {
     return this.mutate('put', `/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/preferences`, { paymentPreference, requestedDeliveryDate }, etag);
+  }
+
+  review(draftId: string): Observable<PurchaseRequestDraftReview> {
+    return this.http.get<unknown>(this.api(`/buyer/purchase-request-drafts/${encodeURIComponent(draftId)}/review`), { withCredentials: true })
+      .pipe(map(review));
   }
 
   submit(draftId: string, etag: string, idempotencyKey: string): Observable<PurchaseRequestDraftView> {

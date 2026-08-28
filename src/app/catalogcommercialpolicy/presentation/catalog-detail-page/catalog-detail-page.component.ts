@@ -49,9 +49,11 @@ export class CatalogDetailPageComponent {
     initialValue: this.route.snapshot.queryParamMap,
   });
   readonly catalogItemId = computed(() => this.routeParams().get('catalogItemId') ?? '');
-  readonly backQueryParams = computed(() =>
-    catalogQueryToParams(catalogQueryFromParams(this.queryParams())),
-  );
+  readonly draftId = computed(() => this.queryParams().get('draftId')?.trim() || null);
+  readonly backQueryParams = computed(() => ({
+    ...catalogQueryToParams(catalogQueryFromParams(this.queryParams())),
+    ...(this.draftId() ? { draftId: this.draftId() as string } : {}),
+  }));
   readonly previewQuantity = signal('1');
   readonly previewQuantityInvalid = signal(false);
 

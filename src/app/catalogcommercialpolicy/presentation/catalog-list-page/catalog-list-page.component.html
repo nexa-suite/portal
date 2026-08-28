@@ -4,7 +4,7 @@
       <div class="page-title">{{ 'catalog.title' | translate }}</div>
       <div class="page-subtitle">{{ 'catalog.authorizedProducts' | translate: { count: totalItems() } }}</div>
     </div>
-    <a class="btn btn-primary" routerLink="/portal/request-builder">
+    <a class="btn btn-primary" [routerLink]="draftId() ? ['/portal/request-builder', draftId()] : ['/portal/request-builder']">
       <nexa-icon name="shopping_cart" />
       {{ 'catalog.requestBuilderCount' | translate: { count: cart.count() } }}
     </a>
