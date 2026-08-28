@@ -454,30 +454,22 @@
             </label>
 
             <div class="payment-mode-grid" role="radiogroup" [attr.aria-label]="'buyerBuilder.confirm.payment' | translate">
-              <button
-                class="payment-mode-card"
-                type="button"
-                [class.active]="form.controls.paymentOption.value === 'CREDIT_LINE'"
-                (click)="form.controls.paymentOption.setValue('CREDIT_LINE')"
-              >
-                <nexa-icon name="account_balance_wallet" />
-                <span>
-                  <strong>{{ 'buyerBuilder.payment.creditTitle' | translate }}</strong>
-                  <small>{{ 'buyerBuilder.payment.creditHint' | translate }}</small>
-                </span>
-              </button>
-              <button
-                class="payment-mode-card"
-                type="button"
-                [class.active]="form.controls.paymentOption.value === 'BANK_TRANSFER'"
-                (click)="form.controls.paymentOption.setValue('BANK_TRANSFER')"
-              >
-                <nexa-icon name="credit_card" />
-                <span>
-                  <strong>{{ 'buyerBuilder.payment.bankTitle' | translate }}</strong>
-                  <small>{{ 'buyerBuilder.payment.bankHint' | translate }}</small>
-                </span>
-              </button>
+              @for (option of paymentOptions; track option.value) {
+                <button
+                  class="payment-mode-card"
+                  type="button"
+                  role="radio"
+                  [attr.aria-checked]="form.controls.paymentOption.value === option.value"
+                  [class.active]="form.controls.paymentOption.value === option.value"
+                  (click)="setPaymentOption(option.value)"
+                >
+                  <nexa-icon [name]="option.icon" />
+                  <span>
+                    <strong>{{ option.title | translate }}</strong>
+                    <small>{{ option.hint | translate }}</small>
+                  </span>
+                </button>
+              }
             </div>
             @if (!paymentValid() && form.controls.paymentOption.touched) {
               <p class="field-error" role="alert">
@@ -685,11 +677,7 @@
             <div class="review-check ok">
               <nexa-icon name="credit_card" />
               <span>
-                <strong>{{
-                  form.controls.paymentOption.value === 'CREDIT_LINE'
-                    ? ('buyerBuilder.payment.creditTitle' | translate)
-                    : ('buyerBuilder.payment.bankTitle' | translate)
-                }}</strong>
+                <strong>{{ paymentLabelKey(form.controls.paymentOption.value) | translate }}</strong>
                 <small>{{ 'buyerBuilder.payment.reviewHint' | translate }}</small>
               </span>
             </div>

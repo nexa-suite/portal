@@ -59,6 +59,25 @@ function draftObject(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 }
 
+const BUYER_PAYMENT_OPTIONS: readonly BuyerPaymentOption[] = [
+  'CREDIT_LINE',
+  'BANK_TRANSFER',
+  'CARD_STRIPE',
+  'CASH',
+  'CASH_ON_DELIVERY',
+];
+
+/** Maps the free-form account condition returned by API to a canonical request option. */
+export function paymentOptionFromCondition(value: string | null | undefined): BuyerPaymentOption | null {
+  const normalized = draftText(value).trim().toUpperCase().replace(/[\s-]+/g, '_');
+  if (normalized === 'CREDIT' || normalized.startsWith('CREDIT_')) return 'CREDIT_LINE';
+  if (['BANK', 'BANK_TRANSFER', 'TRANSFER', 'WIRE', 'WIRE_TRANSFER'].includes(normalized)) return 'BANK_TRANSFER';
+  if (['CARD', 'CARD_STRIPE', 'STRIPE'].includes(normalized)) return 'CARD_STRIPE';
+  if (normalized === 'CASH') return 'CASH';
+  if (['COD', 'CASH_ON_DELIVERY'].includes(normalized)) return 'CASH_ON_DELIVERY';
+  return null;
+}
+
 @Component({
   selector: 'nexa-buyer-request-builder-page',
   imports: [
@@ -144,7 +163,7 @@ export class BuyerRequestBuilderPageComponent {
     districtCode: this.fb.control(''),
     requestedDeliveryDate: this.fb.control(this.minimumDate, Validators.required),
     deliveryNotes: this.fb.control(''),
-    paymentOption: this.fb.control<BuyerPaymentOption>('CREDIT_LINE', Validators.required),
+    paymentOption: this.fb.control<BuyerPaymentOption>('BANK_TRANSFER', Validators.required),
     comments: this.fb.control(''),
   });
 
@@ -153,6 +172,19 @@ export class BuyerRequestBuilderPageComponent {
     { value: 'manual', label: 'Manual Address' },
     { value: 'current', label: 'Current Location' },
   ] as const;
+
+  readonly paymentOptions: readonly {
+    readonly value: BuyerPaymentOption;
+    readonly icon: string;
+    readonly title: string;
+    readonly hint: string;
+  }[] = [
+    { value: 'CREDIT_LINE', icon: 'account_balance_wallet', title: 'buyerBuilder.payment.creditTitle', hint: 'buyerBuilder.payment.creditHint' },
+    { value: 'BANK_TRANSFER', icon: 'credit_card', title: 'buyerBuilder.payment.bankTitle', hint: 'buyerBuilder.payment.bankHint' },
+    { value: 'CARD_STRIPE', icon: 'credit_card', title: 'purchaseRequests.payment.CARD_STRIPE', hint: 'buyerBuilder.payment.serverValidation' },
+    { value: 'CASH', icon: 'payments', title: 'purchaseRequests.payment.CASH', hint: 'buyerBuilder.payment.serverValidation' },
+    { value: 'CASH_ON_DELIVERY', icon: 'local_shipping', title: 'purchaseRequests.payment.CASH_ON_DELIVERY', hint: 'buyerBuilder.payment.serverValidation' },
+  ];
 
   constructor() {
     const identity = this.auth.identity();
@@ -170,6 +202,7 @@ export class BuyerRequestBuilderPageComponent {
             this.hydrateDraft(draft);
             return;
           }
+          this.applyServerPaymentPreference();
           const defaultAddress =
             this.facade.addresses().find((item) => item.defaultAddress) ??
             this.facade.addresses()[0];
@@ -183,13 +216,6 @@ export class BuyerRequestBuilderPageComponent {
     const destinationSnapshot = draftObject(draft.destination?.['snapshot']);
     const addressId = draftText(draft.destination?.['addressId']);
     const payment = draft.paymentPreference;
-    const paymentOptions: readonly BuyerPaymentOption[] = [
-      'CREDIT_LINE',
-      'BANK_TRANSFER',
-      'CARD_STRIPE',
-      'CASH',
-      'CASH_ON_DELIVERY',
-    ];
     const lines: BuilderLine[] = (draft.lines ?? []).map((line, index) => {
       const catalogItemId = draftText(line['catalogItemId']) || draftText(line['skuId']);
       const skuId = draftText(line['skuId']);
@@ -252,9 +278,9 @@ export class BuyerRequestBuilderPageComponent {
       provinceCode: draftText(destinationSnapshot['province']),
       districtCode: draftText(destinationSnapshot['district']),
       requestedDeliveryDate: draft.requestedDeliveryDate ?? this.minimumDate,
-      paymentOption: paymentOptions.includes(payment as BuyerPaymentOption)
+      paymentOption: BUYER_PAYMENT_OPTIONS.includes(payment as BuyerPaymentOption)
         ? (payment as BuyerPaymentOption)
-        : 'CREDIT_LINE',
+        : paymentOptionFromCondition(this.facade.clientAccount()?.paymentCondition) ?? 'BANK_TRANSFER',
     });
     if (this.form.controls.departmentCode.value) this.departmentChanged();
     if (this.form.controls.provinceCode.value) this.provinceChanged();
@@ -268,6 +294,19 @@ export class BuyerRequestBuilderPageComponent {
 
   setAddressMode(value: string): void {
     this.form.controls.addressMode.setValue(value as 'saved' | 'manual' | 'current');
+  }
+
+  setPaymentOption(value: BuyerPaymentOption): void {
+    this.form.controls.paymentOption.setValue(value);
+  }
+
+  paymentLabelKey(value: BuyerPaymentOption): string {
+    return this.paymentOptions.find((option) => option.value === value)?.title ?? 'buyerBuilder.payment.bankTitle';
+  }
+
+  private applyServerPaymentPreference(): void {
+    const paymentOption = paymentOptionFromCondition(this.facade.clientAccount()?.paymentCondition);
+    if (paymentOption) this.form.controls.paymentOption.setValue(paymentOption);
   }
 
   adjustLineQuantity(line: BuilderLine, delta: number): void {
