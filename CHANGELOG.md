@@ -3,6 +3,30 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.16.0] - 2026-08-28
+
+Server-authoritative buyer payment preferences and canonical payment choices.
+
+### Added
+
+- Normalization of the buyer account `paymentCondition` returned by API into the canonical Request Builder payment options.
+- Request Builder cards for all payment preferences accepted by the existing purchase-request draft contract.
+- Accessible radio semantics and localized labels for the expanded payment choices.
+
+### Changed
+
+- Removed the fixed `CREDIT_LINE` initialization; new requests start from the server-provided account condition, with a neutral transfer fallback only when that condition is absent or unrecognized.
+- Draft hydration now prefers the persisted server payment preference and only falls back to the server account condition.
+
+### Boundary
+
+- No API, Blueprint or Vue source changed; the existing buyer-account and purchase-request-draft contracts were sufficient.
+
+### Validation
+
+- Buyer Request Builder tests passed (5/5).
+- Bounded-context, i18n and diff checks are required before publication.
+
 ## [0.15.0] - 2026-08-28
 
 Buyer IAM boundary hardening for the canonical Portal surface.
