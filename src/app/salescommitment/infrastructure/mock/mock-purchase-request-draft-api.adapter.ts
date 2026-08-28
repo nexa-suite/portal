@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { defer, Observable, of } from 'rxjs';
 
 import { PurchaseRequestDraftApiPort } from '../../application/ports/purchase-request-draft-api.port';
-import type { CanonicalDraftLine, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
+import type { CanonicalDraftLine, PurchaseRequestDraftReview, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
 import { MockSalesCommitmentStore } from './mock-sales-commitment.store';
 
 @Injectable({ providedIn: 'root' })
@@ -44,6 +44,10 @@ export class MockPurchaseRequestDraftApiAdapter implements PurchaseRequestDraftA
     requestedDeliveryDate: string,
   ): Observable<PurchaseRequestDraftView> {
     return defer(() => of(this.store.setDraftPreferences(draftId, etag, paymentPreference, requestedDeliveryDate)));
+  }
+
+  review(draftId: string): Observable<PurchaseRequestDraftReview> {
+    return defer(() => of(this.store.reviewDraft(draftId)));
   }
 
   submit(

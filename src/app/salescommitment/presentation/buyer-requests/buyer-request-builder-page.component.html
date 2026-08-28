@@ -107,7 +107,7 @@
               {{ 'buyerBuilder.products.requestSubtitle' | translate: { count: totalUnits() } }}
             </p>
           </div>
-          <a class="btn btn-secondary btn-sm" routerLink="/portal/product-catalog">
+          <a class="btn btn-secondary btn-sm" routerLink="/portal/product-catalog" [queryParams]="catalogQueryParams()">
             <nexa-icon name="add" aria-hidden="true" />
             {{ 'buyerBuilder.products.addProducts' | translate }}
           </a>

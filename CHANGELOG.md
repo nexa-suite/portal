@@ -3,6 +3,33 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.17.0] - 2026-08-28
+
+Server-backed Buyer Request Builder continuity.
+
+### Added
+
+- Persisted the active canonical Purchase Request Draft pointer so catalog navigation can resume the server-owned draft instead of relying on a local cart as business truth.
+- Started the canonical draft and replaced its lines when a buyer moves from Catalog into Request Builder, preserving the existing interaction cart only as presentation state.
+- Added the API-backed draft review contract and readiness check before preview/submit, with focused HTTP mapper coverage.
+- Added authenticated E2E assertions for draft creation, line replacement, route preview and review against the existing API contract.
+
+### Changed
+
+- Rehydrated the Request Builder from the canonical draft route or scoped server-draft pointer and clear the pointer after terminal submit/abandon states.
+- Preserved the buyer-only Portal boundary; internal roles such as `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch remain Platform concerns, and `BOM` is not introduced without an approved contract.
+
+### Boundary
+
+- API, Blueprint, Design Lab and legacy repositories were not modified by this frontend release.
+- The local cart remains recoverable interaction state; the API draft owns lines, prices, readiness, concurrency version and submission state.
+
+### Validation
+
+- Portal unit tests passed: 122 tests across 61 files.
+- Portal production build passed; existing bundle/style budget warnings remain non-blocking.
+- Live Buyer canonical request E2E passed against the Docker API.
+
 ## [0.16.0] - 2026-08-28
 
 Server-authoritative buyer payment preferences and canonical payment choices.

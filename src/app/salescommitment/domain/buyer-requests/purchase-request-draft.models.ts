@@ -24,3 +24,13 @@ export interface PurchaseRequestDraftView {
   readonly submittedAt: string | null;
   readonly etag: string;
 }
+
+export interface PurchaseRequestDraftReview {
+  readonly draft: PurchaseRequestDraftView;
+  readonly productsComplete: boolean;
+  readonly destinationComplete: boolean;
+  readonly routeValidated: boolean;
+  readonly commercialReviewComplete: boolean;
+  readonly readyToSubmit: boolean;
+  readonly missing: readonly string[];
+}

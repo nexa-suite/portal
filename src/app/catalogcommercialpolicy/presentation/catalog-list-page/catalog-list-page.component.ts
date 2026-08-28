@@ -58,7 +58,11 @@ export class CatalogListPageComponent {
   });
 
   readonly query = computed(() => catalogQueryFromParams(this.queryParams()));
-  readonly routeQueryParams = computed(() => catalogQueryToParams(this.query()));
+  readonly draftId = computed(() => this.queryParams().get('draftId')?.trim() || null);
+  readonly routeQueryParams = computed(() => ({
+    ...catalogQueryToParams(this.query()),
+    ...(this.draftId() ? { draftId: this.draftId() as string } : {}),
+  }));
   readonly searchText = signal(this.query().q);
   readonly stockFilter = signal<StockFilter>('all');
   readonly onlyOffers = signal(false);
@@ -237,7 +241,10 @@ export class CatalogListPageComponent {
   private navigateWithQuery(query: CatalogQuery): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: catalogQueryToParams(query),
+      queryParams: {
+        ...catalogQueryToParams(query),
+        ...(this.draftId() ? { draftId: this.draftId() as string } : {}),
+      },
     });
   }
 

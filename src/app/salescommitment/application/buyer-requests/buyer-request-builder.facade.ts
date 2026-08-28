@@ -9,7 +9,8 @@ import {
 import { BuyerRelationshipPort } from '../ports/buyer-relationship.port';
 import { SalesCommitmentAddressInput, SalesCommitmentAddressReference, SalesCommitmentAddressUpdateInput, SalesCommitmentBuyerAccountReference, SalesCommitmentReferenceOption } from '../../domain/buyer-requests/sales-commitment-buyer-reference.models';
 import { PurchaseRequestDraftApiPort } from '../ports/purchase-request-draft-api.port';
-import { PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
+import { CanonicalDraftLine, PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
+import type { PurchaseRequestCartItem } from '../../domain/buyer-requests/purchase-request-cart.models';
 
 function errorCode(error: unknown, fallback: string): string {
   return isStaleApiProblem(error) ? 'BUYER_REQUEST_STALE' : readApiProblemDetails(error)?.code ?? fallback;
@@ -39,6 +40,7 @@ export class PurchaseRequestBuilderFacade {
   readonly districts = signal<readonly SalesCommitmentReferenceOption[]>([]);
   readonly roadTypes = signal<readonly SalesCommitmentReferenceOption[]>([]);
   readonly previewState = signal<{ readonly status: 'idle' | 'loading' | 'success' | 'error'; readonly snapshot: BuyerRequestSnapshot | null; readonly message: string | null }>({ status: 'idle', snapshot: null, message: null });
+  readonly draft = this.canonicalDraft.asReadonly();
   readonly busy = signal(false);
   readonly message = signal<string | null>(null);
   private editingDraftId: string | null = null;
@@ -67,6 +69,42 @@ export class PurchaseRequestBuilderFacade {
 
   loadDraft(draftId: string): Observable<PurchaseRequestDraftView> {
     return this.run(() => this.canonical.get(draftId), 'BUYER_REQUEST_DRAFT_LOAD_FAILED').pipe(
+      tap((draft) => {
+        this.canonicalDraft.set(draft);
+        this.editingDraftId = draft.id;
+        this.canonicalCommandSignature = null;
+        this.canonicalIdempotencyKey = null;
+      }),
+    );
+  }
+
+  /**
+   * Links the interaction cart to a canonical server draft before the user
+   * reaches delivery or confirmation. The cart remains presentation state;
+   * the returned draft owns the authoritative lines, prices and version.
+   */
+  startDraftFromCart(
+    clientAccountId: string | null,
+    requestedDeliveryDate: string,
+    items: readonly PurchaseRequestCartItem[],
+  ): Observable<PurchaseRequestDraftView> {
+    return this.run(() => defer(() => {
+      if (!clientAccountId?.trim() || !requestedDeliveryDate.trim() || items.length === 0) {
+        throw new Error('Canonical purchase request draft input is incomplete');
+      }
+      const lines: readonly CanonicalDraftLine[] = items.map((item) => ({
+        skuId: item.sellableSkuId?.trim() || item.productId.trim() || item.catalogItemId.trim(),
+        quantity: item.quantity,
+        unit: item.unit || 'unit',
+        notes: item.notes || '',
+      }));
+      if (lines.some((line) => !line.skuId || line.quantity <= 0)) {
+        throw new Error('Canonical purchase request draft requires valid cart lines');
+      }
+      return this.canonical.create(clientAccountId.trim(), requestedDeliveryDate).pipe(
+        switchMap((draft) => this.canonical.replaceLines(draft.id, draft.etag, lines)),
+      );
+    }), 'BUYER_REQUEST_DRAFT_CREATE_FAILED').pipe(
       tap((draft) => {
         this.canonicalDraft.set(draft);
         this.editingDraftId = draft.id;
@@ -164,6 +202,13 @@ export class PurchaseRequestBuilderFacade {
         this.canonicalCommandSignature = this.commandSignature(command);
         this.canonicalIdempotencyKey = this.canonicalIdempotencyKey ?? this.newIdempotencyKey();
       }),
+      switchMap((draft) => this.canonical.review(draft.id).pipe(
+        map((review) => {
+          if (!review.readyToSubmit) throw new Error(`Canonical purchase request draft is incomplete: ${review.missing.join(', ')}`);
+          this.canonicalDraft.set(review.draft);
+          return review.draft;
+        }),
+      )),
     );
   }
 
