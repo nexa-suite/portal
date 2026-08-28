@@ -107,7 +107,7 @@
               >
                 {{ (isInCart(item) ? 'catalog.removeFromRequest' : 'catalog.addToRequest') | translate }}
               </button>
-              <a class="request-link" routerLink="/portal/request-builder">
+              <a class="request-link" [routerLink]="draftId() ? ['/portal/request-builder', draftId()] : ['/portal/request-builder']">
                 {{ 'catalog.requestCart' | translate }} ({{ cart.count() }})
               </a>
             </div>

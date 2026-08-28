@@ -15,6 +15,8 @@ import { PurchaseRequestCartPort } from './salescommitment/application/ports/pur
 import { PurchaseRequestCartStoragePort } from './salescommitment/application/ports/purchase-request-cart-storage.port';
 import { PurchaseRequestCartService } from './salescommitment/application/buyer-requests/purchase-request-cart.service';
 import { BrowserPurchaseRequestCartStorageAdapter } from './salescommitment/infrastructure/buyer-requests/browser-purchase-request-cart-storage.adapter';
+import { PurchaseRequestDraftSessionPort } from './salescommitment/application/ports/purchase-request-draft-session.port';
+import { BrowserPurchaseRequestDraftSessionAdapter } from './salescommitment/infrastructure/buyer-requests/browser-purchase-request-draft-session.adapter';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,6 +35,8 @@ export const appConfig: ApplicationConfig = {
     BrowserPurchaseRequestCartStorageAdapter,
     { provide: PurchaseRequestCartPort, useExisting: PurchaseRequestCartService },
     { provide: PurchaseRequestCartStoragePort, useExisting: BrowserPurchaseRequestCartStorageAdapter },
+    BrowserPurchaseRequestDraftSessionAdapter,
+    { provide: PurchaseRequestDraftSessionPort, useExisting: BrowserPurchaseRequestDraftSessionAdapter },
     provideAppInitializer(() => inject(PORTAL_SECURITY_BOUNDARY).restore()),
     provideRouter(routes, withComponentInputBinding()),
     provideTranslateService({

@@ -4,11 +4,11 @@ import { DecimalPipe } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
 import { PORTAL_SECURITY_BOUNDARY } from '../../../core/security/portal-security.boundary';
 import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/buyer-request-builder.facade';
 import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
+import { PurchaseRequestDraftSessionPort } from '../../application/ports/purchase-request-draft-session.port';
 import {
   addressDisplay,
   BuyerRequestCommand,
@@ -96,6 +96,7 @@ export class BuyerRequestBuilderPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly draftSession = inject(PurchaseRequestDraftSessionPort);
   readonly auth = inject(PORTAL_SECURITY_BOUNDARY);
   readonly facade = inject(PurchaseRequestBuilderFacade);
   readonly minimumDate = nextBusinessDateInputValue(3);
@@ -119,6 +120,8 @@ export class BuyerRequestBuilderPageComponent {
   }>({ latitude: -12.0464, longitude: -77.0428, accuracy: null });
   private lastPreviewSignature: string | null = null;
   private trustedRouteUrl: { readonly source: string; readonly value: SafeResourceUrl } | null = null;
+  private readonly routeDraftId = this.route.snapshot.paramMap.get('purchaseRequestId');
+  private readonly draftScope: string | null;
   readonly accountId = computed(
     () => this.auth.identity()?.clientAccountId ?? this.facade.clientAccount()?.id ?? null,
   );
@@ -188,28 +191,84 @@ export class BuyerRequestBuilderPageComponent {
 
   constructor() {
     const identity = this.auth.identity();
-    this.cart.setScope(identity ? `${identity.workspaceSlug ?? 'workspace'}:${identity.id || identity.email}` : null);
+    this.draftScope = identity ? `${identity.workspaceSlug ?? 'workspace'}:${identity.id || identity.email}` : null;
+    this.cart.setScope(this.draftScope);
     effect(() => {
       this.lines.set(this.cart.items().map((item) => this.lineFromCartItem(item)));
     });
-    const draftId = this.route.snapshot.paramMap.get('purchaseRequestId');
-    this.facade
-      .loadInitial(this.accountId())
-      .pipe(switchMap(() => (draftId ? this.facade.loadDraft(draftId) : of(null))))
-      .subscribe({
-        next: (draft) => {
-          if (draft) {
-            this.hydrateDraft(draft);
-            return;
-          }
-          this.applyServerPaymentPreference();
-          const defaultAddress =
-            this.facade.addresses().find((item) => item.defaultAddress) ??
-            this.facade.addresses()[0];
-          if (defaultAddress) this.prefillDefaultAddress(defaultAddress);
-        },
+    this.facade.loadInitial(this.accountId()).subscribe({
+        next: () => this.initializeDraftFlow(),
         error: () => this.message.set('BUYER_REQUEST_DRAFT_LOAD_FAILED'),
       });
+  }
+
+  private initializeDraftFlow(): void {
+    if (this.routeDraftId) {
+      this.loadLinkedDraft(this.routeDraftId, false);
+      return;
+    }
+
+    const linkedDraftId = this.draftScope ? this.draftSession.read(this.draftScope) : null;
+    if (linkedDraftId) {
+      this.loadLinkedDraft(linkedDraftId, true);
+      return;
+    }
+
+    if (this.cart.items().length > 0 && this.accountId()) {
+      this.facade.startDraftFromCart(this.accountId(), this.form.controls.requestedDeliveryDate.value, this.cart.items()).subscribe({
+        next: (draft) => {
+          this.rememberDraft(draft.id);
+          void this.router.navigate(['/portal/request-builder', draft.id], { replaceUrl: true });
+        },
+        error: () => this.message.set(this.facade.message() ?? 'BUYER_REQUEST_DRAFT_CREATE_FAILED'),
+      });
+      return;
+    }
+
+    this.initializeEmptyBuilder();
+  }
+
+  private loadLinkedDraft(draftId: string, redirectToCanonicalRoute: boolean): void {
+    this.facade.loadDraft(draftId).subscribe({
+      next: (draft) => {
+        if (redirectToCanonicalRoute && this.isTerminalDraft(draft.status)) {
+          this.clearRememberedDraft();
+          this.initializeDraftFlow();
+          return;
+        }
+        if (this.isReusableDraft(draft.status)) this.rememberDraft(draft.id);
+        if (redirectToCanonicalRoute) {
+          void this.router.navigate(['/portal/request-builder', draft.id], { replaceUrl: true });
+          return;
+        }
+        this.hydrateDraft(draft);
+      },
+      error: () => this.message.set('BUYER_REQUEST_DRAFT_LOAD_FAILED'),
+    });
+  }
+
+  private initializeEmptyBuilder(): void {
+    this.applyServerPaymentPreference();
+    const defaultAddress =
+      this.facade.addresses().find((item) => item.defaultAddress) ??
+      this.facade.addresses()[0];
+    if (defaultAddress) this.prefillDefaultAddress(defaultAddress);
+  }
+
+  private rememberDraft(draftId: string): void {
+    if (this.draftScope) this.draftSession.write(this.draftScope, draftId);
+  }
+
+  private clearRememberedDraft(): void {
+    if (this.draftScope) this.draftSession.clear(this.draftScope);
+  }
+
+  private isReusableDraft(status: string): boolean {
+    return !this.isTerminalDraft(status);
+  }
+
+  private isTerminalDraft(status: string): boolean {
+    return ['SUBMITTED', 'CANCELLED', 'REJECTED', 'ABANDONED'].includes(status.trim().toUpperCase());
   }
 
   private hydrateDraft(draft: PurchaseRequestDraftView): void {
@@ -520,9 +579,17 @@ export class BuyerRequestBuilderPageComponent {
       return;
     }
     this.facade.create(this.command()).subscribe({
-      next: (request) => void this.router.navigate(['/portal/purchase-requests', request.id]),
+      next: (request) => {
+        this.clearRememberedDraft();
+        this.cart.clear();
+        void this.router.navigate(['/portal/purchase-requests', request.id]);
+      },
       error: () => this.message.set(this.facade.message() ?? 'BUYER_REQUEST_CREATE_FAILED'),
     });
+  }
+
+  catalogQueryParams(): Record<string, string> {
+    return this.routeDraftId ? { draftId: this.routeDraftId } : {};
   }
 
   addressValid(): boolean {

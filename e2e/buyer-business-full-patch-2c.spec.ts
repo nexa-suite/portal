@@ -71,8 +71,14 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   await seededProduct.getByRole('button', { name: /add to cart|agregar al carrito/i }).click();
   await expect(seededProduct).toHaveClass(/selected/);
 
+  const draftCreate = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/api/v1/buyer/purchase-request-drafts'));
+  const draftLines = page.waitForResponse((response) => response.request().method() === 'PUT' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/lines$/.test(new URL(response.url()).pathname));
   await page.locator('.catalog-page-header').getByRole('link', { name: /request builder|constructor de solicitudes/i }).click();
-  await expect(page).toHaveURL(/\/portal\/request-builder/);
+  const draftCreateResponse = await draftCreate;
+  const draftLinesResponse = await draftLines;
+  expect(draftCreateResponse.status()).toBe(201);
+  expect(draftLinesResponse.status()).toBe(200);
+  await expect(page).toHaveURL(/\/portal\/request-builder\/[^/]+$/);
   await expect(page.getByRole('heading', { name: /request items|productos solicitados/i })).toBeVisible();
   await expect(page.locator('.request-item-card')).toContainText(selectedProductName);
   await page.getByRole('button', { name: /continue to delivery|continuar a entrega/i }).click();
@@ -96,9 +102,12 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   expect(minimumDate).toBeTruthy();
   await deliveryDate.fill(minimumDate!);
   const preview = page.waitForResponse((response) => response.request().method() === 'POST' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/route-previews$/.test(new URL(response.url()).pathname));
+  const review = page.waitForResponse((response) => response.request().method() === 'GET' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/review$/.test(new URL(response.url()).pathname));
   await page.locator('.request-step-actions').getByRole('button', { name: /review|revisar/i }).click();
   const previewResponse = await preview;
+  const reviewResponse = await review;
   expect(previewResponse.status()).toBe(200);
+  expect(reviewResponse.status()).toBe(200);
   const previewBody = await previewResponse.json() as {
     readonly destination?: { readonly addressId?: string | null };
     readonly route?: { readonly provider?: string | null };
