@@ -128,6 +128,26 @@ export function todayInputValue(): string {
   return `${year}-${month}-${day}`;
 }
 
+export type DeliveryDateIssue = 'required' | 'minimum' | 'weekday' | null;
+
+export function nextBusinessDateInputValue(days: number): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  while ([0, 6].includes(date.getDay())) date.setDate(date.getDate() + 1);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function deliveryDateIssue(value: string, minimum: string): DeliveryDateIssue {
+  if (!value) return 'required';
+  const selected = new Date(`${value}T00:00:00`);
+  const minimumDate = new Date(`${minimum}T00:00:00`);
+  if (Number.isNaN(selected.getTime()) || selected < minimumDate) return 'minimum';
+  return [0, 6].includes(selected.getDay()) ? 'weekday' : null;
+}
+
 export function addressDisplay(
   address: Pick<BuyerRequestDeliveryAddress, 'line' | 'reference' | 'departmentCode' | 'provinceCode' | 'districtCode'>,
   labelFor: (code: string) => string = (code) => code,

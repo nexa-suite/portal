@@ -3,12 +3,16 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signa
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BrandLogoComponent } from '../../../../shared/presentation/components/brand-logo/brand-logo.component';
+import { NexaIconComponent } from '../../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import { PortalAuthStateService } from '../../application/portal-auth-state.service';
 import { PortalAccessDeniedError } from '../../domain/portal-access.models';
 import { Subject, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap, timeout } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { safeReturnUrl } from '../../../../core/routing/portal.guards';
+import { PORTAL_RUNTIME_CONFIG } from '../../../../core/security/runtime-config';
+import { LanguageService } from '../../../../core/i18n/language.service';
+import { SupportedLanguage } from '../../../../core/i18n/supported-language';
 
 export type WorkspacePreviewErrorCode =
   | 'notFound'
@@ -34,25 +38,30 @@ export function classifyWorkspacePreviewError(error: unknown): WorkspacePreviewE
 
 @Component({
   selector: 'nexa-sign-in-page',
-  imports: [BrandLogoComponent, RouterLink, TranslatePipe],
+  imports: [BrandLogoComponent, NexaIconComponent, RouterLink, TranslatePipe],
   templateUrl: './sign-in-page.component.html',
-  styleUrl: './sign-in-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly runtimeConfig = inject(PORTAL_RUNTIME_CONFIG);
   readonly auth = inject(PortalAuthStateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly previewInput = new Subject<string>();
+  readonly languageService = inject(LanguageService);
   readonly preview = signal<{ recognized: boolean; displayName: string | null; workspaceUrl: string | null; logoUrl: string | null; loginAvailable: boolean } | null>(null);
   readonly previewLoading = signal(false);
   readonly previewError = signal<WorkspacePreviewErrorCode | null>(null);
 
   readonly email = signal('');
   readonly password = signal('');
-  readonly workspaceSlug = signal('icisa');
+  readonly workspaceSlug = signal<string>(this.runtimeConfig.dataMode === 'mock' ? this.runtimeConfig.tenantProfile : '');
   readonly submitted = signal(false);
+  readonly validationError = signal<string | null>(null);
+  readonly twoFactorCode = signal('');
+  readonly passwordVisible = signal(false);
+  readonly twoFactorCanSubmit = computed(() => /^\d{6}$/.test(this.twoFactorCode().trim()) && this.auth.status() !== 'verifying-two-factor');
   readonly canSubmit = computed(
     () =>
       this.email().trim().length > 0 &&
@@ -69,6 +78,7 @@ export class SignInPageComponent {
       return 'auth.signIn.invalidCredentials';
     return error ? 'auth.signIn.unavailable' : null;
   });
+  readonly formErrorMessage = computed(() => this.validationError() ?? this.errorMessage());
 
   constructor() {
     this.previewInput.pipe(
@@ -100,6 +110,7 @@ export class SignInPageComponent {
       const previousSlug = this.workspaceSlug().trim().toLowerCase();
       const normalizedSlug = value.trim().toLowerCase();
       this.workspaceSlug.set(value);
+      this.validationError.set(null);
 
       // Rewriting the same normalized slug (for example, Playwright filling
       // the default value) must not discard a valid preview. A changed slug
@@ -112,22 +123,68 @@ export class SignInPageComponent {
       this.previewInput.next(normalizedSlug);
       return;
     }
+    this.validationError.set(null);
     this[field].set(value);
   }
 
   submit(): void {
     this.submitted.set(true);
-    if (!this.canSubmit() || this.auth.status() === 'authenticating') return;
+    this.validationError.set(null);
+    if (this.auth.status() === 'two-factor-challenge') {
+      this.submitTwoFactor();
+      return;
+    }
+    if (this.auth.status() === 'authenticating') return;
+
+    const workspaceSlug = this.workspaceSlug().trim().toLowerCase();
+    if (!workspaceSlug || !this.email().trim() || !this.password()) {
+      this.validationError.set('auth.signIn.required');
+      return;
+    }
+    if (this.previewLoading()) {
+      this.validationError.set('auth.signIn.workspacePreview.loading');
+      return;
+    }
+    if (this.preview()?.recognized !== true || this.preview()?.loginAvailable !== true) {
+      this.validationError.set('auth.signIn.workspacePreview.notFound');
+      return;
+    }
 
     this.auth
       .signIn({
         email: this.email().trim(),
         password: this.password(),
-        workspaceSlug: this.workspaceSlug().trim().toLowerCase(),
+        workspaceSlug,
       })
       .subscribe({
         next: () => this.router.navigateByUrl(this.returnUrl()),
       });
+  }
+
+  onTwoFactorInput(event: Event): void {
+    const value = event.target instanceof HTMLInputElement ? event.target.value : '';
+    this.twoFactorCode.set(value.replace(/\D/g, '').slice(0, 6));
+  }
+
+  submitTwoFactor(): void {
+    if (!this.twoFactorCanSubmit()) return;
+    this.auth.verifyTwoFactor(this.twoFactorCode()).subscribe({
+      next: () => this.router.navigateByUrl(this.returnUrl()),
+      error: () => undefined,
+    });
+  }
+
+  cancelTwoFactor(): void {
+    this.twoFactorCode.set('');
+    this.auth.cancelTwoFactorChallenge();
+  }
+
+  togglePassword(): void {
+    this.passwordVisible.update((visible) => !visible);
+  }
+
+  setLanguage(language: SupportedLanguage): void {
+    this.languageService.setLanguage(language);
   }
 
   private returnUrl(): string {

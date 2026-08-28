@@ -10,28 +10,27 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import {
-  ColdChainBadgeComponent,
-  ColdChainVariant,
-} from '../../../shared/presentation/components/cold-chain-badge/cold-chain-badge.component';
 import { EmptyStateComponent } from '../../../shared/presentation/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
-import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
-import {
-  StatusBadgeComponent,
-  StatusTone,
-} from '../../../shared/presentation/components/status-badge/status-badge.component';
+import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
+import { ColdChainBadgeComponent, ColdChainVariant } from '../../../shared/presentation/components/cold-chain-badge/cold-chain-badge.component';
+import { StatusBadgeComponent, StatusTone } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
-import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
+import { PortalCatalogCartFacade } from '../../../core/compositions/portal/catalog-cart.facade';
 import {
   catalogItemsWithOutOfStockLast,
   catalogQueryFromParams,
   catalogQueryToParams,
-  CatalogQuery,
   CatalogAvailabilityStatus,
+  CatalogItemSummary,
+  CatalogQuery,
+  coldChainValue,
+  formatCatalogPrice,
   isCatalogOutOfStock,
 } from '../../domain/catalog.models';
+
+type StockFilter = 'all' | 'ok' | 'low' | 'out';
 
 @Component({
   selector: 'nexa-catalog-list-page',
@@ -40,8 +39,7 @@ import {
     EmptyStateComponent,
     ErrorStateComponent,
     LoadingStateComponent,
-    PageHeaderComponent,
-    CatalogPricingSummaryComponent,
+    NexaIconComponent,
     RouterLink,
     StatusBadgeComponent,
     TranslatePipe,
@@ -54,6 +52,7 @@ export class CatalogListPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
+  readonly cart = inject(PortalCatalogCartFacade);
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
@@ -61,9 +60,24 @@ export class CatalogListPageComponent {
   readonly query = computed(() => catalogQueryFromParams(this.queryParams()));
   readonly routeQueryParams = computed(() => catalogQueryToParams(this.query()));
   readonly searchText = signal(this.query().q);
+  readonly stockFilter = signal<StockFilter>('all');
+  readonly onlyOffers = signal(false);
+  readonly brandExpanded = signal(false);
+  readonly stockOptions: readonly StockFilter[] = ['all', 'ok', 'low', 'out'];
   readonly items = computed(() => catalogItemsWithOutOfStockLast(this.catalog.items()));
+  readonly visibleItems = computed(() => {
+    const stock = this.stockFilter();
+    const offersOnly = this.onlyOffers();
+    return this.items().filter((item) => {
+      const matchesStock = stock === 'all' || this.stockMatches(item.availabilityStatus, stock);
+      const matchesOffer = !offersOnly || item.appliedPromotions.length > 0 || Boolean(item.promotionLabel);
+      return matchesStock && matchesOffer;
+    });
+  });
   readonly brands = computed(() => this.uniqueValues((item) => item.brandName));
   readonly categories = computed(() => this.uniqueValues((item) => item.categoryName));
+  readonly coldChains = computed(() => this.uniqueValues((item) => item.coldChainRequirement));
+  readonly totalItems = computed(() => this.catalog.page()?.totalItems ?? this.items().length);
   readonly pageNumbers = computed(() => {
     const page = this.catalog.page();
     if (!page || page.totalPages < 2) return [];
@@ -73,6 +87,7 @@ export class CatalogListPageComponent {
   });
 
   constructor() {
+    this.cart.activate();
     effect(() => {
       const query = this.query();
       untracked(() => {
@@ -86,15 +101,59 @@ export class CatalogListPageComponent {
     this.navigateWithQuery({ ...this.query(), q: this.searchText().trim(), page: 0 });
   }
 
-  updateFilter(field: 'brand' | 'category' | 'coldChain', event: Event): void {
-    const value = event.target instanceof HTMLSelectElement ? event.target.value : '';
-    this.navigateWithQuery({ ...this.query(), [field]: value, page: 0 });
+  selectCategory(category: string): void {
+    this.navigateWithQuery({ ...this.query(), category, page: 0 });
+  }
+
+  selectColdChain(value: string): void {
+    this.navigateWithQuery({ ...this.query(), coldChain: coldChainValue(value), page: 0 });
+  }
+
+  selectBrand(brand: string): void {
+    this.navigateWithQuery({ ...this.query(), brand, page: 0 });
+  }
+
+  toggleBrandExpanded(): void {
+    this.brandExpanded.update((expanded) => !expanded);
+  }
+
+  toggleOffers(): void {
+    this.onlyOffers.update((enabled) => !enabled);
+  }
+
+  toggleCart(item: CatalogItemSummary): void {
+    this.cart.toggle(item);
+  }
+
+  isInCart(item: CatalogItemSummary): boolean {
+    return this.cart.has(item.catalogItemId);
+  }
+
+  isUnavailable(item: CatalogItemSummary): boolean {
+    return isCatalogOutOfStock(item.availabilityStatus);
   }
 
   goToPage(page: number): void {
     const totalPages = this.catalog.page()?.totalPages ?? 0;
     if (page < 0 || page >= totalPages || page === this.query().page) return;
     this.navigateWithQuery({ ...this.query(), page });
+  }
+
+  categoryLabel(value: string): string {
+    return value;
+  }
+
+  coldChainLabel(value: string): string {
+    switch (value.trim().toUpperCase()) {
+      case 'FROZEN':
+        return 'catalog.frozen';
+      case 'NONE':
+        return 'catalog.ambient';
+      case 'REFRIGERATED':
+        return 'catalog.chilled';
+      default:
+        return 'catalog.ambient';
+    }
   }
 
   coldChainVariant(value: string): ColdChainVariant {
@@ -105,6 +164,19 @@ export class CatalogListPageComponent {
         return 'refrigerated';
       default:
         return 'ambient';
+    }
+  }
+
+  stockLabelKey(value: StockFilter): string {
+    switch (value) {
+      case 'ok':
+        return 'catalog.available';
+      case 'low':
+        return 'catalog.lowStock';
+      case 'out':
+        return 'catalog.outOfStock';
+      default:
+        return 'catalog.allStock';
     }
   }
 
@@ -122,7 +194,43 @@ export class CatalogListPageComponent {
     }
   }
 
+  availabilityLabelKey(status: CatalogAvailabilityStatus): string {
+    return `availability.status.${status}`;
+  }
+
+  productTitle(item: CatalogItemSummary): string {
+    return item.productFamilyName || item.itemName;
+  }
+
+  productSku(item: CatalogItemSummary): string {
+    return item.skuCode || item.productId;
+  }
+
+  priceLabel(item: CatalogItemSummary): string {
+    return formatCatalogPrice(item.effectivePrice ?? item.unitPrice ?? item.basePrice) || '—';
+  }
+
+  promotionLabel(item: CatalogItemSummary): string {
+    return item.promotionLabel || item.appliedPromotions[0]?.name || 'catalog.offer';
+  }
+
+  formatPrice(price: CatalogItemSummary['basePrice']): string {
+    return formatCatalogPrice(price) || '—';
+  }
+
+  openDetails(item: CatalogItemSummary): void {
+    void this.router.navigate(['/portal/product-catalog', item.catalogItemId], {
+      queryParams: this.routeQueryParams(),
+    });
+  }
+
   isOutOfStock(status: CatalogAvailabilityStatus): boolean {
+    return isCatalogOutOfStock(status);
+  }
+
+  private stockMatches(status: CatalogAvailabilityStatus, filter: Exclude<StockFilter, 'all'>): boolean {
+    if (filter === 'ok') return status === 'AVAILABLE';
+    if (filter === 'low') return status === 'LOW';
     return isCatalogOutOfStock(status);
   }
 
@@ -133,9 +241,7 @@ export class CatalogListPageComponent {
     });
   }
 
-  private uniqueValues(
-    selector: (item: { readonly brandName: string; readonly categoryName: string }) => string,
-  ): string[] {
+  private uniqueValues(selector: (item: CatalogItemSummary) => string): string[] {
     return [...new Set(this.catalog.items().map(selector).filter(Boolean))].sort((left, right) =>
       left.localeCompare(right),
     );

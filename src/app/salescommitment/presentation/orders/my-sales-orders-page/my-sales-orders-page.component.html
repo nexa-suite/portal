@@ -1,1 +1,127 @@
-<section class="page"><nexa-page-header [eyebrow]="'orders.eyebrow' | translate" [title]="'orders.list.title' | translate" [subtitle]="'orders.list.subtitle' | translate" />@if (facade.listState().status === 'loading') { <nexa-loading-state [lines]="5" [label]="'orders.states.loading' | translate" /> }@if (facade.listState().status === 'error') { <nexa-error-state [title]="'orders.states.errorTitle' | translate" [description]="'orders.states.errorDescription' | translate" [retryLabel]="'orders.actions.retry' | translate" (retry)="facade.loadList()" /> }@if (facade.listState().status === 'empty') { <nexa-empty-state [title]="'orders.list.emptyTitle' | translate" [description]="'orders.list.emptyDescription' | translate" /> }@if (facade.listState().status === 'success') { <div class="list">@for (order of facade.listState().page?.items ?? []; track order.id) { <mat-card><mat-card-header><mat-card-subtitle>{{ order.number }}</mat-card-subtitle><mat-card-title>{{ ('orders.status.' + order.status) | translate }}</mat-card-title></mat-card-header><mat-card-content><p>{{ 'orders.requestLink' | translate }}: {{ order.purchaseRequestCode || order.purchaseRequestId }}</p><p>{{ order.totalAmount }} {{ order.currency }}</p></mat-card-content><mat-card-actions><a mat-button [routerLink]="['/portal/sales-orders', order.id]">{{ 'orders.actions.open' | translate }}</a></mat-card-actions></mat-card> }</div> }</section>
+<section class="orders-page">
+  @if (facade.listState().status === 'loading') {
+    <nexa-loading-state [lines]="5" [label]="'orders.states.loading' | translate" />
+  } @else if (facade.listState().status === 'error') {
+    <nexa-error-state [title]="'orders.states.errorTitle' | translate" [description]="'orders.states.errorDescription' | translate" [retryLabel]="'orders.actions.retry' | translate" (retry)="facade.loadList()" />
+  } @else if (facade.listState().status === 'empty') {
+    <nexa-empty-state [title]="'orders.list.emptyTitle' | translate" [description]="'orders.list.emptyDescription' | translate" />
+  } @else if (facade.listState().status === 'success') {
+    <header class="orders-page-header">
+      <div>
+        <h1 class="orders-page-title">{{ 'orders.list.title' | translate }}</h1>
+        <p class="orders-page-subtitle">{{ 'orders.list.subtitleWithCount' | translate: { count: totalOrders() } }}</p>
+      </div>
+      <a class="orders-action orders-action-primary" routerLink="/portal/product-catalog">
+        <nexa-icon name="add" aria-hidden="true" />
+        {{ 'orders.list.newRequest' | translate }}
+      </a>
+    </header>
+
+    <section class="orders-kpi-grid" [attr.aria-label]="'orders.list.summaryLabel' | translate">
+      <article class="orders-kpi-card">
+        <div class="orders-kpi-label">
+          <nexa-icon name="local_shipping" aria-hidden="true" />
+          {{ 'orders.list.activeOrders' | translate }}
+        </div>
+        <strong class="orders-kpi-value orders-kpi-blue">{{ activeOrders() }}</strong>
+        <p>{{ 'orders.list.activeOrdersDescription' | translate }}</p>
+      </article>
+      <article class="orders-kpi-card">
+        <div class="orders-kpi-label">
+          <nexa-icon name="description" aria-hidden="true" />
+          {{ 'orders.list.pendingDocuments' | translate }}
+        </div>
+        <strong class="orders-kpi-value orders-kpi-amber">{{ pendingDocuments() }}</strong>
+        <p>{{ 'orders.list.pendingDocumentsDescription' | translate }}</p>
+      </article>
+      <article class="orders-kpi-card">
+        <div class="orders-kpi-label">
+          <nexa-icon name="schedule" aria-hidden="true" />
+          {{ 'orders.list.latestActivity' | translate }}
+        </div>
+        @if (latestOrder(); as latest) {
+          <strong class="orders-kpi-value orders-kpi-green orders-kpi-latest">{{ latest.number }}</strong>
+          <p>{{ displayStatusKey(latest) | translate }}</p>
+        } @else {
+          <strong class="orders-kpi-value orders-kpi-green">—</strong>
+          <p>{{ 'orders.list.noActivity' | translate }}</p>
+        }
+      </article>
+    </section>
+
+    <div class="orders-stack">
+      @for (order of orders(); track order.id) {
+        <article class="buyer-card flow-panel-pad buyer-order-card">
+          <div class="orders-order-head">
+            <div class="orders-order-main">
+              <div class="orders-order-identifiers">
+                <span class="orders-order-code">{{ order.number }}</span>
+                @if (isNewOrder(order)) {
+                  <span class="orders-new-badge">{{ 'orders.list.new' | translate }}</span>
+                }
+                <nexa-status-badge [label]="displayStatusKey(order) | translate" [tone]="displayTone(order)" emphasis="standard" />
+                @if (deliveryFor(order); as delivery) {
+                  <span class="orders-dispatch-pill">{{ delivery.dispatchNumber || delivery.id }}</span>
+                }
+              </div>
+              <div class="orders-order-note">
+                @if (order.createdAt; as createdAt) { {{ createdAt | date:'yyyy-MM-dd' }} } @else { — }
+                · {{ 'orders.list.items' | translate: { count: order.lines.length } }}
+                · {{ 'orders.list.pendingWeight' | translate }}
+              </div>
+              <div class="orders-address">
+                <nexa-icon name="location_on" aria-hidden="true" />
+                @if (deliveryFor(order)?.destination; as destination) { {{ destination }} } @else { {{ 'orders.list.deliveryPending' | translate }} }
+              </div>
+            </div>
+
+            <div class="orders-total-block">
+              <div class="orders-total">{{ currencyLabel(order.currency) }} {{ order.totalAmount | number:'1.2-2' }}</div>
+              <a class="orders-tracking-action" [routerLink]="['/portal/sales-orders', order.id]">
+                {{ 'orders.list.tracking' | translate }}
+              </a>
+            </div>
+          </div>
+
+          <div class="orders-meta-grid">
+            <div class="orders-meta-card">
+              <span>{{ 'orders.list.documents' | translate }}</span>
+              <strong>{{ readyDocumentCount(order) }}/{{ documentsFor(order).length }} {{ 'orders.list.ready' | translate }}</strong>
+            </div>
+            <div class="orders-meta-card">
+              <span>{{ 'orders.list.temperature' | translate }}</span>
+              <strong>{{ 'orders.metrics.pending' | translate }}</strong>
+            </div>
+            <div class="orders-meta-card">
+              <span>{{ 'orders.list.route' | translate }}</span>
+              <strong>{{ 'orders.list.notAssigned' | translate }}</strong>
+            </div>
+          </div>
+
+          @if (documentsFor(order).length) {
+            <div class="orders-document-row" aria-label="{{ 'orders.list.documents' | translate }}">
+              @for (document of documentsFor(order).slice(0, 3); track document.id) {
+                <span class="orders-document-chip" [class.orders-document-chip-ready]="isDocumentReady(document)">
+                  <span class="orders-document-dot" aria-hidden="true"></span>
+                  {{ (isDocumentReady(document) ? 'orders.list.documentReady' : 'orders.list.documentPending') | translate }} · {{ documentLabel(document) }}
+                </span>
+              }
+            </div>
+          }
+
+          <div class="flow-timeline-horizontal" [attr.aria-label]="'orders.list.trackingTimeline' | translate">
+            @for (step of trackingSteps(order); track step.key) {
+              <div class="flow-track-step" [class.done]="step.state === 'done'" [class.active]="step.state === 'active'">
+                <div class="flow-track-index">{{ step.index }}</div>
+                <div class="flow-track-label">{{ step.labelKey | translate }}</div>
+                <div class="flow-track-date">
+                  @if (step.date; as date) { {{ date | date:"MMM d, h:mm a" }} } @else { {{ 'orders.metrics.pending' | translate }} }
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CatalogQueryService, CatalogDetailStatus } from '../../application/catalog-query.service';
 import { CatalogItemDetail } from '../../domain/catalog.models';
 import { CatalogDetailPageComponent } from './catalog-detail-page.component';
+import { PortalCatalogCartFacade } from '../../../core/compositions/portal/catalog-cart.facade';
 
 function catalogItem(): CatalogItemDetail {
   return {
@@ -48,11 +49,21 @@ function mockCatalog(status: CatalogDetailStatus) {
   };
 }
 
+function mockCart() {
+  return {
+    count: signal(0),
+    activate: vi.fn(),
+    has: vi.fn(() => false),
+    toggle: vi.fn(),
+  };
+}
+
 describe('CatalogDetailPageComponent', () => {
   let fixture: ComponentFixture<CatalogDetailPageComponent>;
 
   async function render(status: CatalogDetailStatus) {
     const catalog = mockCatalog(status);
+    const cart = mockCart();
     await TestBed.configureTestingModule({
       imports: [CatalogDetailPageComponent],
       providers: [
@@ -70,6 +81,7 @@ describe('CatalogDetailPageComponent', () => {
           },
         },
         { provide: CatalogQueryService, useValue: catalog },
+        { provide: PortalCatalogCartFacade, useValue: cart },
       ],
     }).compileComponents();
     const translate = TestBed.inject(TranslateService);

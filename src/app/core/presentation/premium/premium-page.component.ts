@@ -1,19 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
+import { ButtonComponent } from '../../../shared/presentation/components/button/button.component';
+import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
+import { SectionPanelComponent } from '../../../shared/presentation/components/section-panel/section-panel.component';
 
 @Component({
   selector: 'nexa-premium-page',
-  imports: [MatButtonModule, PageHeaderComponent, RouterLink],
-  template: `
-    <section class="page">
-      <nexa-page-header eyebrow="Premium" title="Premium workspace features" subtitle="This V1 route remains available while commercial packaging is finalized." />
-      <p>No subscription is created from this screen and no unavailable capability is presented as active. Ask your workspace administrator about the current plan and permissions.</p>
-      <a mat-stroked-button routerLink="/portal/home">Back to workspace</a>
-    </section>
-  `,
-  styles: [`:host{display:block}.page{display:grid;gap:1rem;max-width:60rem}.page p{max-width:65ch}`],
+  imports: [TranslatePipe, ButtonComponent, NexaIconComponent, PageHeaderComponent, SectionPanelComponent],
+  templateUrl: './premium-page.component.html',
+  styleUrl: './premium-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PremiumPageComponent {}

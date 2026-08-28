@@ -3,11 +3,17 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { PORTAL_AUTH_PORT } from './portal-auth.port';
 import {
+  NoPendingTwoFactorChallengeError,
   PortalAuthStatus,
+  PortalTwoFactorChallenge,
+  PortalTwoFactorStatus,
   PortalIdentity,
   PortalSession,
+  PortalAccessDeniedError,
   SignInCredentials,
   WorkspacePreview,
+  normalizeWorkspaceSlug,
+  toPortalTwoFactorChallenge,
   toPortalSession,
 } from '../domain/portal-access.models';
 import { AuthLifecycleChannel } from '../../../core/security/auth-lifecycle.channel';
@@ -23,6 +29,8 @@ export class PortalAuthStateService {
   private readonly identityState = signal<PortalIdentity | null>(null);
   private readonly statusState = signal<PortalAuthStatus>('signed-out');
   private readonly errorState = signal<unknown>(null);
+  private readonly twoFactorChallengeState = signal<PortalTwoFactorChallenge | null>(null);
+  private readonly twoFactorStatusState = signal<PortalTwoFactorStatus>('idle');
   private refreshInFlight$: Observable<string> | null = null;
 
   constructor() {
@@ -36,6 +44,8 @@ export class PortalAuthStateService {
   readonly identity = this.identityState.asReadonly();
   readonly status = this.statusState.asReadonly();
   readonly error = this.errorState.asReadonly();
+  readonly twoFactorChallenge = this.twoFactorChallengeState.asReadonly();
+  readonly twoFactorStatus = this.twoFactorStatusState.asReadonly();
   readonly isAuthenticated = computed(
     () => this.statusState() === 'authenticated' && this.tokenState() !== null,
   );
@@ -51,22 +61,44 @@ export class PortalAuthStateService {
   }
 
   workspacePreview(workspaceSlug: string): Observable<WorkspacePreview> {
-    return this.api.workspacePreview(workspaceSlug);
+    return this.api.workspacePreview(normalizeWorkspaceSlug(workspaceSlug));
   }
 
   signIn(credentials: SignInCredentials): Observable<void> {
+    this.tokenState.set(null);
+    this.identityState.set(null);
+    this.twoFactorChallengeState.set(null);
+    this.twoFactorStatusState.set('idle');
     this.statusState.set('authenticating');
     this.errorState.set(null);
 
-    return this.api.signIn(credentials).pipe(
-      map((response) => toPortalSession(response)),
-      tap((session) => this.acceptSession(session)),
+    const normalizedCredentials: SignInCredentials = {
+      ...credentials,
+      email: credentials.email.trim(),
+      workspaceSlug: normalizeWorkspaceSlug(credentials.workspaceSlug),
+    };
+
+    return this.api.signIn(normalizedCredentials).pipe(
+      switchMap((response) => {
+        const challenge = toPortalTwoFactorChallenge(response);
+        if (challenge) {
+          this.twoFactorChallengeState.set(challenge);
+          this.twoFactorStatusState.set('pending');
+          this.statusState.set('two-factor-challenge');
+          return of(undefined);
+        }
+        const session = toPortalSession(response);
+        this.acceptSession(session);
+        return of(undefined);
+      }),
       map(() => undefined),
       catchError((error: unknown) => {
         this.tokenState.set(null);
         this.identityState.set(null);
+        this.twoFactorChallengeState.set(null);
+        this.twoFactorStatusState.set('idle');
         this.statusState.set(
-          error instanceof Error && error.name === 'PortalAccessDeniedError'
+          error instanceof PortalAccessDeniedError
             ? 'forbidden'
             : 'error',
         );
@@ -74,6 +106,41 @@ export class PortalAuthStateService {
         return throwError(() => error);
       }),
     );
+  }
+
+  verifyTwoFactor(code: string): Observable<void> {
+    const challenge = this.twoFactorChallengeState();
+    if (!challenge) {
+      const error = new NoPendingTwoFactorChallengeError();
+      this.twoFactorStatusState.set('error');
+      this.statusState.set('error');
+      this.errorState.set(error);
+      return throwError(() => error);
+    }
+
+    this.statusState.set('verifying-two-factor');
+    this.twoFactorStatusState.set('verifying');
+    this.errorState.set(null);
+
+    return this.api.verifyTwoFactor(challenge.challengeId, code.trim()).pipe(
+      map((response) => toPortalSession(response)),
+      tap((session) => this.acceptSession(session, 'verified')),
+      map(() => undefined),
+      catchError((error: unknown) => {
+        this.statusState.set('two-factor-challenge');
+        this.twoFactorStatusState.set(
+          error?.constructor?.name === 'PortalTwoFactorUnavailableError'
+            ? 'unavailable'
+            : 'error',
+        );
+        this.errorState.set(error);
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  cancelTwoFactorChallenge(): void {
+    this.clearSession();
   }
 
   restore(): Observable<void> {
@@ -167,13 +234,17 @@ export class PortalAuthStateService {
     this.identityState.set(null);
     this.statusState.set('signed-out');
     this.errorState.set(null);
+    this.twoFactorChallengeState.set(null);
+    this.twoFactorStatusState.set('idle');
     this.refreshInFlight$ = null;
   }
 
-  private acceptSession(session: PortalSession): void {
+  private acceptSession(session: PortalSession, twoFactorStatus: PortalTwoFactorStatus = 'idle'): void {
     this.setSessionMarker(true);
     this.tokenState.set(session.accessToken);
     this.identityState.set(session.identity);
+    this.twoFactorChallengeState.set(null);
+    this.twoFactorStatusState.set(twoFactorStatus);
     this.statusState.set('authenticated');
     this.errorState.set(null);
   }

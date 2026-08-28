@@ -1,0 +1,89 @@
+@if (section === 'support') {
+  <section class="legal-page support-page" aria-labelledby="support-title">
+    <section class="legal-hero support-hero">
+      <div class="legal-hero-copy">
+        <span class="legal-pill">{{ 'support.eyebrow' | translate }}</span>
+        <h1 id="support-title">{{ 'support.title' | translate }}</h1>
+        <p>{{ 'support.subtitle' | translate }}</p>
+      </div>
+      <aside class="legal-hero-note" [attr.aria-label]="'support.hero.eyebrow' | translate">
+        <span>{{ 'support.hero.eyebrow' | translate }}</span>
+        <strong>{{ 'support.hero.title' | translate }}</strong>
+        <p>{{ 'support.hero.description' | translate }}</p>
+      </aside>
+    </section>
+
+    <div class="support-body">
+      <div class="support-card-grid">
+        @for (card of supportCards; track card.title) {
+          <article class="support-card">
+            <div class="support-card-pad">
+              <span class="support-icon"><nexa-icon [name]="card.icon" /></span>
+              <div class="support-card-copy">
+                <h2>{{ card.title | translate }}</h2>
+                <p>{{ card.description | translate }}</p>
+              </div>
+              <a class="support-card-action" [routerLink]="card.path">{{ card.action | translate }}</a>
+            </div>
+          </article>
+        }
+      </div>
+
+      <section class="support-guide">
+        <div class="support-guide-head">
+          <div>
+            <h2>{{ 'support.guide.title' | translate }}</h2>
+            <p>{{ 'support.guide.description' | translate }}</p>
+          </div>
+        </div>
+        <div class="support-note-grid">
+          @for (note of supportNotes; track note) {
+            <div>
+              <span class="note-eyebrow">{{ ('support.guide.' + note + '.title') | translate }}</span>
+              <p>{{ ('support.guide.' + note + '.description') | translate }}</p>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  </section>
+} @else {
+  <section class="legal-page legal-page-view">
+    <section class="legal-hero" aria-labelledby="legal-title">
+      <div class="legal-hero-copy">
+        <span class="legal-pill">{{ ('legal.' + legalPage + '.eyebrow') | translate }}</span>
+        <h1 id="legal-title">{{ ('legal.' + legalPage + '.title') | translate }}</h1>
+        <p>{{ ('legal.' + legalPage + '.summary') | translate }}</p>
+      </div>
+      <aside class="legal-hero-note">
+        <span>{{ ('legal.' + legalPage + '.noteTitle') | translate }}</span>
+        <strong>{{ ('legal.' + legalPage + '.noteHeadline') | translate }}</strong>
+        <p>{{ ('legal.' + legalPage + '.noteCopy') | translate }}</p>
+      </aside>
+    </section>
+
+    <div class="legal-layout">
+      <nav class="legal-sidebar" [attr.aria-label]="'legal.navigation' | translate">
+        <a routerLink="/portal/legal/terms" [class.active]="legalPage === 'terms'">{{ 'legal.navigationTerms' | translate }}</a>
+        <a routerLink="/portal/legal/privacy" [class.active]="legalPage === 'privacy'">{{ 'legal.navigationPrivacy' | translate }}</a>
+        <a routerLink="/portal/support">{{ 'legal.navigationSupport' | translate }}</a>
+      </nav>
+
+      <main class="legal-content">
+        <div class="legal-content-head">
+          <span class="legal-badge">{{ ('legal.' + legalPage + '.badge') | translate }}</span>
+          <span class="legal-updated">{{ 'legal.updated' | translate }}</span>
+        </div>
+        @for (key of legalSectionKeys(); track key; let index = $index) {
+          <article class="legal-section-card">
+            <span class="legal-section-index">{{ (index + 1).toString().padStart(2, '0') }}</span>
+            <div>
+              <h2>{{ ('legal.' + legalPage + '.sections.' + key + '.title') | translate }}</h2>
+              <p>{{ ('legal.' + legalPage + '.sections.' + key + '.description') | translate }}</p>
+            </div>
+          </article>
+        }
+      </main>
+    </div>
+  </section>
+}

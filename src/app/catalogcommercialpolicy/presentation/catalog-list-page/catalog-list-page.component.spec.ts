@@ -10,6 +10,7 @@ import {
   CatalogPage,
 } from '../../domain/catalog.models';
 import { CatalogListPageComponent } from './catalog-list-page.component';
+import { PortalCatalogCartFacade } from '../../../core/compositions/portal/catalog-cart.facade';
 
 function catalogItem(): CatalogItemSummary {
   return {
@@ -59,11 +60,21 @@ function mockCatalog(status: CatalogListStatus) {
   };
 }
 
+function mockCart() {
+  return {
+    count: signal(0),
+    activate: vi.fn(),
+    has: vi.fn(() => false),
+    toggle: vi.fn(),
+  };
+}
+
 describe('CatalogListPageComponent', () => {
   let fixture: ComponentFixture<CatalogListPageComponent>;
 
   async function render(status: CatalogListStatus) {
     const catalog = mockCatalog(status);
+    const cart = mockCart();
     await TestBed.configureTestingModule({
       imports: [CatalogListPageComponent],
       providers: [
@@ -77,6 +88,7 @@ describe('CatalogListPageComponent', () => {
           },
         },
         { provide: CatalogQueryService, useValue: catalog },
+        { provide: PortalCatalogCartFacade, useValue: cart },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(CatalogListPageComponent);

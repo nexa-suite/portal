@@ -1,0 +1,59 @@
+<section class="page">
+  <a class="back-link" routerLink="/portal/deliveries">← {{ 'delivery.actions.back' | translate }}</a>
+
+  @if (facade.loading() && !facade.selected()) { <nexa-loading-state [lines]="5" [label]="'delivery.loading' | translate" /> }
+  @else if (facade.error() && !facade.selected()) { <nexa-error-state [title]="'delivery.title' | translate" [description]="('messages.' + facade.error()) | translate" [retryLabel]="'orders.actions.retry' | translate" (retry)="facade.retry()" /> }
+  @else if (facade.selected(); as item) {
+    <nexa-page-header [eyebrow]="'delivery.fields.dispatch' | translate" [title]="item.dispatchNumber" [subtitle]="'delivery.detailSubtitle' | translate">
+      <div page-header-actions>
+        <nexa-status-badge [label]="('delivery.status.' + item.status) | translate" [tone]="deliveryTone(item.status)" emphasis="standard" />
+      </div>
+    </nexa-page-header>
+
+    <section class="delivery-banner" aria-labelledby="delivery-status-title">
+      <div>
+        <p class="banner-kicker">{{ 'delivery.detailKicker' | translate }}</p>
+        <h2 id="delivery-status-title">{{ ('delivery.status.' + item.status) | translate }}</h2>
+        <p>{{ destinationLabel(item) }}</p>
+      </div>
+      <div class="banner-meta">
+        <span>{{ 'delivery.fields.salesOrder' | translate }}</span>
+        @if (item.salesOrderId; as orderId) {
+          <a [routerLink]="['/portal/sales-orders', orderId]">{{ item.salesOrderNumber || orderId }} <nexa-icon name="arrow_forward" aria-hidden="true" /></a>
+        } @else { <strong>{{ item.salesOrderNumber || '—' }}</strong> }
+      </div>
+    </section>
+
+    <div class="detail-grid">
+      <nexa-section-panel [title]="'delivery.summaryTitle' | translate" [description]="'delivery.summaryDescription' | translate">
+        <dl class="summary-list">
+          <div><dt>{{ 'delivery.fields.dispatch' | translate }}</dt><dd>{{ item.dispatchNumber }}</dd></div>
+          <div><dt>{{ 'delivery.fields.destination' | translate }}</dt><dd>{{ destinationLabel(item) }}</dd></div>
+          <div><dt>{{ 'delivery.fields.window' | translate }}</dt><dd>@if (item.deliveryWindowStart; as start) { {{ start | date:'short' }} } @else { — } @if (item.deliveryWindowEnd; as end) { <span> – {{ end | date:'short' }}</span> }</dd></div>
+          <div><dt>{{ 'delivery.fields.eta' | translate }}</dt><dd>{{ item.eta ? (item.eta | date:'short') : '—' }}</dd></div>
+          <div><dt>{{ 'delivery.fields.updated' | translate }}</dt><dd>{{ item.updatedAt ? (item.updatedAt | date:'short') : '—' }}</dd></div>
+          <div><dt>{{ 'delivery.fields.pod' | translate }}</dt><dd><nexa-status-badge [label]="item.podStatus === 'COMPLETED' ? ('delivery.podComplete' | translate) : ('delivery.podPending' | translate)" [tone]="podTone(item)" /></dd></div>
+        </dl>
+      </nexa-section-panel>
+
+      <nexa-section-panel [title]="'delivery.timeline' | translate" [description]="'delivery.timelineDescription' | translate">
+        <ol class="events">
+          @for (event of facade.events(); track event.id) {
+            <li class="event-item">
+              <span class="event-marker" aria-hidden="true"><nexa-icon name="check" /></span>
+              <div><strong>{{ ('delivery.event.' + event.type) | translate }}</strong><span>{{ event.occurredAt | date:'medium' }}</span>@if (event.summary) { <p>{{ event.summary }}</p> }</div>
+            </li>
+          } @empty { <li class="note">{{ 'delivery.noEvents' | translate }}</li> }
+        </ol>
+      </nexa-section-panel>
+    </div>
+
+    @if (item.alerts.length) {
+      <nexa-section-panel [title]="'delivery.incident' | translate" appearance="subtle">
+        <ul class="alerts">
+          @for (alert of item.alerts; track alert) { <li><nexa-icon name="warning" aria-hidden="true" />{{ ('delivery.alerts.' + alert) | translate }}</li> }
+        </ul>
+      </nexa-section-panel>
+    }
+  }
+</section>

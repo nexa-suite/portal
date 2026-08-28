@@ -1,0 +1,61 @@
+<section class="page">
+  <nexa-page-header [eyebrow]="'premium.eyebrow' | translate" [title]="'premium.title' | translate" [subtitle]="'premium.subtitle' | translate">
+    <div page-header-actions><span class="locked-label"><nexa-icon name="verified" />{{ 'premium.locked' | translate }}</span></div>
+  </nexa-page-header>
+
+  <section class="premium-hero" aria-labelledby="premium-hero-title">
+    <div class="hero-copy">
+      <span class="hero-eyebrow">{{ 'premium.hero.eyebrow' | translate }}</span>
+      <h2 id="premium-hero-title">{{ 'premium.hero.title' | translate }}</h2>
+      <p>{{ 'premium.hero.description' | translate }}</p>
+    </div>
+    <div class="hero-mark" aria-hidden="true"><nexa-icon name="verified" /></div>
+  </section>
+
+  <nexa-section-panel [title]="'premium.features.title' | translate" [description]="'premium.features.description' | translate">
+    <div class="feature-grid">
+      <article class="feature-card">
+        <span class="feature-icon blue"><nexa-icon name="category" /></span>
+        <h3>{{ 'premium.features.catalog.title' | translate }}</h3>
+        <p>{{ 'premium.features.catalog.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon cyan"><nexa-icon name="local_shipping" /></span>
+        <h3>{{ 'premium.features.tracking.title' | translate }}</h3>
+        <p>{{ 'premium.features.tracking.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon indigo"><nexa-icon name="warning" /></span>
+        <h3>{{ 'premium.features.temperature.title' | translate }}</h3>
+        <p>{{ 'premium.features.temperature.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon amber"><nexa-icon name="request_quote" /></span>
+        <h3>{{ 'premium.features.campaigns.title' | translate }}</h3>
+        <p>{{ 'premium.features.campaigns.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon green"><nexa-icon name="add_shopping_cart" /></span>
+        <h3>{{ 'premium.features.reorder.title' | translate }}</h3>
+        <p>{{ 'premium.features.reorder.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon neutral"><nexa-icon name="verified" /></span>
+        <h3>{{ 'premium.features.support.title' | translate }}</h3>
+        <p>{{ 'premium.features.support.description' | translate }}</p>
+        <span class="feature-state"><nexa-icon name="verified" />{{ 'premium.featureState' | translate }}</span>
+      </article>
+    </div>
+  </nexa-section-panel>
+
+  <section class="boundary-panel">
+    <div class="boundary-icon"><nexa-icon name="verified" /></div>
+    <div><h2>{{ 'premium.boundary.title' | translate }}</h2><p>{{ 'premium.boundary.description' | translate }}</p></div>
+    <nexa-button routerLink="/portal/support" variant="secondary" size="compact">{{ 'premium.boundary.action' | translate }}</nexa-button>
+  </section>
+</section>

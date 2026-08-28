@@ -1,8 +1,69 @@
 <section class="page">
-  <nexa-page-header [eyebrow]="'purchaseRequests.eyebrow' | translate" [title]="'purchaseRequests.list.title' | translate" [subtitle]="'purchaseRequests.list.subtitle' | translate" />
-  <mat-card class="filter"><mat-select [placeholder]="'purchaseRequests.list.filter' | translate" (selectionChange)="filter($event.value)"><mat-option value="">{{ 'purchaseRequests.list.allStatuses' | translate }}</mat-option><mat-option value="DRAFT">{{ 'purchaseRequests.status.DRAFT' | translate }}</mat-option><mat-option value="SUBMITTED">{{ 'purchaseRequests.status.SUBMITTED' | translate }}</mat-option><mat-option value="IN_REVIEW">{{ 'purchaseRequests.status.IN_REVIEW' | translate }}</mat-option><mat-option value="NEEDS_ADJUSTMENT">{{ 'purchaseRequests.status.NEEDS_ADJUSTMENT' | translate }}</mat-option><mat-option value="APPROVED">{{ 'purchaseRequests.status.APPROVED' | translate }}</mat-option><mat-option value="CONVERTED_TO_ORDER">{{ 'purchaseRequests.status.CONVERTED_TO_ORDER' | translate }}</mat-option><mat-option value="CANCELLED">{{ 'purchaseRequests.status.CANCELLED' | translate }}</mat-option></mat-select></mat-card>
+  <nexa-page-header [eyebrow]="'purchaseRequests.eyebrow' | translate" [title]="'purchaseRequests.list.title' | translate" [subtitle]="'purchaseRequests.list.subtitle' | translate">
+    <div page-header-actions>
+      <nexa-button routerLink="/portal/product-catalog" [ariaLabel]="'purchaseRequests.actions.newRequest' | translate">
+        <nexa-icon name="add_shopping_cart" aria-hidden="true" />
+        {{ 'purchaseRequests.actions.newRequest' | translate }}
+      </nexa-button>
+    </div>
+  </nexa-page-header>
+
+  <label class="filter-control">
+    <span>{{ 'purchaseRequests.list.filter' | translate }}</span>
+    <select (change)="filterFromEvent($event)">
+      <option value="">{{ 'purchaseRequests.list.allStatuses' | translate }}</option>
+      <option value="DRAFT">{{ 'purchaseRequests.status.DRAFT' | translate }}</option>
+      <option value="SUBMITTED">{{ 'purchaseRequests.status.SUBMITTED' | translate }}</option>
+      <option value="IN_REVIEW">{{ 'purchaseRequests.status.IN_REVIEW' | translate }}</option>
+      <option value="NEEDS_ADJUSTMENT">{{ 'purchaseRequests.status.NEEDS_ADJUSTMENT' | translate }}</option>
+      <option value="APPROVED">{{ 'purchaseRequests.status.APPROVED' | translate }}</option>
+      <option value="CONVERTED_TO_ORDER">{{ 'purchaseRequests.status.CONVERTED_TO_ORDER' | translate }}</option>
+      <option value="CANCELLED">{{ 'purchaseRequests.status.CANCELLED' | translate }}</option>
+    </select>
+  </label>
+
   @if (facade.listState().status === 'loading') { <nexa-loading-state [lines]="5" [label]="'purchaseRequests.states.loading' | translate" /> }
   @if (facade.listState().status === 'error') { <nexa-error-state [title]="'purchaseRequests.states.errorTitle' | translate" [description]="'purchaseRequests.states.errorDescription' | translate" [retryLabel]="'purchaseRequests.actions.retry' | translate" (retry)="facade.retryList()" /> }
   @if (facade.listState().status === 'empty') { <nexa-empty-state [title]="'purchaseRequests.list.emptyTitle' | translate" [description]="'purchaseRequests.list.emptyDescription' | translate" /> }
-  @if (facade.listState().status === 'success') { <div class="list">@for (request of facade.listState().page?.items ?? []; track request.id) { <mat-card><mat-card-header><mat-card-subtitle>{{ request.code }}</mat-card-subtitle><mat-card-title>{{ ('purchaseRequests.status.' + request.status) | translate }}</mat-card-title></mat-card-header><mat-card-content><p>{{ request.lines.length }} · {{ request.requestedDeliveryDate || ('purchaseRequests.list.datePending' | translate) }}</p><mat-chip-set><mat-chip>{{ ('purchaseRequests.priority.' + request.priority) | translate }}</mat-chip></mat-chip-set></mat-card-content><mat-card-actions><a mat-button [routerLink]="['/portal/purchase-requests', request.id]">{{ 'purchaseRequests.actions.open' | translate }}</a></mat-card-actions></mat-card> }</div> }
+  @if (facade.listState().status === 'success') {
+    <div class="metrics" [attr.aria-label]="'purchaseRequests.metrics.title' | translate">
+      <nexa-metric-card [label]="'purchaseRequests.metrics.open' | translate" [value]="openRequests()" [hint]="'purchaseRequests.metrics.openHint' | translate" icon="request_quote" tone="info" />
+      <nexa-metric-card [label]="'purchaseRequests.metrics.approved' | translate" [value]="approvedRequests()" [hint]="'purchaseRequests.metrics.approvedHint' | translate" icon="verified" tone="success" />
+      <nexa-metric-card [label]="'purchaseRequests.metrics.latest' | translate" [value]="latestRequest()?.code || '—'" [hint]="latestRequest() ? (('purchaseRequests.status.' + latestRequest()!.status) | translate) : ('purchaseRequests.metrics.noActivity' | translate)" icon="schedule" tone="warning" />
+    </div>
+
+    <nexa-section-panel [title]="'purchaseRequests.list.title' | translate" [description]="'purchaseRequests.list.subtitle' | translate">
+      <div class="request-list">
+        @for (request of requests(); track request.id) {
+          <article class="request-card">
+            <div class="request-card-head">
+              <div class="request-identity">
+                <span class="request-code">{{ request.code }}</span>
+                <nexa-status-badge [label]="('purchaseRequests.status.' + request.status) | translate" [tone]="requestTone(request.status)" emphasis="standard" />
+                <nexa-status-badge [label]="('purchaseRequests.priority.' + request.priority) | translate" [tone]="priorityTone(request.priority)" />
+              </div>
+              <a class="open-link" [routerLink]="['/portal/purchase-requests', request.id]">
+                {{ 'purchaseRequests.actions.open' | translate }}
+                <nexa-icon name="arrow_forward" aria-hidden="true" />
+              </a>
+            </div>
+            @if (summaryText(request); as summary) { <p class="request-summary">{{ summary }}</p> } @else { <p class="request-summary">{{ 'purchaseRequests.card.noSpecifications' | translate }}</p> }
+            <div class="request-meta-grid">
+              <div><span>{{ 'purchaseRequests.card.lines' | translate }}</span><strong>{{ request.lines.length }}</strong></div>
+              <div><span>{{ 'purchaseRequests.fields.deliveryDate' | translate }}</span><strong>{{ request.requestedDeliveryDate || ('purchaseRequests.list.datePending' | translate) }}</strong></div>
+              <div><span>{{ 'purchaseRequests.fields.payment' | translate }}</span><strong>{{ request.paymentOption ? (('purchaseRequests.payment.' + request.paymentOption) | translate) : '—' }}</strong></div>
+            </div>
+            <div class="request-product-strip">
+              @for (line of request.lines.slice(0, 3); track line.id) {
+                <article class="request-product">
+                  <span class="product-icon" aria-hidden="true"><nexa-icon name="category" /></span>
+                  <div><strong>{{ line.itemName }}</strong><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }}</span></div>
+                </article>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </nexa-section-panel>
+  }
 </section>
