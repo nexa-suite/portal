@@ -1,2 +1,172 @@
-<section class="page"><a mat-button routerLink="/portal/purchase-requests">{{ 'purchaseRequests.backToList' | translate }}</a>@if (facade.detailState().status === 'loading') { <nexa-loading-state [lines]="5" [label]="'purchaseRequests.states.loading' | translate" /> }@if (facade.detailState().status === 'error') { <nexa-error-state [title]="'purchaseRequests.states.errorTitle' | translate" [description]="('messages.' + (facade.detailState().message ?? 'PURCHASE_REQUEST_LOAD_FAILED')) | translate" [retryLabel]="'purchaseRequests.actions.reload' | translate" (retry)="reload()" /> }@if (facade.detailState().item; as request) { <nexa-page-header [eyebrow]="'purchaseRequests.eyebrow' | translate" [title]="request.code" [subtitle]="'purchaseRequests.detail.subtitle' | translate" /><mat-card><mat-card-content><div class="summary"><mat-chip-set><mat-chip>{{ ('purchaseRequests.status.' + request.status) | translate }}</mat-chip><mat-chip>{{ ('purchaseRequests.priority.' + request.priority) | translate }}</mat-chip></mat-chip-set><dl><div><dt>{{ 'purchaseRequests.fields.deliveryDate' | translate }}</dt><dd>{{ request.requestedDeliveryDate || ('purchaseRequests.list.datePending' | translate) }}</dd></div><div><dt>{{ 'purchaseRequests.fields.payment' | translate }}</dt><dd>{{ request.paymentOption ? ('purchaseRequests.payment.' + request.paymentOption | translate) : '—' }}</dd></div></dl></div><p>{{ request.comment || ('purchaseRequests.detail.noComment' | translate) }}</p>@if (request.reviewNote) { <p class="note">{{ request.reviewNote }}</p> }<div class="lines">@for (line of request.lines; track line.id) { <div><strong>{{ line.itemName }}</strong><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }} · {{ line.unitPriceAmount }} {{ line.unitPriceCurrency }}</span></div> } @empty { <p class="note">{{ 'purchaseRequests.detail.emptyDraft' | translate }}</p> }</div></mat-card-content><mat-card-actions>@if (canEdit(request.status)) { <a mat-flat-button color="primary" [routerLink]="['/portal/request-builder', request.id]">{{ 'purchaseRequests.actions.edit' | translate }}</a><button mat-stroked-button type="button" (click)="submit()">{{ 'purchaseRequests.actions.submit' | translate }}</button> }@if (canCancel(request.status)) { <button mat-button type="button" (click)="cancel()">{{ 'purchaseRequests.actions.cancel' | translate }}</button> } </mat-card-actions></mat-card>@if (facade.detailState().message) { <p class="message">{{ ('messages.' + facade.detailState().message) | translate }}</p> } }
+<section class="request-detail-page">
+  @if (facade.detailState().status === 'loading') {
+    <nexa-loading-state [lines]="5" [label]="'purchaseRequests.states.loading' | translate" />
+  }
+
+  @if (facade.detailState().status === 'error') {
+    <nexa-error-state
+      [title]="'purchaseRequests.states.errorTitle' | translate"
+      [description]="'purchaseRequests.states.errorDescription' | translate"
+      [retryLabel]="'purchaseRequests.actions.reload' | translate"
+      (retry)="reload()" />
+  }
+
+  @if (facade.detailState().item; as request) {
+    <header class="request-detail-header">
+      <div>
+        <div class="request-detail-code">{{ request.code }}</div>
+        <div class="request-detail-subtitle">Buyer request workflow with Sales validation, documents and conversation history.</div>
+      </div>
+      <div class="request-detail-actions">
+        <a class="btn btn-ghost btn-sm" routerLink="/portal/purchase-requests">
+          <nexa-icon name="arrow_back" aria-hidden="true" />
+          {{ 'purchaseRequests.backToList' | translate }}
+        </a>
+        <nexa-status-badge
+          [label]="('purchaseRequests.status.' + request.status) | translate"
+          [tone]="requestTone(request.status)"
+          emphasis="standard" />
+      </div>
+    </header>
+
+    <div class="flow-grid-12 request-detail-grid">
+      <section class="flow-panel span-7">
+        <div class="flow-panel-head">
+          <div>
+            <div class="flow-title">Requested products</div>
+            <div class="flow-subtitle">
+              {{ request.lines.length }} line item(s) · {{ formatMoney(requestTotal(), currencyFor(request)) }} estimated total
+            </div>
+          </div>
+        </div>
+        <div class="flow-panel-pad flow-stack">
+          <article class="buyer-note">
+            <strong>Buyer specifications</strong>
+            <p>{{ request.comment || ('purchaseRequests.detail.noComment' | translate) }}</p>
+          </article>
+
+          <div class="request-product-grid">
+            @for (line of request.lines; track line.id) {
+              <article class="request-product-card">
+                <div class="request-product-image">
+                  @if (catalogFor(line)?.image?.url; as imageUrl) {
+                    <img [src]="imageUrl" [alt]="productName(line)" loading="lazy" />
+                  } @else {
+                    <nexa-icon name="inventory_2" aria-hidden="true" />
+                  }
+                </div>
+                <div class="request-product-copy">
+                  <strong>{{ productName(line) }}</strong>
+                  <span>{{ productSku(line) }}</span>
+                  <small>
+                    {{ line.quantity }} {{ unitLabel(line) }} · {{ formatMoney(line.unitPriceAmount, line.unitPriceCurrency) }} ·
+                    subtotal {{ formatMoney(lineTotal(line), line.unitPriceCurrency) }}
+                    @if (productColdChain(line)) { · {{ productColdChain(line) }} }
+                  </small>
+                </div>
+              </article>
+            } @empty {
+              <p class="detail-empty">{{ 'purchaseRequests.detail.emptyDraft' | translate }}</p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="flow-panel span-5">
+        <div class="flow-panel-head">
+          <div>
+            <div class="flow-title">Request details</div>
+            <div class="flow-subtitle">{{ requestDetailsSubtitle(request) }}</div>
+          </div>
+        </div>
+        <div class="flow-panel-pad flow-stack">
+          <div class="request-detail-meta">
+            <div>
+              <span>MONTHLY CREDIT</span>
+              @if (request.paymentOption === 'CREDIT_LINE') {
+                <nexa-status-badge [label]="'purchaseRequests.payment.CREDIT_LINE' | translate" tone="success" emphasis="standard" />
+              } @else {
+                <strong>—</strong>
+              }
+            </div>
+            <div><span>AVAILABLE</span><strong>—</strong></div>
+            <div><span>CREATED</span><strong>—</strong></div>
+            <div><span>REQUESTED DELIVERY</span><strong>{{ request.requestedDeliveryDate || '—' }}</strong></div>
+            <div>
+              <span>PAYMENT</span>
+              <strong>{{ request.paymentOption ? (('purchaseRequests.payment.' + request.paymentOption) | translate) : '—' }}</strong>
+            </div>
+            <div><span>LAST UPDATE</span><strong>—</strong></div>
+          </div>
+
+          <div class="mini-row"><span>Address</span><strong>{{ requestAddress(request) }}</strong></div>
+          <div class="mini-row"><span>Reference</span><strong>{{ referenceLabel() }}</strong></div>
+        </div>
+      </section>
+
+      <section class="flow-panel span-12">
+        <div class="flow-panel-head">
+          <div>
+            <div class="flow-title">Request progress</div>
+            <div class="flow-subtitle">Buyer-visible handoff from request to purchase order.</div>
+          </div>
+        </div>
+        <div class="flow-panel-pad">
+          <div class="request-progress" aria-label="Request progress">
+            @for (step of decisionSteps(); track step.key) {
+              <div class="request-progress-step" [class.done]="step.state === 'done'" [class.active]="step.state === 'active'">
+                <span class="request-progress-dot" aria-hidden="true"></span>
+                <span class="request-progress-label">{{ step.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="flow-panel span-12">
+        <div class="flow-panel-head">
+          <div class="flow-title">Conversation</div>
+        </div>
+        <div class="flow-panel-pad flow-stack conversation-body">
+          @if (request.reviewNote) {
+            <div class="message-row">
+              <div><strong>Sales</strong><span>Commercial review</span></div>
+              <p>{{ request.reviewNote }}</p>
+            </div>
+          } @else {
+            <div class="conversation-empty">
+              <strong>No conversation messages</strong>
+              <span>Sales observations and adjustment requests will appear here.</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      @if (canEditRequest(request) || canCancel(request.status)) {
+        <section class="flow-panel span-12 request-actions-panel">
+          <div class="flow-panel-pad request-actions">
+            @if (canEditRequest(request)) {
+              <a class="btn btn-secondary" [routerLink]="['/portal/request-builder', request.id]">
+                <nexa-icon name="edit" aria-hidden="true" />
+                {{ 'purchaseRequests.actions.edit' | translate }}
+              </a>
+              <button class="btn btn-primary" type="button" (click)="submit()">
+                <nexa-icon name="check" aria-hidden="true" />
+                {{ 'purchaseRequests.actions.submit' | translate }}
+              </button>
+            }
+            @if (canCancel(request.status)) {
+              <button class="btn btn-ghost" type="button" (click)="cancel()">
+                {{ 'purchaseRequests.actions.cancel' | translate }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </div>
+
+    @if (facade.detailState().message; as message) {
+      <p class="detail-message" role="status">{{ ('messages.' + message) | translate }}</p>
+    }
+  }
 </section>

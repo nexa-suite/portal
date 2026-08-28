@@ -1,24 +1,92 @@
 <section class="page">
-  <a mat-button routerLink="/portal/sales-orders">{{ 'orders.actions.back' | translate }}</a>
+  <a class="back-link" routerLink="/portal/sales-orders">← {{ 'orders.actions.back' | translate }}</a>
   @if (facade.detailState().status === 'loading') { <nexa-loading-state [lines]="6" [label]="'orders.states.loading' | translate" /> }
   @if (facade.detailState().status === 'error') { <nexa-error-state [title]="'orders.states.errorTitle' | translate" [description]="('messages.' + (facade.detailState().message ?? 'SALES_ORDER_LOAD_FAILED')) | translate" [retryLabel]="'orders.actions.reload' | translate" (retry)="reload()" /> }
   @if (facade.detailState().item; as order) {
-    <nexa-page-header [eyebrow]="'orders.eyebrow' | translate" [title]="order.number" [subtitle]="'orders.detail.subtitle' | translate" />
-    <mat-card>
-      <mat-card-content>
-        <div class="order-head">
-          <mat-chip-set><mat-chip>{{ ('orders.status.' + order.status) | translate }}</mat-chip></mat-chip-set>
-          <div class="export-actions"><button mat-stroked-button type="button" (click)="facade.downloadSummary('PDF')">{{ 'orders.actions.pdf' | translate }}</button><button mat-stroked-button type="button" (click)="facade.downloadSummary('CSV')">{{ 'orders.actions.csv' | translate }}</button></div>
+    <div class="detail-heading">
+      <nexa-page-header [eyebrow]="'orders.eyebrow' | translate" [title]="order.number" [subtitle]="'orders.detail.subtitle' | translate" />
+      <div class="detail-actions">
+        <nexa-status-badge [label]="('orders.status.' + order.status) | translate" [tone]="orderTone(order.status)" emphasis="standard" />
+        @if (order.status === 'PENDING') {
+          <nexa-button variant="primary" size="compact" (click)="facade.confirm()">
+            <nexa-icon name="check" aria-hidden="true" />
+            {{ 'orders.actions.confirm' | translate }}
+          </nexa-button>
+        }
+        <nexa-button variant="secondary" size="compact" (click)="facade.downloadSummary('PDF')">{{ 'orders.actions.pdf' | translate }}</nexa-button>
+        <nexa-button variant="secondary" size="compact" (click)="facade.downloadSummary('CSV')">{{ 'orders.actions.csv' | translate }}</nexa-button>
+      </div>
+    </div>
+
+    <section class="order-banner" aria-labelledby="order-status-title">
+      <div>
+        <p class="banner-kicker">{{ 'orders.detail.statusKicker' | translate }}</p>
+        <h2 id="order-status-title">{{ ('orders.status.' + order.status) | translate }}</h2>
+        <p>{{ 'orders.detail.statusDescription' | translate }}</p>
+      </div>
+      <div class="banner-total"><span>{{ 'orders.total' | translate }}</span><strong>{{ order.totalAmount | number:'1.2-2' }} {{ order.currency }}</strong></div>
+    </section>
+
+    <section class="flow-panel" aria-label="{{ 'orders.flow.title' | translate }}">
+      <div class="flow-panel-heading">
+        <div><h2>{{ 'orders.flow.title' | translate }}</h2><p>{{ 'orders.flow.subtitle' | translate }}</p></div>
+        @if (matchingDeliveryId(); as deliveryId) {
+          <a class="flow-action" [routerLink]="['/portal/deliveries', deliveryId]">
+            {{ 'orders.deliveryLink' | translate }}
+            <nexa-icon name="arrow_forward" aria-hidden="true" />
+          </a>
+        }
+      </div>
+      <ol class="flow-track">
+        @for (step of flowSteps(); track step.key; let index = $index) {
+          <li class="flow-step" [class.complete]="step.state === 'complete'" [class.current]="step.state === 'current'">
+            <span class="flow-marker"><nexa-icon [name]="step.icon" /></span>
+            <span><strong>{{ step.label | translate }}</strong><small>{{ ('orders.flow.' + step.state) | translate }}</small></span>
+            @if (index < flowSteps().length - 1) { <span class="flow-connector" aria-hidden="true"></span> }
+          </li>
+        }
+      </ol>
+    </section>
+
+    <div class="detail-grid">
+      <nexa-section-panel [title]="'orders.products.title' | translate" [description]="'orders.products.subtitle' | translate">
+        <div class="lines">
+          @for (line of order.lines; track line.id) {
+            <article class="line-item">
+              <span class="line-icon" aria-hidden="true"><nexa-icon name="category" /></span>
+              <div class="line-copy"><strong>{{ line.itemName }}</strong><span>{{ line.presentation }} · {{ line.quantity }} {{ line.unit }}</span></div>
+              <strong class="line-total">{{ line.totalAmount | number:'1.2-2' }} {{ line.currency }}</strong>
+            </article>
+          } @empty { <p class="note">{{ 'orders.products.empty' | translate }}</p> }
         </div>
-        <p class="legal-note">{{ 'orders.summaryNotice' | translate }}</p>
-        @if (order.purchaseRequestId; as purchaseRequestId) { <p><strong>{{ 'orders.requestLink' | translate }}:</strong> <a [routerLink]="['/portal/purchase-requests', purchaseRequestId]">{{ order.purchaseRequestCode || purchaseRequestId }}</a></p> } @else { <p class="note">{{ 'orders.manualOrigin' | translate }}</p> }
-        @if (matchingDeliveryId(); as deliveryId) { <p><a mat-stroked-button [routerLink]="['/portal/deliveries', deliveryId]">{{ 'orders.deliveryLink' | translate }}</a></p> }
-        <div class="lines">@for (line of order.lines; track line.id) { <div><strong>{{ line.itemName }}</strong><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }} · {{ line.totalAmount }} {{ line.currency }}</span></div> }</div>
-        <div class="total"><strong>{{ 'orders.total' | translate }}</strong><span>{{ order.totalAmount }} {{ order.currency }}</span></div>
-        @if (order.rejectionReason) { <p class="note">{{ order.rejectionReason }}</p> }
-      </mat-card-content>
-    </mat-card>
-    <section class="events"><h2>{{ 'orders.events.title' | translate }}</h2>@for (event of facade.detailState().events; track event.id) { <div><strong>{{ event.type }}</strong><span>{{ event.occurredAt }} · {{ event.detail }}</span></div> } @empty { <p class="note">{{ 'orders.events.empty' | translate }}</p> }</section>
+      </nexa-section-panel>
+
+      <nexa-section-panel [title]="'orders.summary.title' | translate">
+        <dl class="summary-list">
+          <div><dt>{{ 'orders.summary.account' | translate }}</dt><dd>{{ order.clientAccountId }}</dd></div>
+          <div><dt>{{ 'orders.summary.lines' | translate }}</dt><dd>{{ order.lines.length }}</dd></div>
+          <div><dt>{{ 'orders.summary.units' | translate }}</dt><dd>{{ itemCount(order) }}</dd></div>
+          <div><dt>{{ 'orders.summary.created' | translate }}</dt><dd>@if (order.createdAt; as createdAt) { {{ createdAt | date:'mediumDate' }} } @else { — }</dd></div>
+        </dl>
+        @if (order.purchaseRequestId; as purchaseRequestId) {
+          <a class="summary-link" [routerLink]="['/portal/purchase-requests', purchaseRequestId]">{{ 'orders.requestLink' | translate }}: {{ order.purchaseRequestCode || purchaseRequestId }} <nexa-icon name="arrow_forward" aria-hidden="true" /></a>
+        } @else { <p class="note">{{ 'orders.manualOrigin' | translate }}</p> }
+        @if (order.rejectionReason) { <p class="rejection-note"><strong>{{ 'orders.fields.rejectionReason' | translate }}</strong>{{ order.rejectionReason }}</p> }
+      </nexa-section-panel>
+    </div>
+
+    <nexa-section-panel [title]="'orders.events.title' | translate" [description]="'orders.events.subtitle' | translate">
+      <div class="events">
+        @for (event of facade.detailState().events; track event.id) {
+          <article class="event-item">
+            <span class="event-marker"><nexa-icon name="check" /></span>
+            <div><strong>{{ ('orders.events.types.' + event.type) | translate }}</strong><span>@if (event.occurredAt; as occurredAt) { {{ occurredAt | date:'medium' }} } @else { — }</span>@if (event.detail) { <p>{{ event.detail }}</p> }</div>
+            <nexa-status-badge [label]="('orders.events.types.' + event.type) | translate" [tone]="eventTone(event)" />
+          </article>
+        } @empty { <p class="note">{{ 'orders.events.empty' | translate }}</p> }
+      </div>
+    </nexa-section-panel>
+    <p class="legal-note">{{ 'orders.summaryNotice' | translate }}</p>
     @if (facade.detailState().message) { <p class="message">{{ ('messages.' + facade.detailState().message) | translate }}</p> }
   }
 </section>

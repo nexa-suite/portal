@@ -1,80 +1,34 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, signal, viewChild } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
-import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
-import { ReceivablesApiClient } from '../../../creditreceivables/infrastructure/receivables-api.client';
+import { RECEIVABLES_PORT } from '../../../creditreceivables/application/receivables.port';
 import { Receivable } from '../../../creditreceivables/domain/receivables.models';
-import { PaymentsApiClient } from '../../../payments/infrastructure/payments-api.client';
-import { PaymentElementSession, StripeJsPaymentService } from '../../../payments/infrastructure/stripe-js-payment.service';
+import { ReceivablesPaymentFacade } from './receivables-payment.facade';
+import { PAYMENT_ELEMENT_PORT, PaymentElementSession } from '../../../payments/application/ports/payment-element.port';
 import { PaymentHistoryItem, PaymentIntent } from '../../../payments/domain/payment.models';
+import { ButtonComponent } from '../../../shared/presentation/components/button/button.component';
+import { EmptyStateComponent } from '../../../shared/presentation/components/empty-state/empty-state.component';
+import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
+import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
+import { MetricCardComponent } from '../../../shared/presentation/components/metric-card/metric-card.component';
+import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
+import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
+import { SectionPanelComponent } from '../../../shared/presentation/components/section-panel/section-panel.component';
+import { StatusBadgeComponent, StatusTone } from '../../../shared/presentation/components/status-badge/status-badge.component';
 
 @Component({
   selector: 'nexa-receivables-page',
-  imports: [DecimalPipe, PageHeaderComponent, RouterLink],
-  template: `
-    <section class="page">
-      <nexa-page-header eyebrow="Pagos" title="Cuentas por cobrar" subtitle="Deuda y Payment Intent se calculan sobre órdenes confirmadas por la API." />
-      <p class="context">Área: Buyer · Los importes son de solo lectura y no se reciben desde el navegador.</p>
-      <nav class="links" aria-label="Pagos">
-        <a routerLink="/portal/payment-methods">Métodos de pago</a>
-      </nav>
-      @if (loading()) { <p role="status">Cargando cuentas por cobrar…</p> }
-      @if (error(); as message) { <p role="alert">{{ message }}</p> }
-      @if (bankTransferSuccess(); as message) { <p class="success" role="status">{{ message }}</p> }
-      @if (!loading() && !error()) {
-        <table>
-          <thead><tr><th>Número</th><th>Orden</th><th>Importe</th><th>Saldo</th><th>Vencimiento</th><th>Estado</th><th>Acción</th></tr></thead>
-          <tbody>
-            @for (item of receivables(); track item.id) {
-              <tr [class.focused]="item.id === receivableId()">
-                <td>{{ item.number }}</td><td>{{ item.subjectId }}</td><td>{{ item.amount | number:'1.2-2' }} {{ item.currency }}</td><td>{{ item.remaining | number:'1.2-2' }} {{ item.currency }}</td><td>{{ item.dueAt || '—' }}</td><td>{{ item.status }}</td>
-                <td>
-                  <button type="button" [disabled]="!payable(item) || creatingFor() === item.id" (click)="createIntent(item)">{{ creatingFor() === item.id ? 'Creando…' : 'Crear Payment Intent de prueba' }}</button>
-                  <button type="button" [disabled]="!payable(item) || bankTransferReported(item)" (click)="beginBankTransfer(item)">{{ bankTransferReported(item) ? 'Transferencia reportada' : 'Reportar transferencia' }}</button>
-                  <button type="button" (click)="togglePaymentHistory(item)">{{ paymentHistoryFor() === item.id ? 'Ocultar pagos' : 'Ver pagos' }}</button>
-                </td>
-              </tr>
-              @if (paymentHistoryFor() === item.id) {
-                <tr><td colspan="7"><small role="status">{{ paymentHistoryLoading() ? 'Cargando pagos…' : '' }}</small>@if (!paymentHistoryLoading() && paymentHistory().length === 0) { <span>No hay pagos reportados.</span> } @for (payment of paymentHistory(); track payment.id) { <div>{{ payment.method }} · {{ payment.status }} · {{ payment.amount | number:'1.2-2' }} {{ payment.currency }} · {{ payment.reference || 'sin referencia' }}</div> }</td></tr>
-              }
-            } @empty { <tr><td colspan="7">No hay cuentas por cobrar autorizadas.</td></tr> }
-          </tbody>
-        </table>
-      }
-      @if (bankTransferTarget(); as item) {
-        <section class="bank-transfer" aria-labelledby="bank-transfer-title">
-          <h2 id="bank-transfer-title">Reportar transferencia bancaria</h2>
-          <p>Orden {{ item.number }} · Importe esperado: {{ item.remaining | number:'1.2-2' }} {{ item.currency }}</p>
-          <form (submit)="submitBankTransfer($event, item)">
-            <label [for]="'bank-transfer-reference-' + item.id">Referencia bancaria</label>
-            <input [id]="'bank-transfer-reference-' + item.id" type="text" maxlength="160" autocomplete="off" required [value]="bankTransferReference()" (input)="bankTransferReference.set($any($event.target).value)" />
-            <p class="hint">El comprobante es opcional; puedes continuar sin adjuntarlo.</p>
-            @if (bankTransferError(); as message) { <p role="alert">{{ message }}</p> }
-            <button type="submit" [disabled]="bankTransferSubmitting()">{{ bankTransferSubmitting() ? 'Registrando…' : 'Registrar transferencia' }}</button>
-          </form>
-        </section>
-      }
-      @if (intent(); as created) {
-        <section class="result" aria-live="polite">
-          <h2>Pago con tarjeta</h2>
-          <p>Estado: {{ created.status }} · Proveedor: {{ created.providerPaymentIntentId || '—' }}</p>
-          @if (paymentLoading()) { <p role="status">Cargando formulario seguro de Stripe…</p> }
-          @if (paymentError(); as message) { <p role="alert">{{ message }}</p><button type="button" (click)="retryPaymentElement()">Reintentar formulario</button> }
-          <div #paymentHost class="payment-element" aria-label="Formulario seguro de tarjeta"></div>
-          @if (paymentReady()) { <button type="button" [disabled]="paying()" (click)="confirmPayment()">{{ paying() ? 'Procesando…' : 'Pagar de forma segura' }}</button> }
-          @if (paymentSuccess()) { <p class="success" role="status">Pago enviado a Stripe. El estado final llegará por webhook.</p> }
-        </section>
-      }
-    </section>
-  `,
-  styles: [`:host{display:block}.page{display:grid;gap:1rem}.context{margin:0;color:#52647b}.links{display:flex;gap:1rem;flex-wrap:wrap}table{width:100%;border-collapse:collapse}th,td{padding:.65rem;text-align:left;border-bottom:1px solid #dbe3ee;vertical-align:top}.focused{background:#eef6ff}button{padding:.45rem .7rem;margin:.15rem}.bank-transfer{padding:1rem;border:1px solid #dbe3ee;border-radius:.5rem;background:#fff;display:grid;gap:.75rem}.bank-transfer form{display:grid;gap:.5rem;max-width:32rem}.bank-transfer input{padding:.55rem;border:1px solid #9aaec4;border-radius:.35rem}.hint{margin:0;color:#52647b}.result{padding:1rem;border:1px solid #b9d7f7;border-radius:.5rem;background:#f7fbff}.payment-element{min-height:6rem;padding:.8rem;border:1px solid #dbe3ee;border-radius:.5rem;background:#fff}.success{color:#0c6b41}`],
+  imports: [DatePipe, DecimalPipe, RouterLink, TranslatePipe, ButtonComponent, EmptyStateComponent, ErrorStateComponent, LoadingStateComponent, MetricCardComponent, NexaIconComponent, PageHeaderComponent, SectionPanelComponent, StatusBadgeComponent],
+  templateUrl: './receivables-page.component.html',
+  styleUrl: './receivables-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReceivablesPageComponent {
   readonly receivableId = input<string>();
-  private readonly receivablesApi = inject(ReceivablesApiClient);
-  private readonly paymentsApi = inject(PaymentsApiClient);
-  private readonly stripe = inject(StripeJsPaymentService);
+  private readonly receivablesApi = inject(RECEIVABLES_PORT);
+  private readonly paymentsApi = inject(ReceivablesPaymentFacade);
+  private readonly paymentElement = inject(PAYMENT_ELEMENT_PORT);
   readonly paymentHost = viewChild<ElementRef<HTMLElement>>('paymentHost');
   readonly receivables = signal<readonly Receivable[]>([]);
   readonly loading = signal(false);
@@ -96,8 +50,15 @@ export class ReceivablesPageComponent {
   readonly paymentHistory = signal<readonly PaymentHistoryItem[]>([]);
   readonly paymentHistoryLoading = signal(false);
   private paymentSession: PaymentElementSession | null = null;
+
   readonly focused = computed(() => this.receivables().find((item) => item.id === this.receivableId()) ?? null);
   readonly bankTransferTarget = computed(() => this.receivables().find((item) => item.id === this.bankTransferFor()) ?? null);
+  readonly openReceivables = computed(() => this.receivables().filter((item) => this.payable(item)));
+  readonly overdueReceivables = computed(() => this.receivables().filter((item) => item.status === 'OVERDUE'));
+  readonly totalOutstanding = computed(() => this.receivables().reduce((total, item) => total + item.remaining, 0));
+  readonly totalPaid = computed(() => this.receivables().reduce((total, item) => total + item.amountPaid, 0));
+  readonly nextDue = computed(() => [...this.openReceivables()]
+    .sort((left, right) => (left.dueAt ?? '9999').localeCompare(right.dueAt ?? '9999'))[0] ?? null);
 
   constructor() { this.load(); }
 
@@ -113,6 +74,32 @@ export class ReceivablesPageComponent {
   payable(item: Receivable): boolean { return item.remaining > 0 && ['OPEN', 'PARTIALLY_PAID', 'OVERDUE'].includes(item.status); }
 
   bankTransferReported(item: Receivable): boolean { return this.reportedBankTransferIds().has(item.id); }
+
+  receivableTone(status: string): StatusTone {
+    if (status === 'OVERDUE') return 'danger';
+    if (status === 'PARTIALLY_PAID') return 'warning';
+    if (status === 'PAID' || status === 'SETTLED') return 'success';
+    return 'info';
+  }
+
+  receivableState(status: string): string { return status.toLowerCase(); }
+
+  paymentState(status: string): string {
+    const normalized = status.toLowerCase();
+    if (['paid', 'confirmed', 'succeeded'].includes(normalized)) return 'paid';
+    if (['failed', 'rejected'].includes(normalized)) return 'failed';
+    if (normalized === 'cancelled') return 'cancelled';
+    if (normalized === 'processing') return 'processing';
+    return 'pending';
+  }
+
+  paymentTone(status: string): StatusTone {
+    const state = this.paymentState(status);
+    if (state === 'paid') return 'success';
+    if (state === 'failed' || state === 'cancelled') return 'danger';
+    if (state === 'processing') return 'info';
+    return 'warning';
+  }
 
   togglePaymentHistory(item: Receivable): void {
     if (this.paymentHistoryFor() === item.id) {
@@ -198,7 +185,7 @@ export class ReceivablesPageComponent {
     this.resetPaymentSession();
     this.paymentLoading.set(true);
     this.paymentError.set(null);
-    this.stripe.mountPaymentElement(value.publishableKey, value.clientSecret, host).then((session) => {
+    this.paymentElement.mountPaymentElement(value.publishableKey, value.clientSecret, host).then((session) => {
       this.paymentSession = session;
       this.paymentReady.set(true);
       this.paymentLoading.set(false);
@@ -213,7 +200,7 @@ export class ReceivablesPageComponent {
     if (!this.paymentSession || this.paying()) return;
     this.paying.set(true);
     this.paymentError.set(null);
-    this.stripe.confirmPayment(this.paymentSession, `${window.location.origin}/portal/receivables/${this.intent()?.receivableId ?? ''}`).then((result) => {
+    this.paymentElement.confirmPayment(this.paymentSession, `${window.location.origin}/portal/receivables/${this.intent()?.receivableId ?? ''}`).then((result) => {
       this.paying.set(false);
       if (result.error) {
         this.paymentError.set(result.error.message ?? 'Stripe rechazó el pago.');

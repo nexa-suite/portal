@@ -18,7 +18,7 @@ describe('PortalShellComponent', () => {
         providePortalRuntimeConfig(),
         provideRouter([]),
         provideTranslateService(),
-        { provide: PORTAL_SECURITY_BOUNDARY, useValue: { hasPermission: () => true, signOut: () => of(undefined) } },
+        { provide: PORTAL_SECURITY_BOUNDARY, useValue: { hasPermission: () => true, identity: () => null, signOut: () => of(undefined) } },
         { provide: NotificationsApiPort, useValue: { list: () => of({ items: [], unreadCount: 0, limit: 25 }), unreadCount: () => of(0), markRead: () => of(undefined), markAllRead: () => of(undefined) } },
       ],
     }).compileComponents();
@@ -30,6 +30,6 @@ describe('PortalShellComponent', () => {
     expect(fixture.nativeElement.querySelector('nexa-language-switcher')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.sign-out-button')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('a[href="/portal/support"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('a[href="/portal/support"]')).toBeTruthy();
   });
 });

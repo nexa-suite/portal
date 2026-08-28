@@ -1,175 +1,246 @@
-<div class="catalog-page">
-  <nexa-page-header
-    [eyebrow]="'catalog.eyebrow' | translate"
-    [title]="'catalog.title' | translate"
-    [subtitle]="'catalog.subtitle' | translate"
-  >
-    <a page-header-actions class="home-link" routerLink="/portal/home">{{
-      'catalog.backHome' | translate
-    }}</a>
-  </nexa-page-header>
+<div class="catalog-page buyer-catalog-page">
+  <div class="page-header catalog-page-header">
+    <div>
+      <div class="page-title">{{ 'catalog.title' | translate }}</div>
+      <div class="page-subtitle">{{ 'catalog.authorizedProducts' | translate: { count: totalItems() } }}</div>
+    </div>
+    <a class="btn btn-primary" routerLink="/portal/request-builder">
+      <nexa-icon name="shopping_cart" />
+      {{ 'catalog.requestBuilderCount' | translate: { count: cart.count() } }}
+    </a>
+  </div>
 
-  <div class="catalog-layout">
-  <form class="catalog-toolbar" (submit)="$event.preventDefault(); submitSearch()" role="search" [attr.aria-label]="'catalog.search' | translate">
-    <label class="search-field">
-      <span>{{ 'catalog.searchLabel' | translate }}</span>
-      <input
-        type="search"
-        [value]="searchText()"
-        (input)="searchText.set($any($event.target).value)"
-        [placeholder]="'catalog.searchPlaceholder' | translate"
-      />
-    </label>
-    <label>
-      <span>{{ 'catalog.brand' | translate }}</span>
-      <select [value]="query().brand" (change)="updateFilter('brand', $event)">
-        <option value="">{{ 'catalog.allBrands' | translate }}</option>
-        @for (brand of brands(); track brand) {
-          <option [value]="brand">{{ brand }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>{{ 'catalog.category' | translate }}</span>
-      <select [value]="query().category" (change)="updateFilter('category', $event)">
-        <option value="">{{ 'catalog.allCategories' | translate }}</option>
+  <div class="catalog-layout catalog-management-layout buyer-catalog-layout">
+    <aside class="catalog-filter-panel" [attr.aria-label]="'catalog.filters' | translate">
+      <form class="search-input catalog-search" (submit)="$event.preventDefault(); submitSearch()" role="search">
+        <nexa-icon name="search" aria-hidden="true" />
+        <label class="sr-only" for="catalog-search-input">{{ 'catalog.searchFullPlaceholder' | translate }}</label>
+        <input
+          id="catalog-search-input"
+          type="search"
+          [value]="searchText()"
+          (input)="searchText.set($any($event.target).value)"
+          [placeholder]="'catalog.searchFullPlaceholder' | translate"
+        />
+      </form>
+
+      <section class="catalog-filter-section">
+        <div class="catalog-filter-title">{{ 'catalog.categories' | translate }}</div>
+        <button
+          class="catalog-filter-option"
+          type="button"
+          [class.active]="query().category === ''"
+          [attr.aria-pressed]="query().category === ''"
+          (click)="selectCategory('')">
+          {{ 'catalog.allCategories' | translate }}
+        </button>
         @for (category of categories(); track category) {
-          <option [value]="category">{{ category }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>{{ 'catalog.coldChain' | translate }}</span>
-      <select [value]="query().coldChain" (change)="updateFilter('coldChain', $event)">
-        <option value="">{{ 'catalog.allColdChain' | translate }}</option>
-        <option value="REFRIGERATED">{{ 'catalog.refrigerated' | translate }}</option>
-        <option value="FROZEN">{{ 'catalog.frozen' | translate }}</option>
-        <option value="NONE">{{ 'catalog.ambient' | translate }}</option>
-      </select>
-    </label>
-    <button class="search-button" type="submit">{{ 'catalog.search' | translate }}</button>
-  </form>
-
-  <div class="catalog-content">
-  @switch (catalog.listStatus()) {
-    @case ('idle') {
-      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
-    }
-    @case ('loading') {
-      <nexa-loading-state [label]="'catalog.states.loading' | translate" />
-    }
-    @case ('retrying') {
-      <nexa-loading-state [label]="'catalog.states.retrying' | translate" />
-    }
-    @case ('error') {
-      <nexa-error-state
-        [title]="'catalog.states.errorTitle' | translate"
-        [description]="'catalog.states.errorDescription' | translate"
-        [retryLabel]="'catalog.retry' | translate"
-        (retry)="catalog.retryList()"
-      />
-    }
-    @case ('empty') {
-      <nexa-empty-state
-        [title]="'catalog.states.emptyTitle' | translate"
-        [description]="'catalog.states.emptyDescription' | translate"
-      />
-    }
-    @case ('success') {
-      <section class="catalog-results" aria-live="polite" aria-labelledby="catalog-results-title">
-        <div class="results-heading">
-          <div>
-            <h2 id="catalog-results-title">{{ 'catalog.results' | translate }}</h2>
-            <p>
-              {{ 'catalog.resultCount' | translate: { count: catalog.page()?.totalItems ?? 0 } }}
-            </p>
-          </div>
-          <span class="result-page">{{
-            'catalog.pageOf'
-              | translate
-                : { page: (catalog.page()?.page ?? 0) + 1, pages: catalog.page()?.totalPages ?? 1 }
-          }}</span>
-        </div>
-
-        <div class="catalog-grid">
-          @for (item of items(); track item.catalogItemId) {
-            <article class="catalog-card" [class.out-of-stock]="isOutOfStock(item.availabilityStatus)">
-              <a
-                class="catalog-card-visual"
-                [routerLink]="['/portal/product-catalog', item.catalogItemId]"
-                [queryParams]="routeQueryParams()"
-              >
-                @if (item.image?.url) {
-                  <img [src]="item.image?.url" [alt]="item.productFamilyName || item.itemName" loading="lazy" />
-                } @else {
-                  <span class="image-placeholder" aria-hidden="true">N</span>
-                }
-              </a>
-              <div class="catalog-card-body">
-                <p class="catalog-category">{{ item.categoryName }}</p>
-                <h3>{{ item.productFamilyName || item.itemName }}@if (item.productVariantName) { <span aria-hidden="true"> · </span>{{ item.productVariantName }} }</h3>
-                <p class="catalog-brand">
-                  {{ item.brandName }}<span aria-hidden="true"> · </span>{{ item.skuCode || item.productId }}<span aria-hidden="true"> · </span>{{ item.presentation }}@if (item.unitOfMeasure) {<span aria-hidden="true"> · </span>{{ item.unitOfMeasure }} }
-                </p>
-                <div class="catalog-card-tags">
-                  <nexa-status-badge
-                    [label]="('availability.status.' + item.availabilityStatus) | translate"
-                    [tone]="availabilityTone(item.availabilityStatus)"
-                  />
-                  @if (item.promotionLabel) {
-                    <nexa-status-badge [label]="item.promotionLabel" tone="accent" />
-                  }
-                </div>
-                <nexa-catalog-pricing-summary [pricing]="item" />
-                <p class="availability-note">{{ 'availability.disclaimer' | translate }}</p>
-                @if (item.coldChainRequirement) {
-                  <nexa-cold-chain-badge
-                    [label]="item.coldChainRequirement"
-                    [variant]="coldChainVariant(item.coldChainRequirement)"
-                  />
-                }
-                <a
-                  class="detail-link"
-                  [routerLink]="['/portal/product-catalog', item.catalogItemId]"
-                  [queryParams]="routeQueryParams()"
-                  >{{ 'catalog.viewDetails' | translate }}</a
-                >
-              </div>
-            </article>
-          }
-        </div>
-
-        @if ((catalog.page()?.totalPages ?? 0) > 1) {
-          <nav class="pagination" [attr.aria-label]="'catalog.pagination' | translate">
-            <button
-              type="button"
-              (click)="goToPage(query().page - 1)"
-              [disabled]="query().page === 0"
-            >
-              {{ 'catalog.previous' | translate }}
-            </button>
-            @for (page of pageNumbers(); track page) {
-              <button
-                type="button"
-                [class.active]="page === query().page"
-                [attr.aria-current]="page === query().page ? 'page' : null"
-                (click)="goToPage(page)"
-              >
-                {{ page + 1 }}
-              </button>
-            }
-            <button
-              type="button"
-              (click)="goToPage(query().page + 1)"
-              [disabled]="query().page + 1 >= (catalog.page()?.totalPages ?? 0)"
-            >
-              {{ 'catalog.next' | translate }}
-            </button>
-          </nav>
+          <button
+            class="catalog-filter-option"
+            type="button"
+            [class.active]="query().category === category"
+            [attr.aria-pressed]="query().category === category"
+            (click)="selectCategory(category)">
+            {{ categoryLabel(category) }}
+          </button>
         }
       </section>
-    }
-  }
-  </div>
+
+      <section class="catalog-filter-section">
+        <div class="catalog-filter-title">{{ 'catalog.coldType' | translate }}</div>
+        <button
+          class="catalog-filter-option"
+          type="button"
+          [class.active]="query().coldChain === ''"
+          [attr.aria-pressed]="query().coldChain === ''"
+          (click)="selectColdChain('')">
+          {{ 'catalog.allColdTypes' | translate }}
+        </button>
+        @for (coldChain of coldChains(); track coldChain) {
+          <button
+            class="catalog-filter-option"
+            type="button"
+            [class.active]="query().coldChain === coldChain"
+            [attr.aria-pressed]="query().coldChain === coldChain"
+            (click)="selectColdChain(coldChain)">
+            {{ coldChainLabel(coldChain) | translate }}
+          </button>
+        }
+      </section>
+
+      <section class="catalog-filter-section">
+        <div class="catalog-filter-title">{{ 'catalog.status' | translate }}</div>
+        @for (option of stockOptions; track option) {
+          <button
+            class="catalog-filter-option"
+            type="button"
+            [class.active]="stockFilter() === option"
+            [attr.aria-pressed]="stockFilter() === option"
+            (click)="stockFilter.set(option)">
+            {{ stockLabelKey(option) | translate }}
+          </button>
+        }
+      </section>
+
+      <section class="catalog-filter-section">
+        <button
+          class="catalog-filter-heading"
+          type="button"
+          [attr.aria-expanded]="brandExpanded()"
+          (click)="toggleBrandExpanded()">
+          <span>{{ 'catalog.brand' | translate }}</span>
+          <nexa-icon [name]="brandExpanded() ? 'expand_less' : 'expand_more'" aria-hidden="true" />
+        </button>
+        <button
+          class="catalog-filter-option"
+          type="button"
+          [class.active]="query().brand === ''"
+          [attr.aria-pressed]="query().brand === ''"
+          (click)="selectBrand('')">
+          {{ 'catalog.allBrands' | translate }}
+        </button>
+        @if (brandExpanded()) {
+          <div class="catalog-filter-collapsible">
+            @for (brand of brands(); track brand) {
+              <button
+                class="catalog-filter-option"
+                type="button"
+                [class.active]="query().brand === brand"
+                [attr.aria-pressed]="query().brand === brand"
+                (click)="selectBrand(brand)">
+                {{ brand }}
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="catalog-filter-section">
+        <button class="catalog-filter-option" type="button" [class.active]="onlyOffers()" [attr.aria-pressed]="onlyOffers()" (click)="toggleOffers()">
+          <nexa-icon name="tag" aria-hidden="true" />
+          {{ 'catalog.offers' | translate }}
+        </button>
+      </section>
+    </aside>
+
+    <section class="catalog-results">
+      @switch (catalog.listStatus()) {
+        @case ('idle') {
+          <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+        }
+        @case ('loading') {
+          <nexa-loading-state [label]="'catalog.states.loading' | translate" />
+        }
+        @case ('retrying') {
+          <nexa-loading-state [label]="'catalog.states.retrying' | translate" />
+        }
+        @case ('error') {
+          <nexa-error-state
+            [title]="'catalog.states.errorTitle' | translate"
+            [description]="'catalog.states.errorDescription' | translate"
+            [retryLabel]="'catalog.retry' | translate"
+            (retry)="catalog.retryList()" />
+        }
+        @case ('empty') {
+          <nexa-empty-state
+            [title]="'catalog.states.emptyTitle' | translate"
+            [description]="'catalog.states.emptyDescription' | translate" />
+        }
+        @case ('success') {
+          <section aria-live="polite" aria-labelledby="catalog-results-title">
+            <div class="catalog-results-head">
+              <strong id="catalog-results-title">{{ 'catalog.filteredSummary' | translate: { visible: visibleItems().length, total: totalItems() } }}</strong>
+              <span>{{ 'catalog.filters' | translate }}</span>
+            </div>
+
+            <div class="grid-4 catalog-product-grid">
+              @for (item of visibleItems(); track item.catalogItemId) {
+                <article class="buyer-card catalog-management-card" [class.selected]="isInCart(item)" [class.out-of-stock]="isOutOfStock(item.availabilityStatus)">
+                  <button
+                    class="buyer-product-visual catalog-visual-button"
+                    type="button"
+                    [attr.aria-label]="('catalog.viewDetails' | translate) + ': ' + productTitle(item)"
+                    (click)="openDetails(item)">
+                    @if (item.image?.url) {
+                      <img class="buyer-product-image" [src]="item.image?.url" [alt]="productTitle(item)" loading="lazy" />
+                    } @else {
+                      <nexa-icon name="category" aria-hidden="true" />
+                    }
+                    @if (item.promotionLabel || item.appliedPromotions.length > 0) {
+                      <span class="flow-pill flow-pill-amber catalog-card-offer">{{ 'catalog.offer' | translate }}</span>
+                    }
+                    @if (isInCart(item)) {
+                      <span class="flow-pill flow-pill-blue catalog-card-selected">{{ 'catalog.selected' | translate }}</span>
+                    }
+                  </button>
+
+                  <div class="catalog-card-body">
+                    <div class="catalog-card-title-row">
+                      <div>
+                        <h3 class="catalog-card-title">{{ productTitle(item) }}@if (item.productVariantName) { <span aria-hidden="true"> · </span>{{ item.productVariantName }} }</h3>
+                        <div class="mono catalog-card-sku">{{ productSku(item) }}</div>
+                        <div class="catalog-brand-line">{{ 'catalog.brandLine' | translate: { brand: item.brandName } }}</div>
+                        @if (item.presentation) { <div class="catalog-presentation">{{ item.presentation }}</div> }
+                      </div>
+                      <button
+                        class="add-btn"
+                        [class.add-btn-added]="isInCart(item)"
+                        type="button"
+                        [disabled]="isUnavailable(item)"
+                        [attr.aria-label]="(isInCart(item) ? 'catalog.removeFromRequest' : 'catalog.addToRequest') | translate"
+                        (click)="toggleCart(item)">
+                        <span aria-hidden="true">{{ isInCart(item) ? '−' : '+' }}</span>
+                      </button>
+                    </div>
+
+                    <div class="flow-row catalog-card-badges">
+                      <nexa-cold-chain-badge [label]="coldChainLabel(item.coldChainRequirement) | translate" [variant]="coldChainVariant(item.coldChainRequirement)" />
+                      <nexa-status-badge [label]="availabilityLabelKey(item.availabilityStatus) | translate" [tone]="availabilityTone(item.availabilityStatus)" />
+                    </div>
+
+                    <div class="flow-row-between catalog-card-footer">
+                      <strong>{{ priceLabel(item) }}</strong>
+                      <span class="catalog-availability-summary">{{ availabilityLabelKey(item.availabilityStatus) | translate }}</span>
+                    </div>
+
+                    <div class="sr-only" aria-label="{{ 'catalog.pricingDetails' | translate }}">
+                      <span>{{ 'catalog.basePrice' | translate }}: {{ formatPrice(item.basePrice) }}</span>
+                      <span>{{ 'catalog.effectivePrice' | translate }}: {{ formatPrice(item.effectivePrice) }}</span>
+                      <span>{{ 'catalog.discountAmount' | translate }}: {{ formatPrice(item.discountAmount) }}</span>
+                      @for (promotion of item.appliedPromotions; track promotion.id || promotion.name) {
+                        <span>{{ promotion.name }}</span>
+                      }
+                    </div>
+
+                    @if (isOutOfStock(item.availabilityStatus)) {
+                      <small class="catalog-stock-message" role="status">{{ 'catalog.outOfStockMessage' | translate }}</small>
+                    }
+
+                    <button class="btn btn-ghost btn-sm catalog-details-button" type="button" (click)="openDetails(item)">
+                      {{ 'catalog.viewDetails' | translate }}
+                    </button>
+                  </div>
+                </article>
+              } @empty {
+                <div class="empty-inline grid-empty">
+                  <nexa-icon name="search" aria-hidden="true" />
+                  <span>{{ 'catalog.states.emptyDescription' | translate }}</span>
+                </div>
+              }
+            </div>
+
+            @if ((catalog.page()?.totalPages ?? 0) > 1) {
+              <nav class="pagination" [attr.aria-label]="'catalog.pagination' | translate">
+                <button type="button" (click)="goToPage(query().page - 1)" [disabled]="query().page === 0">{{ 'catalog.previous' | translate }}</button>
+                @for (page of pageNumbers(); track page) {
+                  <button type="button" [class.active]="page === query().page" [attr.aria-current]="page === query().page ? 'page' : null" (click)="goToPage(page)">{{ page + 1 }}</button>
+                }
+                <button type="button" (click)="goToPage(query().page + 1)" [disabled]="query().page + 1 >= (catalog.page()?.totalPages ?? 0)">{{ 'catalog.next' | translate }}</button>
+              </nav>
+            }
+          </section>
+        }
+      }
+    </section>
   </div>
 </div>

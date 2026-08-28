@@ -371,3 +371,321 @@
     justify-content: flex-start;
   }
 }
+
+/* Vue parity: the Buyer Portal shell follows legacy/portal-vue's
+   portal-layout.vue composition and app.css measurements. */
+.portal-shell {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+.portal-header.portal-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  height: 60px;
+  min-height: 60px;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.portal-logo-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.portal-logo-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
+}
+
+.portal-logo-button nexa-brand-logo { width: 82px; }
+
+.portal-navigation.portal-nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.portal-navigation.portal-nav::-webkit-scrollbar { display: none; }
+
+.portal-navigation .portal-nav-item {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #6b7280;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms, color 140ms;
+}
+
+.portal-navigation .portal-nav-item:hover {
+  color: #111827;
+  background: #f6faff;
+}
+
+.portal-navigation .portal-nav-item.active {
+  color: #2563eb;
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.portal-actions.portal-topbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.portal-topbar-actions nexa-language-switcher .lang-group { gap: 2px; }
+.portal-topbar-actions nexa-language-switcher .lang-opt { width: auto; height: auto; min-height: 26px; padding: 3px 8px; border-radius: 6px; font-size: 11px; }
+
+.portal-topbar .cart-btn {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 140ms;
+}
+
+.portal-topbar .cart-btn:hover { background: #1d4ed8; }
+.portal-topbar .cart-btn nexa-icon { width: 16px; height: 16px; }
+
+.portal-topbar .cart-count {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #ffffff;
+  background: #f97316;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portal-menu-btn { display: none; }
+
+.portal-content.portal-page {
+  width: min(100%, 1680px);
+  max-width: 1680px;
+  flex: 1 0 auto;
+  margin-inline: auto;
+  padding: 30px clamp(18px, 2.4vw, 40px);
+}
+
+.portal-footer {
+  display: flex;
+  width: min(100%, 1680px);
+  max-width: 1680px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-inline: auto;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.portal-footer-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.portal-footer-link { padding: 8px 10px; border: 0; border-radius: 8px; color: #6b7280; background: transparent; font: inherit; text-decoration: none; cursor: pointer; transition: color 140ms, background-color 140ms; }
+.portal-footer-link:hover { color: #2563eb; background: #eff6ff; }
+
+.portal-mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: none;
+  border: 0;
+  background: rgba(15, 23, 42, .36);
+}
+
+.portal-mobile-menu {
+  position: fixed;
+  right: 12px;
+  bottom: 82px;
+  left: 12px;
+  z-index: 75;
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 22px 54px rgba(15, 23, 42, .20);
+}
+
+.portal-mobile-menu.open { display: grid; }
+
+.portal-mobile-menu-item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 46px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #334155;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.portal-mobile-menu-item nexa-icon { width: 18px; height: 18px; }
+.portal-mobile-menu-item.active { color: #2563eb; border-color: #bfdbfe; background: #eff6ff; }
+.portal-mobile-menu-item-danger { color: #b91c1c; border-color: #fecaca; background: #fff5f5; }
+.portal-mobile-menu-item > span:not(.mobile-notification-count) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-notification-count { margin-left: auto; padding: 2px 6px; border-radius: 9999px; color: #ffffff; background: #f97316; font-size: 10px; line-height: 1; }
+
+.portal-bottom-nav { display: none; }
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  border: 0;
+  background: rgba(0, 0, 0, .28);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: flex;
+  width: 400px;
+  flex-direction: column;
+  border-left: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: -4px 0 32px rgba(0, 0, 0, .10);
+}
+
+.drawer-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid #e5e7eb; }
+.drawer-title { color: #111827; font-family: var(--nexa-font-family-display); font-size: 15px; }
+.drawer-close { display: inline-grid; width: 36px; height: 36px; place-items: center; padding: 0; border: 1px solid #e5e7eb; border-radius: 8px; color: #64748b; background: #ffffff; font-size: 24px; line-height: 1; cursor: pointer; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.drawer-footer { display: grid; flex-shrink: 0; gap: 12px; padding: 16px 24px; border-top: 1px solid #e5e7eb; }
+.cart-empty { display: grid; justify-items: center; gap: 10px; padding: 48px 18px; color: #334155; text-align: center; }
+.cart-empty-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 14px; color: #2563eb; background: #eff6ff; }
+.cart-empty p { margin: 0; color: #64748b; font-size: 13px; line-height: 1.5; }
+.cart-line { display: grid; grid-template-columns: 60px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px solid #e8eef7; }
+.cart-line-visual { display: grid; width: 60px; height: 60px; place-items: center; overflow: hidden; border-radius: 8px; color: #2563eb; background: #eff6ff; }
+.cart-line-visual img { width: 100%; height: 100%; object-fit: contain; }
+.cart-line-visual nexa-icon { width: 24px; height: 24px; }
+.cart-line-copy { display: grid; min-width: 0; gap: 4px; }
+.cart-line-copy > strong { overflow: hidden; color: #1f2937; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cart-line-copy small { color: #9ca3af; font-size: 11px; }
+.cart-line-total { color: #111827; font-size: 13px; white-space: nowrap; }
+.cart-quantity { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.cart-quantity > button { display: inline-grid; width: 28px; height: 28px; place-items: center; padding: 0; border: 1px solid #e5e7eb; border-radius: 6px; color: #334155; background: #ffffff; cursor: pointer; }
+.cart-quantity > span { min-width: 24px; color: #111827; font-size: 13px; font-weight: 600; text-align: center; }
+.cart-quantity .cart-remove { margin-left: auto; border: 0; color: #b91c1c; background: transparent; }
+.cart-quantity .cart-remove nexa-icon { width: 16px; height: 16px; }
+.cart-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #334155; font-size: 15px; font-weight: 700; }
+.cart-submit { width: 100%; justify-content: center; }
+
+@media (min-width: 1900px) {
+  .portal-content.portal-page,
+  .portal-footer { max-width: 1760px; }
+}
+
+/* Vue's portal-page uses the legacy content-box width plus its page gutters.
+   Keep the shared application reset for controls, but preserve that desktop
+   shell geometry so Design Lab captures and the production portal align. */
+@media (min-width: 901px) {
+  .portal-content.portal-page,
+  .portal-footer {
+    box-sizing: content-box;
+  }
+}
+
+@media (max-width: 900px) {
+  .portal-header.portal-topbar {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .portal-header.portal-topbar .portal-actions.portal-topbar-actions {
+    width: auto;
+    justify-content: flex-end;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .portal-header.portal-topbar { height: 56px; min-height: 56px; gap: 10px; padding: 0 14px; }
+  .portal-topbar .portal-nav { display: none; }
+  .portal-topbar .cart-btn { padding: 8px 10px; }
+  .portal-menu-btn { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; padding: 0; border: 1px solid #e2e8f0; border-radius: 10px; color: #334155; background: #ffffff; cursor: pointer; }
+  .portal-menu-btn nexa-icon { width: 19px; height: 19px; }
+  .portal-mobile-menu-backdrop { display: block; }
+  .portal-content.portal-page { width: 100%; padding: 18px 14px 92px; }
+  .portal-footer { width: 100%; justify-content: center; padding: 16px 14px 96px; text-align: center; }
+  .portal-bottom-nav { position: fixed; right: 0; bottom: 0; left: 0; z-index: 60; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; height: 70px; padding: 6px 8px; border-top: 1px solid #e5e7eb; background: #ffffff; box-shadow: 0 -10px 24px rgba(15, 23, 42, .06); }
+  .portal-bottom-nav-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 12px; color: #64748b; background: transparent; font-size: 10px; font-weight: 700; text-align: center; text-decoration: none; }
+  .portal-bottom-nav-item nexa-icon { width: 18px; height: 18px; }
+  .portal-bottom-nav-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .portal-bottom-nav-item.active { color: #2563eb; background: #eff6ff; }
+  .drawer { width: min(100vw, 420px); }
+}
+
+@media (max-width: 560px) {
+  .portal-topbar-actions > * { flex: 0 0 auto; }
+  .portal-topbar .cart-btn { width: 38px; flex: 0 0 38px; justify-content: center; padding: 0; }
+  .portal-topbar .portal-menu-btn { flex: 0 0 38px; }
+  .portal-topbar .cart-btn > span:not(.cart-count) { display: none; }
+  .portal-mobile-menu { grid-template-columns: 1fr; }
+  .portal-topbar-actions nexa-language-switcher .lang-opt { min-height: 26px; padding-inline: 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-navigation .portal-nav-item,
+  .portal-footer-link,
+  .cart-btn { transition: none; }
+}

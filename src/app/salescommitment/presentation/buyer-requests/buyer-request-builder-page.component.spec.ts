@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PORTAL_SECURITY_BOUNDARY } from '../../../core/security/portal-security.boundary';
 import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/buyer-request-builder.facade';
-import { PurchaseRequestCatalogPort } from '../../application/ports/purchase-request-catalog.port';
+import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
 import {
   BUYER_REQUEST_BUILDER_STEPS,
   BuyerRequestBuilderPageComponent,
@@ -38,19 +38,33 @@ describe('BuyerRequestBuilderPageComponent', () => {
     }),
   };
   const router = { navigate: vi.fn(() => Promise.resolve(true)) };
+  const cart = {
+    items: signal<readonly never[]>([]),
+    count: signal(0),
+    subtotal: signal(0),
+    setScope: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+    setQuantity: vi.fn(),
+    replace: vi.fn(),
+    clear: vi.fn(),
+  };
 
   beforeEach(() => {
     vi.resetAllMocks();
     facade.previewState.set({ status: 'idle', snapshot: null, message: null });
     facade.busy.set(false);
     facade.message.set(null);
+    cart.items.set([]);
+    cart.count.set(0);
+    cart.subtotal.set(0);
     TestBed.configureTestingModule({
       imports: [BuyerRequestBuilderPageComponent],
       providers: [
         provideTranslateService(),
         { provide: PurchaseRequestBuilderFacade, useValue: facade },
         { provide: PORTAL_SECURITY_BOUNDARY, useValue: auth },
-        { provide: PurchaseRequestCatalogPort, useValue: { search: vi.fn(() => of({ items: [] })) } },
+        { provide: PurchaseRequestCartPort, useValue: cart },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } },
         { provide: Router, useValue: router },
       ],
@@ -59,14 +73,14 @@ describe('BuyerRequestBuilderPageComponent', () => {
 
   it('keeps the four canonical step labels in order', () => {
     expect(BUYER_REQUEST_BUILDER_STEPS).toEqual([
-      'requestReview',
-      'commercialDelivery',
-      'paymentTerms',
+      'buyer',
+      'products',
+      'delivery',
       'confirmation',
     ]);
   });
 
-  it('navigates request review to commercial delivery, preview, payment and confirmation', () => {
+  it('navigates buyer context to products, delivery preview and confirmation', () => {
     const fixture = TestBed.createComponent(BuyerRequestBuilderPageComponent);
     const page = fixture.componentInstance;
     page.lines.set([
@@ -84,12 +98,12 @@ describe('BuyerRequestBuilderPageComponent', () => {
     page.next();
     expect(page.step()).toBe(2);
 
+    page.next();
+    expect(page.step()).toBe(3);
+
     page.form.patchValue({ addressId: 'address-1' });
     page.next();
     expect(facade.preview).toHaveBeenCalledOnce();
-    expect(page.step()).toBe(3);
-
-    page.next();
     expect(page.step()).toBe(4);
   });
 

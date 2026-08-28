@@ -1,41 +1,43 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DecimalPipe } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { PORTAL_SECURITY_BOUNDARY } from '../../../core/security/portal-security.boundary';
-import { PageHeaderComponent } from '../../../shared/presentation/components/page-header/page-header.component';
+import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/buyer-request-builder.facade';
-import { PurchaseRequestCatalogPort } from '../../application/ports/purchase-request-catalog.port';
+import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
 import {
   addressDisplay,
   BuyerRequestCommand,
   BuyerRequestLineInput,
   BuyerPaymentOption,
   BuyerRequestDeliveryAddress,
-  todayInputValue,
+  deliveryDateIssue as getDeliveryDateIssue,
+  nextBusinessDateInputValue,
 } from '../../domain/buyer-requests/buyer-request.models';
+import type { SalesCommitmentAddressReference } from '../../domain/buyer-requests/sales-commitment-buyer-reference.models';
 import { PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
-import { PurchaseRequestCatalogItem } from '../../domain/buyer-requests/purchase-request-catalog.models';
+import type { PurchaseRequestCartItem } from '../../domain/buyer-requests/purchase-request-cart.models';
 
 interface BuilderLine extends BuyerRequestLineInput {
   readonly id: string;
   readonly itemName: string;
   readonly presentation: string;
+  readonly unitPriceAmount?: number | null;
+  readonly currency?: string;
+  readonly brandName?: string;
+  readonly coldChainRequirement?: string;
 }
 
 export type BuyerRequestBuilderStep = 1 | 2 | 3 | 4;
 
 export const BUYER_REQUEST_BUILDER_STEPS = [
-  'requestReview',
-  'commercialDelivery',
-  'paymentTerms',
+  'buyer',
+  'products',
+  'delivery',
   'confirmation',
 ] as const;
 
@@ -62,34 +64,30 @@ function draftObject(value: unknown): Record<string, unknown> {
   imports: [
     DecimalPipe,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     RouterLink,
     TranslatePipe,
-    PageHeaderComponent,
+    NexaIconComponent,
   ],
   templateUrl: './buyer-request-builder-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BuyerRequestBuilderPageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
-  private readonly catalog = inject(PurchaseRequestCatalogPort);
+  private readonly cart = inject(PurchaseRequestCartPort);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly sanitizer = inject(DomSanitizer);
   readonly auth = inject(PORTAL_SECURITY_BOUNDARY);
   readonly facade = inject(PurchaseRequestBuilderFacade);
-  readonly minimumDate = todayInputValue();
-  readonly step = signal<BuyerRequestBuilderStep>(1);
+  readonly minimumDate = nextBusinessDateInputValue(3);
+  readonly step = signal<BuyerRequestBuilderStep>(this.cart.items().length > 0 ? 2 : 1);
   readonly stepLabels = BUYER_REQUEST_BUILDER_STEPS;
   readonly message = signal<string | null>(null);
-  readonly catalogSearch = this.fb.control('');
-  readonly catalogSelection = this.fb.control('');
-  readonly quantity = this.fb.control(1, [Validators.required, Validators.min(0.01)]);
-  readonly catalogItems = signal<readonly PurchaseRequestCatalogItem[]>([]);
   readonly lines = signal<readonly BuilderLine[]>([]);
+  readonly subtotal = computed(() => this.cart.subtotal());
+  readonly totalUnits = computed(() =>
+    this.lines().reduce((total, line) => total + line.quantity, 0),
+  );
   readonly locationStatus = signal<
     'idle' | 'requesting' | 'ready' | 'denied' | 'timeout' | 'unavailable' | 'unsupported'
   >('idle');
@@ -101,8 +99,26 @@ export class BuyerRequestBuilderPageComponent {
     readonly accuracy: number | null;
   }>({ latitude: -12.0464, longitude: -77.0428, accuracy: null });
   private lastPreviewSignature: string | null = null;
+  private trustedRouteUrl: { readonly source: string; readonly value: SafeResourceUrl } | null = null;
   readonly accountId = computed(
     () => this.auth.identity()?.clientAccountId ?? this.facade.clientAccount()?.id ?? null,
+  );
+  readonly defaultAddress = computed(
+    () => this.facade.addresses().find((item) => item.defaultAddress) ?? this.facade.addresses()[0] ?? null,
+  );
+  readonly accountLabel = computed(
+    () => this.facade.clientAccount()?.commercialName || this.facade.clientAccount()?.businessName || this.accountId() || '',
+  );
+  readonly warehouse = computed(() =>
+    this.auth.identity()?.workspaceSlug === 'icisa'
+      ? {
+          name: 'ICISA Lima Cold Hub',
+          address: 'Av. Guillermo Dansey 2211, Cercado de Lima, Lima, Perú',
+        }
+      : {
+          name: 'Nexa cold-chain warehouse',
+          address: 'Lima, Peru',
+        },
   );
   readonly form = this.fb.group({
     addressMode: this.fb.control<'saved' | 'manual' | 'current'>('saved'),
@@ -128,7 +144,7 @@ export class BuyerRequestBuilderPageComponent {
     districtCode: this.fb.control(''),
     requestedDeliveryDate: this.fb.control(this.minimumDate, Validators.required),
     deliveryNotes: this.fb.control(''),
-    paymentOption: this.fb.control<BuyerPaymentOption>('CARD_STRIPE', Validators.required),
+    paymentOption: this.fb.control<BuyerPaymentOption>('CREDIT_LINE', Validators.required),
     comments: this.fb.control(''),
   });
 
@@ -139,13 +155,17 @@ export class BuyerRequestBuilderPageComponent {
   ] as const;
 
   constructor() {
+    const identity = this.auth.identity();
+    this.cart.setScope(identity ? `${identity.workspaceSlug ?? 'workspace'}:${identity.id || identity.email}` : null);
+    effect(() => {
+      this.lines.set(this.cart.items().map((item) => this.lineFromCartItem(item)));
+    });
     const draftId = this.route.snapshot.paramMap.get('purchaseRequestId');
     this.facade
       .loadInitial(this.accountId())
       .pipe(switchMap(() => (draftId ? this.facade.loadDraft(draftId) : of(null))))
       .subscribe({
         next: (draft) => {
-          this.searchCatalog();
           if (draft) {
             this.hydrateDraft(draft);
             return;
@@ -153,8 +173,7 @@ export class BuyerRequestBuilderPageComponent {
           const defaultAddress =
             this.facade.addresses().find((item) => item.defaultAddress) ??
             this.facade.addresses()[0];
-          if (defaultAddress)
-            this.form.patchValue({ addressMode: 'saved', addressId: defaultAddress.id });
+          if (defaultAddress) this.prefillDefaultAddress(defaultAddress);
         },
         error: () => this.message.set('BUYER_REQUEST_DRAFT_LOAD_FAILED'),
       });
@@ -172,11 +191,12 @@ export class BuyerRequestBuilderPageComponent {
       'CASH_ON_DELIVERY',
     ];
     const lines: BuilderLine[] = (draft.lines ?? []).map((line, index) => {
+      const catalogItemId = draftText(line['catalogItemId']) || draftText(line['skuId']);
       const skuId = draftText(line['skuId']);
       const presentation = draftText(line['presentation']) || draftText(line['skuCode']) || skuId;
       return {
-        id: draftText(line['id']) || `${skuId}-${index}`,
-        catalogItemId: skuId,
+        id: draftText(line['id']) || `${catalogItemId}-${index}`,
+        catalogItemId,
         skuId,
         itemName: presentation,
         presentation,
@@ -185,6 +205,19 @@ export class BuyerRequestBuilderPageComponent {
         notes: draftText(line['notes']),
       };
     });
+    this.cart.replace(lines.map((line): PurchaseRequestCartItem => ({
+      catalogItemId: line.catalogItemId,
+      productId: line.skuId || line.catalogItemId,
+      sellableSkuId: line.skuId || null,
+      itemName: line.itemName,
+      presentation: line.presentation,
+      unit: line.unit,
+      quantity: line.quantity,
+      unitPriceAmount: line.unitPriceAmount ?? null,
+      currency: line.currency || 'PEN',
+      imageUrl: null,
+      notes: line.notes,
+    })));
     this.lines.set(lines);
     this.form.patchValue({
       addressMode: addressId ? 'saved' : 'manual',
@@ -221,7 +254,7 @@ export class BuyerRequestBuilderPageComponent {
       requestedDeliveryDate: draft.requestedDeliveryDate ?? this.minimumDate,
       paymentOption: paymentOptions.includes(payment as BuyerPaymentOption)
         ? (payment as BuyerPaymentOption)
-        : 'CARD_STRIPE',
+        : 'CREDIT_LINE',
     });
     if (this.form.controls.departmentCode.value) this.departmentChanged();
     if (this.form.controls.provinceCode.value) this.provinceChanged();
@@ -237,72 +270,18 @@ export class BuyerRequestBuilderPageComponent {
     this.form.controls.addressMode.setValue(value as 'saved' | 'manual' | 'current');
   }
 
-  searchCatalog(): void {
-    const q = this.catalogSearch.value.trim();
-    this.catalog.search(q).subscribe({
-      next: (page) => {
-        this.catalogItems.set(page.items);
-        this.message.set(null);
-      },
-      error: () => this.message.set('CATALOG_SELECTION_FAILED'),
-    });
-  }
-
-  addCatalogItem(): void {
-    const catalogItemId = this.catalogSelection.value;
-    const item = this.catalogItems().find((current) => current.catalogItemId === catalogItemId);
-    if (!item || this.quantity.invalid) return;
-    if (this.lines().some((line) => line.catalogItemId === item.catalogItemId)) {
-      this.message.set('REQUEST_LINE_DUPLICATE');
-      return;
-    }
-    this.lines.update((lines) => [
-      ...lines,
-      {
-        id: item.catalogItemId,
-        catalogItemId: item.catalogItemId,
-        skuId: item.sellableSkuId || item.productId,
-        itemName: item.itemName,
-        presentation: item.presentation,
-        quantity: this.quantity.value,
-        unit: 'unit',
-        notes: '',
-      },
-    ]);
-    this.catalogSelection.setValue('');
-    this.quantity.setValue(1);
-    this.message.set(null);
-  }
-
-  selectedCatalogItem(): PurchaseRequestCatalogItem | null {
-    return this.catalogItems().find((item) => item.catalogItemId === this.catalogSelection.value) ?? null;
-  }
-
-  selectCatalogItem(item: PurchaseRequestCatalogItem): void {
-    this.catalogSelection.setValue(item.catalogItemId);
-    this.message.set(null);
-  }
-
-  adjustDraftQuantity(delta: number): void {
-    this.quantity.setValue(Math.max(1, this.quantity.value + delta));
-  }
-
   adjustLineQuantity(line: BuilderLine, delta: number): void {
-    this.lines.update((lines) => lines.map((item) => item.id === line.id
-      ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-      : item));
+    this.cart.setQuantity(line.catalogItemId, Math.max(1, line.quantity + delta));
   }
 
   updateLine(line: BuilderLine, event: Event): void {
     const quantity = Number((event.target as HTMLInputElement).value);
     if (!Number.isFinite(quantity) || quantity <= 0) return;
-    this.lines.update((lines) =>
-      lines.map((item) => (item.id === line.id ? { ...item, quantity } : item)),
-    );
+    this.cart.setQuantity(line.catalogItemId, quantity);
   }
 
   removeLine(line: BuilderLine): void {
-    this.lines.update((items) => items.filter((item) => item.id !== line.id));
+    this.cart.remove(line.catalogItemId);
   }
 
   departmentChanged(): void {
@@ -372,11 +351,11 @@ export class BuyerRequestBuilderPageComponent {
 
   next(): void {
     const current = this.step();
-    if (current === 1 && this.lines().length === 0) {
+    if (current === 2 && this.lines().length === 0) {
       this.message.set('BUYER_REQUEST_LINES_REQUIRED');
       return;
     }
-    if (current === 2) {
+    if (current === 3) {
       if (!this.addressValid()) {
         this.message.set('BUYER_ADDRESS_REQUIRED');
         this.form.markAllAsTouched();
@@ -387,12 +366,12 @@ export class BuyerRequestBuilderPageComponent {
         this.form.markAllAsTouched();
         return;
       }
+      if (!this.paymentValid()) {
+        this.message.set('BUYER_PAYMENT_REQUIRED');
+        this.form.controls.paymentOption.markAsTouched();
+        return;
+      }
       this.preview();
-      return;
-    }
-    if (current === 3 && !this.paymentValid()) {
-      this.message.set('BUYER_PAYMENT_REQUIRED');
-      this.form.controls.paymentOption.markAsTouched();
       return;
     }
     this.message.set(null);
@@ -412,10 +391,24 @@ export class BuyerRequestBuilderPageComponent {
     this.step.update((value) => Math.max(1, value - 1) as BuyerRequestBuilderStep);
   }
 
+  backToCart(): void {
+    this.step.set(2);
+  }
+
   preview(): void {
+    if (!this.addressValid()) {
+      this.message.set('BUYER_ADDRESS_REQUIRED');
+      this.form.markAllAsTouched();
+      return;
+    }
     if (!this.deliveryValid()) {
       this.message.set('BUYER_DELIVERY_REQUIRED');
       this.form.markAllAsTouched();
+      return;
+    }
+    if (!this.paymentValid()) {
+      this.message.set('BUYER_PAYMENT_REQUIRED');
+      this.form.controls.paymentOption.markAsTouched();
       return;
     }
     const command = this.command();
@@ -423,11 +416,58 @@ export class BuyerRequestBuilderPageComponent {
       next: () => {
         this.lastPreviewSignature = JSON.stringify(command);
         this.message.set(null);
-        this.step.set(3);
+        this.step.set(4);
       },
       error: () =>
         this.message.set(this.facade.previewState().message ?? 'BUYER_REQUEST_PREVIEW_FAILED'),
     });
+  }
+
+  private prefillDefaultAddress(address: SalesCommitmentAddressReference): void {
+    const addressLine =
+      [address.streetName, address.streetNumber, address.interior].filter(Boolean).join(' ') ||
+      address.line;
+    this.form.patchValue({
+      addressMode: 'manual',
+      addressId: address.id,
+      addressType: address.addressType || 'DELIVERY',
+      recipientName: address.recipientName ?? '',
+      recipientPhone: address.recipientPhone ?? '',
+      roadType: address.roadType ?? '',
+      streetName: address.streetName ?? '',
+      streetNumber: address.streetNumber ?? '',
+      interior: address.interior ?? '',
+      postalCode: address.postalCode ?? '',
+      addressLine,
+      reference: address.reference ?? '',
+      receivingHours: address.receivingHours ?? '',
+      receivingInstructions: address.receivingInstructions ?? '',
+      latitude: address.latitude ?? null,
+      longitude: address.longitude ?? null,
+      placeId: address.placeId ?? '',
+      source: address.source ?? 'MANUAL',
+      departmentCode: address.departmentCode,
+      provinceCode: address.provinceCode,
+      districtCode: address.districtCode,
+    });
+    if (address.latitude != null && address.longitude != null) {
+      this.mapPin.set({
+        latitude: address.latitude,
+        longitude: address.longitude,
+        accuracy: null,
+      });
+    }
+    if (address.departmentCode) {
+      this.facade.loadProvinces(address.departmentCode).subscribe({
+        next: () => {
+          if (!address.provinceCode) return;
+          this.form.controls.provinceCode.setValue(address.provinceCode);
+          this.facade.loadDistricts(address.provinceCode).subscribe({
+            next: () => this.form.controls.districtCode.setValue(address.districtCode),
+          });
+        },
+      });
+    }
   }
 
   submit(): void {
@@ -460,13 +500,40 @@ export class BuyerRequestBuilderPageComponent {
 
   deliveryValid(): boolean {
     const value = this.form.getRawValue();
-    return Boolean(value.requestedDeliveryDate && this.lines().length);
+    return !this.deliveryDateIssue() && this.lines().length > 0;
+  }
+
+  deliveryDateIssue(): ReturnType<typeof getDeliveryDateIssue> {
+    return getDeliveryDateIssue(this.form.controls.requestedDeliveryDate.value, this.minimumDate);
   }
 
   paymentValid(): boolean {
     return (
       this.form.controls.paymentOption.valid && Boolean(this.form.controls.paymentOption.value)
     );
+  }
+
+  lineTotal(line: BuilderLine): number | null {
+    return line.unitPriceAmount == null || !Number.isFinite(line.unitPriceAmount)
+      ? null
+      : line.unitPriceAmount * line.quantity;
+  }
+
+  formatMoney(amount: number | null, currency = 'PEN'): string {
+    if (amount == null || !Number.isFinite(amount)) return '—';
+    if (currency === 'PEN') return `S/ ${amount.toFixed(2)}`;
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+
+  coldChainLabel(value: string): string {
+    switch (value.trim().toUpperCase()) {
+      case 'FROZEN':
+        return 'catalog.frozen';
+      case 'REFRIGERATED':
+        return 'catalog.chilled';
+      default:
+        return 'catalog.ambient';
+    }
   }
 
   previewIsStale(): boolean {
@@ -509,6 +576,50 @@ export class BuyerRequestBuilderPageComponent {
   routePreviewUrl(): string {
     const route = this.facade.previewState().snapshot?.delivery?.route;
     return route?.previewUrl?.startsWith('http') ? route.previewUrl : '';
+  }
+
+  routeEmbedUrl(): string {
+    const route = this.facade.previewState().snapshot?.delivery?.route;
+    const destination = this.selectedAddressLabel() || route?.destinationLabel || '';
+    if (!destination) return '';
+    const origin = this.warehouseOrigin();
+    return `https://maps.google.com/maps?f=d&source=s_d&saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(`${destination}, Peru`)}&hl=es&z=12&output=embed`;
+  }
+
+  routeEmbedUrlTrusted(): SafeResourceUrl | null {
+    const source = this.routeEmbedUrl();
+    if (!source) return null;
+    if (this.trustedRouteUrl?.source === source) return this.trustedRouteUrl.value;
+    const value = this.sanitizer.bypassSecurityTrustResourceUrl(source);
+    this.trustedRouteUrl = { source, value };
+    return value;
+  }
+
+  routeDirectionsUrl(): string {
+    const destination = this.selectedAddressLabel();
+    if (!destination) return '';
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(this.warehouseOrigin())}&destination=${encodeURIComponent(`${destination}, Peru`)}&travelmode=driving`;
+  }
+
+  private warehouseOrigin(): string {
+    return `${this.warehouse().name}, ${this.warehouse().address}`;
+  }
+
+  private lineFromCartItem(item: PurchaseRequestCartItem): BuilderLine {
+    return {
+      id: item.catalogItemId,
+      catalogItemId: item.catalogItemId,
+      skuId: item.sellableSkuId || item.productId,
+      itemName: item.itemName,
+      presentation: item.presentation,
+      brandName: item.brandName,
+      coldChainRequirement: item.coldChainRequirement,
+      quantity: item.quantity,
+      unit: item.unit,
+      notes: item.notes,
+      unitPriceAmount: item.unitPriceAmount,
+      currency: item.currency,
+    };
   }
 
   private command(): BuyerRequestCommand {

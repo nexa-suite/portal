@@ -1,1 +1,165 @@
-<main class="security-page" aria-labelledby="security-title"><h1 id="security-title">{{ 'iamSecurity.profileTitle' | translate }}</h1><form [formGroup]="form" (ngSubmit)="submit()"><label>{{ 'iamSecurity.displayName' | translate }}<input formControlName="displayName" autocomplete="name"></label><label>{{ 'iamSecurity.email' | translate }}<input [value]="facade.profile()?.email" readonly></label><label>{{ 'iamSecurity.phone' | translate }}<input formControlName="phone" autocomplete="tel"></label><label>{{ 'iamSecurity.language' | translate }}<input formControlName="preferredLanguage"></label><label>{{ 'iamSecurity.timezone' | translate }}<input formControlName="timezone"></label><button type="submit" [disabled]="form.invalid || facade.busy()">{{ 'iamSecurity.save' | translate }}</button></form>@if (facade.error()) {<p role="alert">{{ facade.error()! | translate }}</p>}</main>
+<main class="buyer-profile" aria-labelledby="profile-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">{{ 'iamSecurity.buyer.portal' | translate }}</span>
+      <h1 id="profile-title">{{ 'iamSecurity.buyer.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'iamSecurity.buyer.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  <section class="profile-hero buyer-profile-hero" aria-labelledby="profile-hero-name">
+    <div class="profile-avatar-xl" aria-hidden="true">{{ initials() }}</div>
+    <div class="profile-hero-copy">
+      <span class="flow-pill flow-pill-blue">{{ 'iamSecurity.buyer.role' | translate }}</span>
+      <h2 id="profile-hero-name">{{ displayName() }}</h2>
+      <p>{{ email() }} <span aria-hidden="true">·</span> {{ 'iamSecurity.buyer.client' | translate }} {{ clientIdentifier() }}</p>
+    </div>
+    <div class="profile-hero-actions">
+      <button class="btn btn-secondary" type="button" (click)="switchAccount()">
+        <nexa-icon name="person" />
+        {{ 'iamSecurity.buyer.switchAccount' | translate }}
+      </button>
+      <button class="btn btn-logout-contrast" type="button" (click)="switchAccount()">
+        <nexa-icon name="logout" />
+        {{ 'iamSecurity.buyer.logout' | translate }}
+      </button>
+    </div>
+  </section>
+
+  <div class="profile-grid">
+    <section class="flow-panel span-6" [class.editing]="editingAccount()" aria-labelledby="account-summary-title">
+      <div class="flow-panel-head">
+        <div>
+          <h2 id="account-summary-title" class="flow-title">{{ 'iamSecurity.buyer.accountSummary' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'iamSecurity.buyer.accountSummaryDescription' | translate }}</p>
+        </div>
+        @if (!editingAccount()) {
+          <button class="btn btn-secondary" type="button" (click)="beginAccountEdit()">{{ 'iamSecurity.buyer.editAccount' | translate }}</button>
+        }
+      </div>
+      <form class="flow-panel-pad form-grid buyer-editable-grid" [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.fullName' | translate }}</span>
+          <input formControlName="displayName" autocomplete="name" [readonly]="!editingAccount()" />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.email' | translate }}</span>
+          <input [value]="email()" autocomplete="username" disabled />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.clientIdentifier' | translate }}</span>
+          <input [value]="clientIdentifier()" disabled />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.accountRole' | translate }}</span>
+          <input [value]="'iamSecurity.buyer.role' | translate" disabled />
+        </label>
+        @if (editingAccount()) {
+          <div class="profile-form-actions span-full">
+            <button class="btn btn-ghost" type="button" (click)="cancelAccountEdit()">{{ 'iamSecurity.buyer.cancel' | translate }}</button>
+            <button class="btn btn-primary" type="submit" [disabled]="facade.busy()">
+              {{ facade.busy() ? ('iamSecurity.buyer.saving' | translate) : ('iamSecurity.buyer.saveAccount' | translate) }}
+            </button>
+          </div>
+        }
+        @if (accountSaved()) { <p class="muted-text span-full" role="status">{{ 'iamSecurity.buyer.accountUpdated' | translate }}</p> }
+        @if (accountError()) { <p class="banner banner-danger span-full" role="alert">{{ accountError()! | translate }}</p> }
+      </form>
+    </section>
+
+    <section class="flow-panel span-12" aria-labelledby="password-change-title">
+      <div class="flow-panel-head">
+        <div>
+          <h2 id="password-change-title" class="flow-title">{{ 'iamSecurity.buyer.security' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'iamSecurity.buyer.securityDescription' | translate }}</p>
+        </div>
+      </div>
+      <form class="flow-panel-pad form-grid buyer-editable-grid" [formGroup]="passwordForm" (ngSubmit)="changePassword()" [attr.aria-busy]="facade.busy()">
+        <input class="sr-only" type="email" [value]="email()" autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.currentPassword' | translate }}</span>
+          <input formControlName="currentPassword" type="password" autocomplete="current-password" />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.newPassword' | translate }}</span>
+          <input formControlName="newPassword" type="password" autocomplete="new-password" aria-describedby="password-policy" />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'iamSecurity.buyer.confirmPassword' | translate }}</span>
+          <input formControlName="confirmPassword" type="password" autocomplete="new-password" />
+        </label>
+        <p id="password-policy" class="password-policy">{{ 'iamSecurity.buyer.passwordPolicy' | translate }}</p>
+        <div class="profile-form-actions span-full">
+          <button class="btn btn-primary" type="submit" [disabled]="facade.busy()">
+            {{ facade.busy() ? ('iamSecurity.buyer.changingPassword' | translate) : ('iamSecurity.buyer.changePassword' | translate) }}
+          </button>
+        </div>
+        @if (passwordError()) { <p class="banner banner-danger span-full" role="alert">{{ passwordError()! | translate }}</p> }
+        @if (passwordSaved()) { <p class="banner banner-success span-full" role="status">{{ 'iamSecurity.buyer.passwordChanged' | translate }}</p> }
+      </form>
+    </section>
+
+    <section class="flow-panel span-6" aria-labelledby="activity-title">
+      <div class="flow-panel-head">
+        <div>
+          <h2 id="activity-title" class="flow-title">{{ 'iamSecurity.buyer.activity' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'iamSecurity.buyer.activityDescription' | translate }}</p>
+        </div>
+      </div>
+      <div class="flow-panel-pad buyer-kpi-grid">
+        <div class="credit-summary-box">
+          <div class="mini-row"><span class="meta-label">{{ 'iamSecurity.buyer.orders' | translate }}</span><strong>{{ activity().orders ?? '—' }}</strong></div>
+          <div class="flow-note">{{ 'iamSecurity.buyer.ordersDescription' | translate }}</div>
+        </div>
+        <div class="credit-summary-box">
+          <div class="mini-row"><span class="meta-label">{{ 'iamSecurity.buyer.invoices' | translate }}</span><strong>{{ activity().invoices ?? '—' }}</strong></div>
+          <div class="flow-note">{{ 'iamSecurity.buyer.invoicesDescription' | translate }}</div>
+        </div>
+      </div>
+      @if (activityState() === 'error') { <p class="panel-note" role="status">{{ 'iamSecurity.buyer.activityUnavailable' | translate }}</p> }
+    </section>
+
+    <section class="flow-panel span-12" aria-labelledby="client-profile-title">
+      <div class="flow-panel-head">
+        <div>
+          <h2 id="client-profile-title" class="flow-title">{{ 'iamSecurity.buyer.clientProfile' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'iamSecurity.buyer.clientProfileDescription' | translate }}</p>
+        </div>
+      </div>
+      <div class="flow-panel-pad">
+        @if (account(); as client) {
+          <div class="nexa-select-grid" [attr.aria-label]="'iamSecurity.buyer.buyerType' | translate">
+            <div class="nexa-select-card" [class.active]="buyerType() === 'company'">
+              <nexa-icon name="business" />
+              <span><strong>{{ 'iamSecurity.buyer.company' | translate }}</strong><small>{{ 'iamSecurity.buyer.companyDescription' | translate }}</small></span>
+            </div>
+            <div class="nexa-select-card" [class.active]="buyerType() === 'individual'">
+              <nexa-icon name="person" />
+              <span><strong>{{ 'iamSecurity.buyer.individual' | translate }}</strong><small>{{ 'iamSecurity.buyer.individualDescription' | translate }}</small></span>
+            </div>
+          </div>
+          <div class="form-grid buyer-editable-grid client-profile-fields">
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.businessName' | translate }}</span><input [value]="client.businessName || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.tradeName' | translate }}</span><input [value]="client.commercialName || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ taxLabel() }}</span><input [value]="client.taxValue || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.primaryContact' | translate }}</span><input [value]="client.contactPerson || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.contactEmail' | translate }}</span><input [value]="client.contactEmail || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.phone' | translate }}</span><input [value]="client.phone || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.segment' | translate }}</span><input [value]="client.segment || '—'" disabled /></label>
+            <label class="field"><span class="field-label">{{ 'iamSecurity.buyer.paymentCondition' | translate }}</span><input [value]="client.paymentCondition || '—'" disabled /></label>
+            <label class="field span-full"><span class="field-label">{{ 'iamSecurity.buyer.deliveryAddress' | translate }}</span><input [value]="deliveryAddress()" disabled /></label>
+          </div>
+          <div class="profile-boundary-note">
+            <nexa-icon name="info" />
+            <span>{{ 'iamSecurity.buyer.clientProfileReadOnly' | translate }}</span>
+            <a routerLink="/portal/account">{{ 'iamSecurity.buyer.openCommercialAccount' | translate }}</a>
+          </div>
+        } @else if (accountState() === 'loading') {
+          <p class="panel-note" role="status">{{ 'iamSecurity.buyer.loading' | translate }}</p>
+        } @else {
+          <p class="panel-note" role="status">{{ 'iamSecurity.buyer.accountUnavailable' | translate }}</p>
+        }
+      </div>
+    </section>
+  </div>
+</main>

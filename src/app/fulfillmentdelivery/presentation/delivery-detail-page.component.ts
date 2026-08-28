@@ -1,13 +1,39 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { PageHeaderComponent } from '../../shared/presentation/components/page-header/page-header.component';
-import { LoadingStateComponent } from '../../shared/presentation/components/loading-state/loading-state.component';
 import { ErrorStateComponent } from '../../shared/presentation/components/error-state/error-state.component';
+import { LoadingStateComponent } from '../../shared/presentation/components/loading-state/loading-state.component';
+import { NexaIconComponent } from '../../shared/presentation/components/nexa-icon/nexa-icon.component';
+import { PageHeaderComponent } from '../../shared/presentation/components/page-header/page-header.component';
 import { SectionPanelComponent } from '../../shared/presentation/components/section-panel/section-panel.component';
+import { StatusBadgeComponent, StatusTone } from '../../shared/presentation/components/status-badge/status-badge.component';
 import { DeliveryTrackingFacade } from '../application/delivery-tracking.facade';
+import { BuyerDeliveryStatus, Delivery } from '../domain/delivery.models';
+import { formatBuyerDeliveryDestination } from './delivery-destination.util';
 
-@Component({selector:'nexa-delivery-detail-page',standalone:true,imports:[DatePipe,RouterLink,TranslatePipe,PageHeaderComponent,LoadingStateComponent,ErrorStateComponent,SectionPanelComponent],template:`<section class="page"><a routerLink="/portal/deliveries">← {{'delivery.title'|translate}}</a>@if(facade.loading()){<nexa-loading-state [label]="'delivery.loading'|translate"/>}@else if(facade.error();as error){<nexa-error-state [title]="'delivery.title'|translate" [description]="('messages.'+error)|translate" (retry)="facade.retry()"/>}@else if(facade.selected();as item){<nexa-page-header [eyebrow]="'delivery.fields.dispatch'|translate" [title]="item.dispatchNumber" [subtitle]="('delivery.status.'+item.status)|translate"/><nexa-section-panel [title]="'delivery.fields.salesOrder'|translate"><p>{{item.salesOrderNumber||'—'}}</p><p>{{'delivery.fields.destination'|translate}}: {{item.destination||'—'}}</p><p>{{'delivery.fields.window'|translate}}: {{item.deliveryWindowStart?(item.deliveryWindowStart|date:'short'):'—'}} – {{item.deliveryWindowEnd?(item.deliveryWindowEnd|date:'short'):'—'}}</p><p>{{'delivery.fields.updated'|translate}}: {{item.updatedAt?(item.updatedAt|date:'short'):'—'}}</p><p>{{'delivery.fields.pod'|translate}}: {{item.podStatus==='COMPLETED'?('delivery.podComplete'|translate):('delivery.podPending'|translate)}}</p></nexa-section-panel>@if(item.alerts.length){<nexa-section-panel [title]="'delivery.incident'|translate"><ul>@for(alert of item.alerts;track alert){<li>{{('delivery.alerts.'+alert)|translate}}</li>}</ul></nexa-section-panel>}<nexa-section-panel [title]="'delivery.timeline'|translate"><ol>@for(event of facade.events();track event.id){<li><strong>{{('delivery.event.'+event.type)|translate}}</strong> · {{event.occurredAt|date:'short'}}@if(event.summary){<span> — {{('delivery.event.'+event.summary)|translate}}</span>}</li>}@empty{<li>{{'delivery.noEvents'|translate}}</li>}</ol></nexa-section-panel>}</section>`,changeDetection:ChangeDetectionStrategy.OnPush})
-export class DeliveryDetailPageComponent{readonly facade=inject(DeliveryTrackingFacade);readonly id=inject(ActivatedRoute).snapshot.paramMap.get('dispatchOrderId')!;constructor(){this.facade.loadDetail(this.id);}}
+@Component({
+  selector: 'nexa-delivery-detail-page',
+  standalone: true,
+  imports: [DatePipe, RouterLink, TranslatePipe, PageHeaderComponent, LoadingStateComponent, ErrorStateComponent, NexaIconComponent, SectionPanelComponent, StatusBadgeComponent],
+  templateUrl: './delivery-detail-page.component.html',
+  styleUrl: './delivery-detail-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DeliveryDetailPageComponent {
+  readonly facade = inject(DeliveryTrackingFacade);
+  readonly id = inject(ActivatedRoute).snapshot.paramMap.get('dispatchOrderId')!;
+
+  constructor() { this.facade.loadDetail(this.id); }
+
+  deliveryTone(status: BuyerDeliveryStatus): StatusTone {
+    if (status === 'DELIVERED') return 'success';
+    if (status === 'DELIVERY_REVIEW' || status === 'DELIVERY_RESCHEDULED') return 'warning';
+    if (status === 'DELIVERY_CANCELLED' || status === 'UNKNOWN') return 'danger';
+    return 'info';
+  }
+
+  podTone(item: Delivery): StatusTone { return item.podStatus === 'COMPLETED' ? 'success' : 'warning'; }
+
+  destinationLabel(item: Delivery): string { return formatBuyerDeliveryDestination(item); }
+}

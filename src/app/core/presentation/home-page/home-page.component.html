@@ -1,52 +1,188 @@
-<nexa-page-header
-  [title]="'shell.portalName' | translate"
-  [subtitle]="'shell.buyerDescription' | translate"
-  [eyebrow]="'shell.buyerWorkspace' | translate" />
+<div class="home-page buyer-home-page">
+  @if (loading()) {
+    <nexa-loading-state [label]="'home.loading' | translate" [lines]="5" />
+  } @else if (!hasClient()) {
+    <section class="flow-panel no-client-state" aria-live="polite">
+      <nexa-icon name="lock" />
+      <h1>{{ 'home.homePanel.noClientTitle' | translate }}</h1>
+      <p>{{ 'home.homePanel.noClientDescription' | translate }}</p>
+    </section>
+  } @else if (error(); as message) {
+    <nexa-error-state
+      [title]="'home.errorTitle' | translate"
+      [description]="message"
+      [retryLabel]="'home.retry' | translate"
+      (retry)="load()" />
+  } @else {
+    @if (partial()) { <p class="partial-notice" role="status">{{ 'home.partial' | translate }}</p> }
 
-@if (loading()) {
-  <nexa-loading-state [label]="'home.loading' | translate" [lines]="5" />
-} @else if (error(); as message) {
-  <nexa-error-state
-    [title]="'home.errorTitle' | translate"
-    [description]="message"
-    [retryLabel]="'home.retry' | translate"
-    (retry)="load()" />
-} @else {
-  @if (partial()) { <p class="partial-notice" role="status">{{ 'home.partial' | translate }}</p> }
-
-  <section class="metric-grid" [attr.aria-label]="'home.metricsLabel' | translate">
-    <nexa-metric-card [label]="'home.metrics.requests' | translate" [value]="requestItems().length" [hint]="'home.metrics.requestsHint' | translate" tone="info" />
-    <nexa-metric-card [label]="'home.metrics.orders' | translate" [value]="openOrders()" [hint]="'home.metrics.ordersHint' | translate" tone="success" />
-    <nexa-metric-card [label]="'home.metrics.deliveries' | translate" [value]="activeDeliveries()" [hint]="'home.metrics.deliveriesHint' | translate" tone="warning" />
-    <nexa-metric-card [label]="'home.metrics.receivables' | translate" [value]="outstandingReceivables()" [hint]="'home.metrics.receivablesHint' | translate" tone="danger" />
-  </section>
-
-  <div class="home-grid">
-    <nexa-section-panel [title]="'home.actions.title' | translate" [description]="'home.actions.description' | translate">
-      <div class="action-grid">
-        <a class="action-card" routerLink="/portal/product-catalog"><span>{{ 'home.actions.catalog' | translate }}</span><small>{{ catalogTotal() }} {{ 'home.actions.catalogHint' | translate }}</small></a>
-        <a class="action-card primary" routerLink="/portal/request-builder"><span>{{ 'home.actions.request' | translate }}</span><small>{{ 'home.actions.requestHint' | translate }}</small></a>
-        <a class="action-card" routerLink="/portal/purchase-requests"><span>{{ 'home.actions.requests' | translate }}</span><small>{{ 'home.actions.requestsHint' | translate }}</small></a>
-        <a class="action-card" routerLink="/portal/deliveries"><span>{{ 'home.actions.deliveries' | translate }}</span><small>{{ 'home.actions.deliveriesHint' | translate }}</small></a>
+    <section class="buyer-shell-band" aria-labelledby="buyer-home-title">
+      <div class="buyer-shell-copy">
+        <span class="flow-pill flow-pill-blue buyer-eyebrow">{{ 'home.homePanel.eyebrow' | translate }}</span>
+        <h1 id="buyer-home-title" class="buyer-title">{{ 'home.homePanel.title' | translate: { name: firstName() } }}</h1>
+        <p class="buyer-subtitle">{{ 'home.homePanel.subtitle' | translate: { company: companyName() } }}</p>
+        <div class="flow-row buyer-hero-actions">
+          <a class="btn btn-secondary buyer-hero-primary" routerLink="/portal/product-catalog">
+            <nexa-icon name="inventory_2" />
+            {{ 'shell.navigation.catalog' | translate }}
+          </a>
+          <a class="btn btn-secondary buyer-hero-secondary" routerLink="/portal/request-builder">
+            <nexa-icon name="shopping_cart" />
+            {{ 'shell.navigation.requestBuilder' | translate }}
+          </a>
+        </div>
       </div>
-    </nexa-section-panel>
+    </section>
 
-    <nexa-section-panel [title]="'home.recent.title' | translate" [description]="'home.recent.description' | translate">
-      <div class="activity-list">
-        @for (request of requestItems().slice(0, 3); track request.id) {
-          <a class="activity-row" [routerLink]="['/portal/purchase-requests', request.id]"><span><strong>{{ request.code || request.id }}</strong><small>{{ 'home.recent.request' | translate }}</small></span><span class="status-text">{{ request.status }}</span></a>
-        }
-        @for (order of orderItems().slice(0, 3); track order.id) {
-          <a class="activity-row" [routerLink]="['/portal/sales-orders', order.id]"><span><strong>{{ order.number || order.id }}</strong><small>{{ 'home.recent.order' | translate }}</small></span><span class="status-text">{{ order.status }}</span></a>
-        }
-        @if (requestItems().length === 0 && orderItems().length === 0) {
-          <nexa-empty-state [compact]="true" [title]="'home.recent.emptyTitle' | translate" [description]="'home.recent.emptyDescription' | translate" />
-        }
-      </div>
-    </nexa-section-panel>
-  </div>
+    <section class="buyer-kpi-grid" [attr.aria-label]="'home.homePanel.kpiLabel' | translate">
+      <a class="buyer-card flow-panel-pad buyer-kpi-card" routerLink="/portal/product-catalog">
+        <span class="flow-kpi-icon"><nexa-icon name="inventory_2" /></span>
+        <strong class="flow-title">{{ 'shell.navigation.catalog' | translate }}</strong>
+        <span class="flow-note">{{ 'home.homePanel.catalogDesc' | translate: { count: catalogTotal() } }}</span>
+      </a>
+      <a class="buyer-card flow-panel-pad buyer-kpi-card" routerLink="/portal/purchase-requests">
+        <span class="flow-kpi-icon flow-kpi-icon-amber"><nexa-icon name="inbox" /></span>
+        <strong class="flow-title">{{ 'shell.navigation.requests' | translate }}</strong>
+        <span class="flow-note">{{ 'home.homePanel.requestsDesc' | translate: { count: requestItems().length } }}</span>
+      </a>
+      <a class="buyer-card flow-panel-pad buyer-kpi-card" routerLink="/portal/purchase-orders">
+        <span class="flow-kpi-icon flow-kpi-icon-cyan"><nexa-icon name="local_shipping" /></span>
+        <strong class="flow-title">{{ 'shell.navigation.orders' | translate }}</strong>
+        <span class="flow-note">{{ 'home.homePanel.ordersDesc' | translate: { count: orderItems().length } }}</span>
+      </a>
+      <a class="buyer-card flow-panel-pad buyer-kpi-card" routerLink="/portal/receivables">
+        <span class="flow-kpi-icon flow-kpi-icon-indigo"><nexa-icon name="credit_card" /></span>
+        <strong class="flow-title">{{ 'home.homePanel.credit' | translate }}</strong>
+        <span class="flow-note">{{ 'home.homePanel.creditUnavailable' | translate }}</span>
+      </a>
+    </section>
 
-  <nexa-section-panel [title]="'home.bodyTitle' | translate" [description]="'home.body' | translate" appearance="subtle">
-    <p class="boundary-note">{{ 'home.boundary' | translate }}</p>
-  </nexa-section-panel>
-}
+    <div class="flow-grid-12">
+      <section class="flow-panel span-12">
+        <div class="flow-panel-head">
+          <div>
+            <h2 class="flow-title">{{ 'home.homePanel.currentStatus' | translate }}</h2>
+            <p class="flow-subtitle">{{ 'home.homePanel.currentStatusDesc' | translate }}</p>
+          </div>
+          @if (latestOrder() || latestRequest() || activeDelivery()) {
+            <nexa-status-badge [label]="statusLabel() | translate" [tone]="statusTone()" emphasis="standard" />
+          }
+        </div>
+        <div class="flow-panel-pad">
+          @if (latestOrder(); as order) {
+            <div class="flow-row-between current-status-summary">
+              <div>
+                <div class="order-code">{{ order.number }}</div>
+                <div class="flow-note">
+                  @if (activeDelivery(); as delivery) {
+                    {{ 'home.homePanel.deliverySummary' | translate: { date: requestedDeliveryLabel() | translate, destination: destinationLabel() || ('delivery.destinationPending' | translate) } }}
+                  } @else {
+                    {{ 'home.homePanel.orderSummary' | translate: { amount: order.totalAmount, currency: order.currency } }}
+                  }
+                </div>
+              </div>
+              <a class="btn btn-primary" [routerLink]="['/portal/sales-orders', order.id]">
+                <nexa-icon name="visibility" />
+                {{ 'home.homePanel.openTracking' | translate }}
+              </a>
+            </div>
+            <div class="flow-timeline-horizontal" [attr.aria-label]="'home.homePanel.trackingLabel' | translate">
+              @for (step of trackingSteps(); track step.key) {
+                <div class="flow-track-step" [class.done]="step.state === 'done'" [class.active]="step.state === 'active'">
+                  <div class="flow-track-index">{{ step.index }}</div>
+                  <div class="flow-track-label">{{ step.labelKey | translate }}</div>
+                  <div class="flow-track-date">{{ step.dateLabel | translate }}</div>
+                </div>
+              }
+            </div>
+          } @else if (latestRequest(); as request) {
+            <div class="flow-action-banner">
+              <nexa-icon name="verified" />
+              <div>{{ 'home.homePanel.requestStatus' | translate: { code: request.code, status: ('purchaseRequests.status.' + request.status | translate) } }}</div>
+            </div>
+          } @else {
+            <div class="empty-state empty-state-inline">
+              <span class="empty-state-icon"><nexa-icon name="add_shopping_cart" /></span>
+              <strong>{{ 'home.homePanel.noActiveRequest' | translate }}</strong>
+              <a class="btn btn-primary" routerLink="/portal/product-catalog">{{ 'home.homePanel.exploreCatalog' | translate }}</a>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="flow-panel span-5">
+        <div class="flow-panel-head">
+          <h2 class="flow-title">{{ 'home.homePanel.activeOffers' | translate }}</h2>
+          <span class="premium-lock"><nexa-icon name="lock" /> Premium</span>
+        </div>
+        <div class="flow-panel-pad flow-stack">
+          @for (item of activeOffers(); track item.catalogItemId) {
+            <div class="flow-list-item">
+              <div>
+                <strong>{{ productTitle(item) }}</strong>
+                <div class="flow-note">{{ offerLabel(item) | translate }}</div>
+              </div>
+              <a class="btn btn-secondary btn-sm" routerLink="/portal/product-catalog">{{ 'home.homePanel.viewOffer' | translate }}</a>
+            </div>
+          } @empty {
+            <div class="empty-inline">
+              <nexa-icon name="sparkles" />
+              <span>{{ 'home.homePanel.noOffers' | translate }}</span>
+            </div>
+          }
+          <a class="btn btn-ghost" routerLink="/portal/premium"><nexa-icon name="sparkles" /> {{ 'home.homePanel.viewPremium' | translate }}</a>
+        </div>
+      </section>
+
+      <section class="flow-panel span-7">
+        <div class="flow-panel-head">
+          <div>
+            <h2 class="flow-title">{{ 'home.homePanel.nextActions' | translate }}</h2>
+            <p class="flow-subtitle">{{ 'home.homePanel.nextActionsDesc' | translate }}</p>
+          </div>
+        </div>
+        <div class="flow-panel-pad quick-action-grid">
+          <a class="btn btn-secondary" routerLink="/portal/purchase-requests"><nexa-icon name="chat" /> {{ 'home.homePanel.nextRequests' | translate }}</a>
+          <a class="btn btn-secondary" routerLink="/portal/payment-methods"><nexa-icon name="credit_card" /> {{ 'home.homePanel.nextPayments' | translate }}</a>
+        </div>
+      </section>
+
+      <section class="flow-panel span-12">
+        <div class="flow-panel-head">
+          <div>
+            <h2 class="flow-title">{{ 'home.homePanel.suggestedProducts' | translate }}</h2>
+            <p class="flow-subtitle">{{ 'home.homePanel.suggestedDesc' | translate }}</p>
+          </div>
+        </div>
+        <div class="grid-4 flow-panel-pad">
+          @for (item of recommendedItems(); track item.catalogItemId) {
+            <article class="buyer-card suggested-product-card">
+              <a class="buyer-product-visual" [routerLink]="['/portal/product-catalog', item.catalogItemId]" [attr.aria-label]="productTitle(item)">
+                @if (item.image?.url) {
+                  <img class="buyer-product-image" [src]="item.image?.url" [alt]="productTitle(item)" loading="lazy" />
+                } @else {
+                  <nexa-icon name="inventory_2" />
+                }
+              </a>
+              <div class="suggested-product-copy">
+                <strong>{{ productTitle(item) }}</strong>
+                <span class="flow-note">{{ item.brandName }} · {{ item.presentation }}</span>
+                <div class="flow-row-between suggested-product-footer">
+                  <strong class="product-price">{{ priceLabel(item) }}</strong>
+                  <button class="add-btn" type="button" [disabled]="!canAddToRequest(item)" [attr.aria-label]="('catalog.addToRequest' | translate) + ': ' + productTitle(item)" (click)="addToRequest(item)">
+                    <nexa-icon name="add_shopping_cart" />
+                  </button>
+                </div>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-inline grid-empty">
+              <nexa-icon name="inventory_2" />
+              <span>{{ 'home.products.emptyDescription' | translate }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</div>
