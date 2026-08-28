@@ -260,6 +260,47 @@
   background: var(--nexa-surface-info);
 }
 
+.cart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nexa-space-4);
+  padding: var(--nexa-space-4);
+  border: 1px solid var(--nexa-color-primary-200);
+  border-radius: var(--nexa-radius-card);
+  background: var(--nexa-surface-info);
+}
+
+.cart-toolbar p {
+  margin: 0;
+}
+
+.cart-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--nexa-space-2);
+  margin-top: var(--nexa-space-5);
+  padding: var(--nexa-space-6);
+  border: 1px dashed var(--nexa-color-border-strong);
+  border-radius: var(--nexa-radius-card);
+  text-align: center;
+}
+
+.cart-empty p {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--nexa-color-text-secondary);
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--nexa-space-3);
+  margin-top: var(--nexa-space-4);
+  padding-top: var(--nexa-space-4);
+  border-top: 1px solid var(--nexa-color-border-default);
+}
+
 .add-selection > div:first-child {
   display: grid;
   gap: var(--nexa-space-1);
@@ -486,6 +527,15 @@
   background: var(--nexa-color-cold-refrigerated-soft);
 }
 
+.buyer-map-embed {
+  display: block;
+  width: 100%;
+  min-height: 18.75rem;
+  border: 1px solid var(--nexa-color-border-default);
+  border-radius: var(--nexa-radius-card);
+  background: var(--nexa-surface-inset);
+}
+
 .buyer-map-preview::before {
   position: absolute;
   top: 50%;
@@ -660,6 +710,7 @@
 
   .add-selection,
   .line,
+  .cart-toolbar,
   .map-selection {
     grid-template-columns: 1fr;
     align-items: start;
@@ -699,6 +750,10 @@
     flex-direction: column;
   }
 
+  .buyer-map-embed {
+    min-height: 18rem;
+  }
+
   .buyer-map-node {
     max-width: 75%;
   }
@@ -713,5 +768,777 @@
     right: 30%;
     left: 30%;
     transform: rotate(58deg);
+  }
+}
+
+/* ── Buyer Request Builder: Vue / Design Lab composition ── */
+.builder-page {
+  display: grid;
+  gap: 18px;
+}
+
+.builder-page-header,
+.buyer-stepper,
+.builder-form {
+  width: min(100%, 1480px);
+  margin-inline: auto;
+}
+
+.builder-page-header {
+  display: grid;
+  gap: 6px;
+}
+
+.builder-page-header .page-title {
+  margin: 0;
+  color: #0f172a;
+  font-family: var(--nexa-font-family-display);
+  font-size: clamp(21px, 1.65vw, 28px);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.builder-page-header .page-subtitle {
+  max-width: 780px;
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.buyer-stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.buyer-stepper .step-item {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+  gap: 8px;
+}
+
+.buyer-stepper .step-circle {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #6b7280;
+  background: #e5e7eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.buyer-stepper .step-circle nexa-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.buyer-stepper .step-active .step-circle {
+  color: #fff;
+  background: #2563eb;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.buyer-stepper .step-done .step-circle {
+  color: #fff;
+  background: #2563eb;
+}
+
+.buyer-stepper .step-label {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.buyer-stepper .step-active .step-label {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.buyer-stepper .step-done .step-label {
+  color: #2563eb;
+}
+
+.buyer-stepper .step-connector {
+  min-width: 20px;
+  height: 2px;
+  flex: 1;
+  margin: 0 8px;
+}
+
+.buyer-stepper .step-connector-done {
+  background: #2563eb;
+}
+
+.buyer-stepper .step-connector-pending {
+  background: #e5e7eb;
+}
+
+.flow-panel {
+  overflow: hidden;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.flow-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px;
+  border-bottom: 1px solid #dbe3ef;
+  flex-wrap: wrap;
+}
+
+.flow-panel-pad {
+  padding: 22px;
+}
+
+.flow-title {
+  color: #0f172a;
+  font-family: var(--nexa-font-family-display);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.flow-subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.buyer-validation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.review-check {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.review-check.ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.review-check > nexa-icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: #2563eb;
+}
+
+.review-check > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.review-check strong {
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.review-check small {
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.span-full {
+  grid-column: 1 / -1;
+}
+
+.builder-page .btn {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.builder-page .btn:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.builder-page .btn-primary {
+  color: #fff;
+  background: #2563eb;
+}
+
+.builder-page .btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.builder-page .btn-primary:focus-visible,
+.buyer-stepper .step-circle:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 22%);
+  outline-offset: 2px;
+}
+
+.builder-continue {
+  justify-content: flex-start !important;
+  width: 100%;
+}
+
+.builder-continue nexa-icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 1180px) {
+  .buyer-validation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .builder-page-header,
+  .buyer-stepper,
+  .builder-form {
+    width: 100%;
+  }
+
+  .buyer-stepper {
+    padding-bottom: 2px;
+  }
+
+  .flow-panel-head,
+  .flow-panel-pad {
+    padding-inline: 16px;
+  }
+}
+
+/* ── Request Builder phases 2–4: Vue / Design Lab composition ── */
+.request-items-panel,
+.buyer-confirm-panel,
+.route-map-card {
+  width: 100%;
+}
+
+.request-item-list,
+.request-lines,
+.route-panel-content,
+.flow-stack,
+.delivery-builder-content {
+  display: grid;
+  gap: 14px;
+}
+
+.request-item-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.request-item-mark {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 14px;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.request-item-mark nexa-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.request-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.request-item-copy strong {
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.request-item-copy span,
+.request-item-copy small {
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.request-item-copy .ok-text {
+  color: #15803d;
+}
+
+.request-item-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.builder-page .btn-sm {
+  min-height: 36px;
+  padding-inline: 10px;
+  font-size: 12px;
+}
+
+.builder-page .btn-secondary,
+.builder-page .btn-ghost {
+  color: #334155;
+  border-color: #dbe3ef;
+  background: #fff;
+}
+
+.builder-page .btn-secondary:hover:not(:disabled),
+.builder-page .btn-ghost:hover:not(:disabled) {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.builder-page .btn-ghost {
+  color: #64748b;
+}
+
+.builder-page .remove-line {
+  color: #b91c1c;
+}
+
+.qty-input {
+  width: 54px;
+  height: 36px;
+  padding: 0 6px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  color: #0f172a;
+  background: #fff;
+  text-align: center;
+  font: inherit;
+}
+
+.qty-input:focus-visible {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 18%);
+}
+
+.request-item-controls > strong {
+  min-width: 82px;
+  color: #0f172a;
+  font-size: 14px;
+  text-align: right;
+}
+
+.request-step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.delivery-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.delivery-form-card,
+.route-map-card {
+  min-width: 0;
+}
+
+.delivery-builder-content {
+  grid-template-columns: 1fr;
+}
+
+.nexa-select-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.delivery-mode-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nexa-select-card,
+.payment-mode-card {
+  display: flex;
+  min-height: 96px;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #c7d7ec;
+  border-radius: 8px;
+  color: #1d4ed8;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nexa-select-card:hover,
+.payment-mode-card:hover,
+.nexa-select-card.active,
+.payment-mode-card.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.nexa-select-card:focus-visible,
+.payment-mode-card:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 22%);
+  outline-offset: 2px;
+}
+
+.nexa-select-card nexa-icon,
+.payment-mode-card nexa-icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+}
+
+.nexa-select-card > span,
+.payment-mode-card > span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.nexa-select-card strong,
+.payment-mode-card strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.nexa-select-card small,
+.payment-mode-card small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.full-field {
+  grid-column: 1 / -1;
+}
+
+.builder-address-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.builder-map-selection {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.builder-map-selection .field {
+  grid-column: span 1;
+}
+
+.builder-map-selection .location-status {
+  grid-column: 1 / -1;
+}
+
+.buyer-address-line {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.buyer-address-line select,
+.buyer-address-line input {
+  min-width: 0;
+}
+
+.builder-map-selection .map-pin nexa-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.payment-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payment-mode-card {
+  min-height: 84px;
+}
+
+.route-panel-content {
+  min-width: 0;
+}
+
+.route-trace-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  background: #eff6ff;
+}
+
+.route-trace-card > span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.route-trace-card > strong {
+  overflow-wrap: anywhere;
+  color: #1e3a8a;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.route-node {
+  display: grid;
+  gap: 3px;
+}
+
+.route-node > span {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.route-node strong {
+  overflow-wrap: anywhere;
+  color: #1e3a8a;
+  font-size: 14px;
+}
+
+.route-node small {
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.route-trace-line {
+  width: 2px;
+  height: 28px;
+  margin: 8px 0 8px 7px;
+  background: #93c5fd;
+}
+
+.buyer-map-placeholder {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 1px dashed #93c5fd;
+  border-radius: 14px;
+  color: #2563eb;
+  background: #eff6ff;
+  text-align: center;
+}
+
+.buyer-map-placeholder nexa-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.buyer-map-placeholder strong {
+  color: #1e3a8a;
+  font-size: 14px;
+}
+
+.buyer-map-placeholder p {
+  max-width: 28rem;
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.request-cost-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.request-cost-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.request-cost-card strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.request-cost-total {
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.request-cost-total strong {
+  color: #2563eb;
+  font-size: 18px;
+}
+
+.builder-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.builder-info-banner nexa-icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.flow-pill {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.flow-pill-blue {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.route-map-card .flow-panel-head .btn nexa-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.buyer-confirm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, .55fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .delivery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .buyer-confirm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .route-map-card {
+    order: -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .delivery-mode-grid,
+  .payment-mode-grid,
+  .builder-address-grid,
+  .nexa-select-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .request-item-card {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .request-item-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .request-item-controls {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .request-item-controls > strong {
+    margin-left: auto;
+  }
+
+  .request-step-actions {
+    justify-content: stretch;
+  }
+
+  .request-step-actions .btn {
+    flex: 1 1 10rem;
+  }
+
+  .builder-map-selection {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .buyer-address-line {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-map-selection .map-pin,
+  .builder-map-selection .location-status,
+  .builder-map-selection .field {
+    grid-column: auto;
+  }
+
+  .builder-page .flow-title {
+    font-size: 17px;
   }
 }

@@ -13,11 +13,13 @@ import {
   StatusTone,
 } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { CatalogQueryService } from '../../application/catalog-query.service';
+import { PortalCatalogCartFacade } from '../../../core/compositions/portal/catalog-cart.facade';
 import { CatalogPricingSummaryComponent } from '../catalog-pricing-summary/catalog-pricing-summary.component';
 import {
   CatalogAvailabilityStatus,
   catalogQueryFromParams,
   catalogQueryToParams,
+  CatalogItemDetail,
 } from '../../domain/catalog.models';
 
 @Component({
@@ -39,6 +41,7 @@ export class CatalogDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly catalog = inject(CatalogQueryService);
+  readonly cart = inject(PortalCatalogCartFacade);
   private readonly routeParams = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -53,6 +56,7 @@ export class CatalogDetailPageComponent {
   readonly previewQuantityInvalid = signal(false);
 
   constructor() {
+    this.cart.activate();
     effect(() => {
       const id = this.catalogItemId();
       if (id) untracked(() => this.catalog.loadDetail(id));
@@ -86,6 +90,18 @@ export class CatalogDetailPageComponent {
 
   backToCatalog(): void {
     void this.router.navigate(['/portal/product-catalog'], { queryParams: this.backQueryParams() });
+  }
+
+  toggleCart(item: CatalogItemDetail): void {
+    this.cart.toggle(item);
+  }
+
+  isInCart(item: CatalogItemDetail): boolean {
+    return this.cart.has(item.catalogItemId);
+  }
+
+  isUnavailable(item: CatalogItemDetail): boolean {
+    return item.availabilityStatus === 'OUT_OF_STOCK' || item.availabilityStatus === 'UNAVAILABLE';
   }
 
   previewPrice(): void {

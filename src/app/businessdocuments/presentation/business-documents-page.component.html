@@ -1,0 +1,78 @@
+<section class="page">
+  <nexa-page-header
+    [eyebrow]="'businessDocuments.eyebrow' | translate"
+    [title]="'businessDocuments.title' | translate"
+    [subtitle]="'businessDocuments.subtitle' | translate">
+    <div page-header-actions>
+      <nexa-button routerLink="/portal/sales-orders" variant="secondary" size="compact">
+        <nexa-icon name="receipt_long" />
+        {{ 'businessDocuments.actions.orders' | translate }}
+      </nexa-button>
+    </div>
+  </nexa-page-header>
+
+  @if (loading()) {
+    <nexa-loading-state [label]="'businessDocuments.loading' | translate" [lines]="5" />
+  } @else if (error(); as message) {
+    <nexa-error-state [title]="'businessDocuments.errorTitle' | translate" [description]="message" [retryLabel]="'businessDocuments.actions.retry' | translate" (retry)="load()" />
+  } @else {
+    <section class="metrics-grid" [attr.aria-label]="'businessDocuments.metrics.label' | translate">
+      <nexa-metric-card icon="receipt_long" [label]="'businessDocuments.metrics.documents' | translate" [value]="documents().length" [hint]="'businessDocuments.metrics.documentsHint' | translate" tone="info" />
+      <nexa-metric-card icon="verified" [label]="'businessDocuments.metrics.generated' | translate" [value]="generatedDocuments()" [hint]="'businessDocuments.metrics.generatedHint' | translate" tone="success" />
+      <nexa-metric-card icon="check" [label]="'businessDocuments.metrics.evidence' | translate" [value]="availableEvidence()" [hint]="'businessDocuments.metrics.evidenceHint' | translate" tone="success" />
+      <nexa-metric-card icon="schedule" [label]="'businessDocuments.metrics.pending' | translate" [value]="pendingEvidence()" [hint]="'businessDocuments.metrics.pendingHint' | translate" tone="warning" />
+    </section>
+
+    <nexa-section-panel [title]="'businessDocuments.documents.title' | translate" [description]="'businessDocuments.documents.description' | translate">
+      @if (documents().length) {
+        <div class="table-shell">
+          <table>
+            <caption>{{ 'businessDocuments.documents.caption' | translate }}</caption>
+            <thead><tr><th scope="col">{{ 'businessDocuments.fields.reference' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.type' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.format' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.status' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.generatedAt' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.action' | translate }}</th></tr></thead>
+            <tbody>
+              @for (document of documents(); track document.id) {
+                <tr>
+                  <td><strong>{{ document.documentNumber || document.subjectId }}</strong><small>{{ document.subjectType }} · v{{ document.version }}</small></td>
+                  <td>{{ document.documentType }}</td>
+                  <td><span class="format-chip">{{ document.format }}</span></td>
+                  <td><nexa-status-badge [label]="('businessDocuments.status.' + statusKey(document.status)) | translate" [tone]="documentTone(document.status)" /></td>
+                  <td>{{ document.generatedAt ? (document.generatedAt | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
+                  <td><nexa-button variant="secondary" size="compact" [disabled]="document.status !== 'GENERATED'" [ariaLabel]="('businessDocuments.actions.download' | translate) + ' ' + (document.documentNumber || document.subjectId)" (click)="download(document)"><nexa-icon name="receipt_long" />{{ 'businessDocuments.actions.download' | translate }}</nexa-button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <nexa-empty-state icon="receipt_long" [title]="'businessDocuments.documents.emptyTitle' | translate" [description]="'businessDocuments.documents.emptyDescription' | translate" />
+      }
+    </nexa-section-panel>
+
+    <nexa-section-panel [title]="'businessDocuments.evidence.title' | translate" [description]="'businessDocuments.evidence.description' | translate" appearance="subtle">
+      @if (evidence().length) {
+        <div class="table-shell">
+          <table>
+            <caption>{{ 'businessDocuments.evidence.caption' | translate }}</caption>
+            <thead><tr><th scope="col">{{ 'businessDocuments.fields.file' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.subject' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.status' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.detectedType' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.createdAt' | translate }}</th><th scope="col">{{ 'businessDocuments.fields.action' | translate }}</th></tr></thead>
+            <tbody>
+              @for (item of evidence(); track item.id) {
+                <tr>
+                  <td><strong>{{ item.originalFilename }}</strong><small>{{ item.declaredContentType }}</small></td>
+                  <td>{{ item.subjectType }} · {{ item.subjectId }}</td>
+                  <td><nexa-status-badge [label]="('businessDocuments.evidenceStatus.' + statusKey(item.lifecycleStatus)) | translate" [tone]="evidenceTone(item.lifecycleStatus)" /></td>
+                  <td>{{ item.detectedContentType || ('businessDocuments.fields.pending' | translate) }}</td>
+                  <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td><nexa-button variant="quiet" size="compact" [disabled]="item.lifecycleStatus !== 'AVAILABLE'" [ariaLabel]="('businessDocuments.actions.download' | translate) + ' ' + item.originalFilename" (click)="downloadEvidence(item)"><nexa-icon name="receipt_long" />{{ 'businessDocuments.actions.download' | translate }}</nexa-button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <nexa-empty-state icon="verified" [title]="'businessDocuments.evidence.emptyTitle' | translate" [description]="'businessDocuments.evidence.emptyDescription' | translate" />
+      }
+    </nexa-section-panel>
+
+    <p class="boundary-note"><nexa-icon name="verified" />{{ 'businessDocuments.boundary' | translate }}</p>
+  }
+</section>

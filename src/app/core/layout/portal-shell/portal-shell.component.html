@@ -1,50 +1,181 @@
 <a class="skip-link" href="#main-content">{{ 'shell.skipToContent' | translate }}</a>
+
 <div class="portal-shell">
-  <header class="portal-header">
-    <a class="brand-lockup" routerLink="/portal/home" aria-label="Nexa Buyer Portal home" (click)="closeMenu()">
-      <nexa-brand-logo [width]="100" />
-      <span>{{ 'shell.portalLabel' | translate }}</span>
+  <header class="portal-header portal-topbar" role="banner">
+    <a
+      class="portal-logo-button"
+      routerLink="/portal/home"
+      aria-label="Nexa Buyer Portal home"
+      (click)="closeMenu()">
+      <nexa-brand-logo [width]="82" />
     </a>
 
-    <button #menuTrigger class="menu-toggle" type="button" [attr.aria-expanded]="menuOpen()" aria-controls="portal-navigation" (click)="toggleMenu()">
-      {{ 'shell.menu' | translate }}
-    </button>
-
-    <nav id="portal-navigation" class="portal-navigation" [class.open]="menuOpen()" aria-label="Buyer portal navigation">
-      <span class="work-area-context">{{ 'shell.workArea.' + activeWorkArea() | translate }}</span>
-      @for (item of navigation(); track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{ exact: item.path.endsWith('/home') }" (click)="closeMenu()">{{ item.labelKey | translate }}</a>
+    <nav id="portal-navigation" class="portal-navigation portal-nav" role="navigation" aria-label="Buyer portal navigation">
+      @for (item of primaryNavigation(); track item.path) {
+        <a
+          class="portal-nav-item"
+          [class.active]="isNavigationItemActive(item.path)"
+          [attr.aria-current]="isNavigationItemActive(item.path) ? 'page' : null"
+          [routerLink]="item.path"
+          (click)="closeMenu()">
+          {{ item.labelKey | translate }}
+        </a>
       }
     </nav>
 
-    @if (menuOpen()) {
-      <button class="navigation-backdrop" type="button" [attr.aria-label]="'shell.closeMenu' | translate" (click)="closeMenu(true)"></button>
-    }
-
-    <div class="portal-actions">
+    <div class="portal-actions portal-topbar-actions">
       <nexa-language-switcher />
-      @if (auth.hasPermission('notification.read')) {
-        <button class="notification-button" type="button" [attr.aria-expanded]="notificationsOpen()" aria-controls="notifications-panel" aria-haspopup="dialog" (click)="toggleNotifications()">
-          {{ 'notifications.button' | translate }} @if (unreadCount() > 0) { <span class="notification-count">{{ unreadCount() }}</span> }
-        </button>
-      }
-      <button type="button" class="sign-out-button" (click)="signOut()">
-        {{ 'shell.signOut' | translate }}
+      <button
+        class="cart-btn"
+        type="button"
+        [attr.aria-label]="('shell.cart' | translate) + ' (' + cartCount() + ')'"
+        (click)="toggleCart()">
+        <nexa-icon name="shopping_cart" />
+        <span>{{ 'shell.cart' | translate }}</span>
+        @if (cartCount() > 0) { <span class="cart-count" aria-live="polite">{{ cartCount() }}</span> }
+      </button>
+      <button
+        #menuTrigger
+        class="portal-menu-btn menu-toggle"
+        type="button"
+        [attr.aria-label]="'shell.menu' | translate"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="portal-mobile-menu"
+        (click)="toggleMenu()">
+        <nexa-icon name="menu" />
       </button>
     </div>
   </header>
 
+  <main id="main-content" class="portal-content portal-page" tabindex="-1" role="main">
+    <router-outlet />
+  </main>
+
+  <footer class="portal-footer" role="contentinfo">
+    <span>{{ 'shell.footerRights' | translate }}</span>
+    <nav class="portal-footer-links" [attr.aria-label]="'shell.legalNavigation' | translate">
+      <a class="portal-footer-link" routerLink="/portal/legal/terms">{{ 'legal.navigationTerms' | translate }}</a>
+      <a class="portal-footer-link" routerLink="/portal/legal/privacy">{{ 'legal.navigationPrivacy' | translate }}</a>
+      <a class="portal-footer-link" routerLink="/portal/support">{{ 'legal.navigationSupport' | translate }}</a>
+    </nav>
+  </footer>
+
+  @if (menuOpen()) {
+    <button
+      class="portal-mobile-menu-backdrop"
+      type="button"
+      [attr.aria-label]="'shell.closeMenu' | translate"
+      (click)="closeMenu(true)"></button>
+  }
+
+  <nav
+    id="portal-mobile-menu"
+    class="portal-mobile-menu"
+    [class.open]="menuOpen()"
+    role="navigation"
+    [attr.aria-label]="'shell.moreNavigation' | translate">
+    @for (item of mobileNavigation(); track item.path) {
+      <a
+        class="portal-mobile-menu-item"
+        [class.active]="isNavigationItemActive(item.path)"
+        [attr.aria-current]="isNavigationItemActive(item.path) ? 'page' : null"
+        [routerLink]="item.path"
+        (click)="closeMenu()">
+        <nexa-icon [name]="item.icon ?? 'arrow_forward'" />
+        <span>{{ item.labelKey | translate }}</span>
+      </a>
+    }
+    @if (auth.hasPermission('notification.read')) {
+      <button class="portal-mobile-menu-item" type="button" (click)="toggleNotifications()">
+        <nexa-icon name="notifications" />
+        <span>{{ 'notifications.button' | translate }}</span>
+        @if (unreadCount() > 0) { <span class="mobile-notification-count">{{ unreadCount() }}</span> }
+      </button>
+    }
+    <button class="portal-mobile-menu-item portal-mobile-menu-item-danger sign-out-button" type="button" (click)="signOut()">
+      <nexa-icon name="logout" />
+      <span>{{ 'shell.signOut' | translate }}</span>
+    </button>
+  </nav>
+
+  <nav class="portal-bottom-nav" role="navigation" aria-label="Mobile buyer navigation">
+    @for (item of bottomNavigation(); track item.path) {
+      <a
+        class="portal-bottom-nav-item"
+        [class.active]="isNavigationItemActive(item.path)"
+        [attr.aria-current]="isNavigationItemActive(item.path) ? 'page' : null"
+        [routerLink]="item.path">
+        <nexa-icon [name]="item.icon ?? 'arrow_forward'" />
+        <span>{{ item.labelKey | translate }}</span>
+      </a>
+    }
+  </nav>
+
   @if (notificationsOpen()) {
     <aside id="notifications-panel" class="notifications-popover" role="dialog" aria-labelledby="notifications-title" aria-live="polite">
-      <div class="popover-head"><strong id="notifications-title">{{ 'notifications.title' | translate }}</strong><div class="popover-actions"><a routerLink="/portal/notifications" (click)="notificationsOpen.set(false)">{{ 'notifications.viewAll' | translate }}</a><button type="button" [attr.aria-label]="'notifications.close' | translate" (click)="notificationsOpen.set(false)">×</button></div></div>
+      <div class="popover-head">
+        <strong id="notifications-title">{{ 'notifications.title' | translate }}</strong>
+        <div class="popover-actions">
+          <a routerLink="/portal/notifications" (click)="notificationsOpen.set(false)">{{ 'notifications.viewAll' | translate }}</a>
+          <button type="button" [attr.aria-label]="'notifications.close' | translate" (click)="notificationsOpen.set(false)">×</button>
+        </div>
+      </div>
       @if (notifications.state() === 'loading') { <p>{{ 'notifications.loading' | translate }}</p> }
       @for (item of notifications.page().items.slice(0, 4); track item.id) {
-        <button class="notification-preview" type="button" [class.unread]="!item.readAt" (click)="openNotification(item)"><strong>{{ item.title }}</strong><span>{{ item.message }}</span></button>
-      } @empty { @if (notifications.state() === 'success') { <p>{{ 'notifications.empty' | translate }}</p> } }
+        <button class="notification-preview" type="button" [class.unread]="!item.readAt" (click)="openNotification(item)">
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.message }}</span>
+        </button>
+      } @empty {
+        @if (notifications.state() === 'success') { <p>{{ 'notifications.empty' | translate }}</p> }
+      }
     </aside>
   }
 
-  <main id="main-content" class="portal-content" tabindex="-1">
-    <router-outlet />
-  </main>
+  @if (cartOpen()) {
+    <button class="drawer-overlay" type="button" [attr.aria-label]="'shell.closeCart' | translate" (click)="closeCart()"></button>
+    <aside class="drawer open" role="dialog" [attr.aria-label]="'shell.cart' | translate" aria-modal="true">
+      <div class="drawer-header">
+        <strong class="drawer-title">{{ 'shell.cart' | translate }} ({{ cartCount() }})</strong>
+        <button class="drawer-close" type="button" [attr.aria-label]="'shell.closeCart' | translate" (click)="closeCart()">×</button>
+      </div>
+      <div class="drawer-body">
+        @if (cartItems().length === 0) {
+          <div class="cart-empty">
+            <span class="cart-empty-icon" aria-hidden="true"><nexa-icon name="shopping_cart" /></span>
+            <strong>{{ 'shell.emptyCart' | translate }}</strong>
+            <p>{{ 'shell.emptyCartDescription' | translate }}</p>
+          </div>
+        } @else {
+          @for (item of cartItems(); track item.catalogItemId) {
+            <div class="cart-line">
+              <div class="cart-line-visual">
+                @if (item.imageUrl) { <img [src]="item.imageUrl" [alt]="item.itemName" loading="lazy" /> }
+                @else { <nexa-icon name="category" aria-hidden="true" /> }
+              </div>
+              <div class="cart-line-copy">
+                <strong>{{ item.itemName }}</strong>
+                <small>{{ formatMoney(item.unitPriceAmount, item.currency) }} / {{ item.unit }}</small>
+                <div class="cart-quantity">
+                  <button type="button" [attr.aria-label]="'shell.decreaseQuantity' | translate" (click)="setCartQuantity(item.catalogItemId, item.quantity - 1)">−</button>
+                  <span>{{ item.quantity }}</span>
+                  <button type="button" [attr.aria-label]="'shell.increaseQuantity' | translate" (click)="setCartQuantity(item.catalogItemId, item.quantity + 1)">+</button>
+                  <button class="cart-remove" type="button" [attr.aria-label]="'shell.removeItem' | translate" (click)="setCartQuantity(item.catalogItemId, 0)">
+                    <nexa-icon name="delete" />
+                  </button>
+                </div>
+              </div>
+              <strong class="cart-line-total">{{ formatMoney(cartLineTotal(item), item.currency) }}</strong>
+            </div>
+          }
+        }
+      </div>
+      @if (cartItems().length > 0) {
+        <div class="drawer-footer">
+          <div class="cart-total"><span>{{ 'shell.cartTotal' | translate }}</span><strong>{{ formatMoney(cartSubtotal(), cartItems()[0].currency) }}</strong></div>
+          <button class="btn btn-primary cart-submit" type="button" (click)="goToRequestBuilder()">{{ 'shell.submitRequest' | translate }}</button>
+        </div>
+      }
+    </aside>
+  }
 </div>

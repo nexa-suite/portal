@@ -38,7 +38,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "550kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -64,7 +64,8 @@
               "buildTarget": "nexa-portal:build:production"
             },
             "development": {
-              "buildTarget": "nexa-portal:build:development"
+              "buildTarget": "nexa-portal:build:development",
+              "proxyConfig": "e2e/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

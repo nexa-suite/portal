@@ -97,6 +97,20 @@
             @if (item.description) {
               <p class="description">{{ item.description }}</p>
             }
+            <div class="detail-actions">
+              <button
+                type="button"
+                class="cart-button"
+                [disabled]="isUnavailable(item)"
+                [class.selected]="isInCart(item)"
+                (click)="toggleCart(item)"
+              >
+                {{ (isInCart(item) ? 'catalog.removeFromRequest' : 'catalog.addToRequest') | translate }}
+              </button>
+              <a class="request-link" routerLink="/portal/request-builder">
+                {{ 'catalog.requestCart' | translate }} ({{ cart.count() }})
+              </a>
+            </div>
             <button type="button" class="back-button" (click)="backToCatalog()">
               {{ 'catalog.backToResults' | translate }}
             </button>

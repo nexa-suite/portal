@@ -1,9 +1,9 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable, Provider } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { PORTAL_AUTH_PORT } from '../application/portal-auth.port';
 import type { PortalAuthPort } from '../application/portal-auth.port';
-import type { SignInCredentials, WorkspacePreview } from '../domain/portal-access.models';
+import { PortalTwoFactorUnavailableError, type SignInCredentials, type WorkspacePreview } from '../domain/portal-access.models';
 import {
   portalApiUrl,
   PORTAL_RUNTIME_CONFIG,
@@ -65,6 +65,12 @@ export class PortalAuthApiClient implements PortalAuthPort {
         withCredentials: true,
       },
     );
+  }
+
+  verifyTwoFactor(_challengeId: string, _code: string): Observable<unknown> {
+    // The current API contract has no second-factor verification endpoint.
+    // Keep the application boundary explicit until that contract is published.
+    return throwError(() => new PortalTwoFactorUnavailableError());
   }
 }
 

@@ -1,0 +1,101 @@
+<section class="page">
+  <nexa-page-header
+    [eyebrow]="'receivables.eyebrow' | translate"
+    [title]="'receivables.title' | translate"
+    [subtitle]="'receivables.subtitle' | translate">
+    <div page-header-actions>
+      <nexa-button routerLink="/portal/payment-methods" variant="secondary" size="compact">
+        <nexa-icon name="account_balance" />
+        {{ 'receivables.actions.paymentCenter' | translate }}
+      </nexa-button>
+    </div>
+  </nexa-page-header>
+
+  <p class="context"><nexa-icon name="verified" />{{ 'receivables.context' | translate }}</p>
+
+  @if (loading()) {
+    <nexa-loading-state [label]="'receivables.loading' | translate" [lines]="5" />
+  } @else if (error(); as message) {
+    <nexa-error-state [title]="'receivables.errorTitle' | translate" [description]="message" [retryLabel]="'receivables.actions.retry' | translate" (retry)="load()" />
+  } @else {
+    <section class="summary-panel" aria-labelledby="receivables-summary-title">
+      <div>
+        <span class="eyebrow" id="receivables-summary-title">{{ 'receivables.summary.eyebrow' | translate }}</span>
+        <strong>{{ totalOutstanding() | number:'1.2-2' }} PEN</strong>
+        <p>{{ 'receivables.summary.outstanding' | translate }}</p>
+      </div>
+      <div class="summary-stat"><span>{{ 'receivables.summary.nextDue' | translate }}</span>@if (nextDue(); as item) { <strong>{{ item.remaining | number:'1.2-2' }} {{ item.currency }}</strong><small>{{ item.number }} · {{ item.dueAt ? (item.dueAt | date:'dd/MM/yyyy') : ('receivables.summary.datePending' | translate) }}</small> } @else { <strong>—</strong><small>{{ 'receivables.summary.noPending' | translate }}</small> }</div>
+      <div class="summary-stat"><span>{{ 'receivables.summary.followUp' | translate }}</span><strong>{{ overdueReceivables().length }}</strong><small>{{ 'receivables.summary.followUpHint' | translate }}</small></div>
+    </section>
+
+    <section class="metrics-grid" [attr.aria-label]="'receivables.metrics.label' | translate">
+      <nexa-metric-card icon="request_quote" [label]="'receivables.metrics.accounts' | translate" [value]="receivables().length" [hint]="'receivables.metrics.accountsHint' | translate" tone="info" />
+      <nexa-metric-card icon="account_balance" [label]="'receivables.metrics.outstanding' | translate" [value]="(totalOutstanding() | number:'1.2-2') + ' PEN'" [hint]="'receivables.metrics.outstandingHint' | translate" tone="danger" />
+      <nexa-metric-card icon="check" [label]="'receivables.metrics.paid' | translate" [value]="(totalPaid() | number:'1.2-2') + ' PEN'" [hint]="'receivables.metrics.paidHint' | translate" tone="success" />
+      <nexa-metric-card icon="schedule" [label]="'receivables.metrics.overdue' | translate" [value]="overdueReceivables().length" [hint]="'receivables.metrics.overdueHint' | translate" tone="warning" />
+    </section>
+
+    <nexa-section-panel [title]="'receivables.list.title' | translate" [description]="'receivables.list.description' | translate">
+      <div class="receivable-list">
+        @for (item of receivables(); track item.id) {
+          <article class="receivable-card" [class.focused]="item.id === receivableId()" [attr.aria-label]="item.number">
+            <header class="card-header">
+              <div class="card-heading"><span class="row-icon"><nexa-icon name="receipt_long" /></span><div><strong>{{ item.number }}</strong><span>{{ item.subjectId }}</span></div></div>
+              <nexa-status-badge [label]="('receivables.status.' + receivableState(item.status)) | translate" [tone]="receivableTone(item.status)" emphasis="standard" />
+            </header>
+            <dl class="details-grid">
+              <div><dt>{{ 'receivables.fields.amount' | translate }}</dt><dd>{{ item.amount | number:'1.2-2' }} {{ item.currency }}</dd></div>
+              <div><dt>{{ 'receivables.fields.paid' | translate }}</dt><dd>{{ item.amountPaid | number:'1.2-2' }} {{ item.currency }}</dd></div>
+              <div><dt>{{ 'receivables.fields.remaining' | translate }}</dt><dd class="emphasis">{{ item.remaining | number:'1.2-2' }} {{ item.currency }}</dd></div>
+              <div><dt>{{ 'receivables.fields.dueAt' | translate }}</dt><dd>{{ item.dueAt ? (item.dueAt | date:'dd/MM/yyyy') : ('receivables.summary.datePending' | translate) }}</dd></div>
+            </dl>
+            <div class="card-actions">
+              <nexa-button variant="primary" size="compact" [disabled]="!payable(item) || creatingFor() === item.id" [loading]="creatingFor() === item.id" (click)="createIntent(item)">
+                <nexa-icon name="verified" />{{ 'receivables.actions.payCard' | translate }}
+              </nexa-button>
+              <nexa-button variant="secondary" size="compact" [disabled]="!payable(item) || bankTransferReported(item)" (click)="beginBankTransfer(item)">
+                <nexa-icon name="account_balance" />{{ bankTransferReported(item) ? ('receivables.actions.transferReported' | translate) : ('receivables.actions.reportTransfer' | translate) }}
+              </nexa-button>
+              <nexa-button variant="quiet" size="compact" (click)="togglePaymentHistory(item)">{{ paymentHistoryFor() === item.id ? ('receivables.actions.hideHistory' | translate) : ('receivables.actions.viewHistory' | translate) }}</nexa-button>
+            </div>
+            @if (paymentHistoryFor() === item.id) {
+              <div class="history-panel" aria-live="polite">
+                <div class="history-heading"><strong>{{ 'receivables.history.title' | translate }}</strong><span>{{ 'receivables.history.description' | translate }}</span></div>
+                @if (paymentHistoryLoading()) { <span role="status">{{ 'receivables.history.loading' | translate }}</span> }
+                @else { @for (payment of paymentHistory(); track payment.id) { <div class="history-row"><span><strong>{{ payment.reference || payment.id }}</strong><small>{{ payment.method }} · {{ payment.createdAt | date:'dd/MM/yyyy' }}</small></span><span class="history-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</span><nexa-status-badge [label]="('payments.status.' + paymentState(payment.status)) | translate" [tone]="paymentTone(payment.status)" /></div> } @empty { <span>{{ 'receivables.history.empty' | translate }}</span> } }
+              </div>
+            }
+          </article>
+        } @empty {
+          <nexa-empty-state icon="receipt_long" [title]="'receivables.emptyTitle' | translate" [description]="'receivables.emptyDescription' | translate" />
+        }
+      </div>
+    </nexa-section-panel>
+
+    @if (bankTransferSuccess(); as message) { <p class="success" role="status"><nexa-icon name="check" />{{ message }}</p> }
+
+    @if (bankTransferTarget(); as item) {
+      <section class="interaction-panel" aria-labelledby="bank-transfer-title">
+        <div class="interaction-heading"><span class="interaction-icon"><nexa-icon name="account_balance" /></span><div><h2 id="bank-transfer-title">{{ 'receivables.bankTransfer.title' | translate }}</h2><p>{{ 'receivables.bankTransfer.description' | translate }}</p></div></div>
+        <p class="amount-callout"><strong>{{ item.number }}</strong><span>{{ 'receivables.bankTransfer.expected' | translate }} {{ item.remaining | number:'1.2-2' }} {{ item.currency }}</span></p>
+        <form (submit)="submitBankTransfer($event, item)">
+          <label [for]="'bank-transfer-reference-' + item.id">{{ 'receivables.bankTransfer.reference' | translate }}</label>
+          <div class="form-row"><input [id]="'bank-transfer-reference-' + item.id" type="text" maxlength="160" autocomplete="off" required [value]="bankTransferReference()" (input)="bankTransferReference.set($any($event.target).value)" [placeholder]="'receivables.bankTransfer.placeholder' | translate" /><nexa-button type="submit" variant="primary" [disabled]="bankTransferSubmitting()" [loading]="bankTransferSubmitting()">{{ 'receivables.bankTransfer.submit' | translate }}</nexa-button></div>
+          <p class="hint">{{ 'receivables.bankTransfer.hint' | translate }}</p>
+          @if (bankTransferError(); as message) { <p class="inline-error" role="alert">{{ message }}</p> }
+        </form>
+      </section>
+    }
+
+    @if (intent(); as created) {
+      <section class="interaction-panel payment-panel" aria-labelledby="card-payment-title">
+        <div class="interaction-heading"><span class="interaction-icon"><nexa-icon name="verified" /></span><div><h2 id="card-payment-title">{{ 'receivables.cardPayment.title' | translate }}</h2><p>{{ 'receivables.cardPayment.description' | translate }}</p></div><nexa-status-badge [label]="('payments.status.' + paymentState(created.status)) | translate" [tone]="paymentTone(created.status)" emphasis="standard" /></div>
+        @if (paymentLoading()) { <p role="status">{{ 'receivables.cardPayment.loading' | translate }}</p> }
+        @if (paymentError(); as message) { <p class="inline-error" role="alert">{{ message }}</p><nexa-button variant="secondary" size="compact" (click)="retryPaymentElement()">{{ 'receivables.cardPayment.retry' | translate }}</nexa-button> }
+        <div #paymentHost class="payment-element" [attr.aria-label]="'receivables.cardPayment.secureForm' | translate"></div>
+        @if (paymentReady()) { <nexa-button variant="primary" [disabled]="paying()" [loading]="paying()" (click)="confirmPayment()">{{ 'receivables.cardPayment.submit' | translate }}</nexa-button> }
+        @if (paymentSuccess()) { <p class="success" role="status"><nexa-icon name="check" />{{ 'receivables.cardPayment.success' | translate }}</p> }
+      </section>
+    }
+  }
+</section>

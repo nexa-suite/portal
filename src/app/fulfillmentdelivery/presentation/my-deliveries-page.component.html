@@ -1,0 +1,52 @@
+<section class="page">
+  <nexa-page-header [eyebrow]="'delivery.title' | translate" [title]="'delivery.title' | translate" [subtitle]="'delivery.subtitle' | translate">
+    <div page-header-actions>
+      <nexa-button variant="secondary" routerLink="/portal/product-catalog" [ariaLabel]="'delivery.actions.catalog' | translate">
+        <nexa-icon name="category" aria-hidden="true" />
+        {{ 'delivery.actions.catalog' | translate }}
+      </nexa-button>
+    </div>
+  </nexa-page-header>
+
+  @if (facade.loading() && !facade.page()) { <nexa-loading-state [lines]="5" [label]="'delivery.loading' | translate" /> }
+  @else if (facade.error() && !facade.page()) { <nexa-error-state [title]="'delivery.title' | translate" [description]="('messages.' + facade.error()) | translate" [retryLabel]="'orders.actions.retry' | translate" (retry)="facade.retry()" /> }
+  @else if (!deliveries().length) { <nexa-empty-state [title]="'delivery.empty' | translate" [description]="'delivery.empty' | translate" /> }
+  @else {
+    <div class="metrics" [attr.aria-label]="'delivery.metrics.title' | translate">
+      <nexa-metric-card [label]="'delivery.metrics.active' | translate" [value]="activeDeliveries().length" [hint]="'delivery.metrics.activeHint' | translate" icon="local_shipping" tone="info" />
+      <nexa-metric-card [label]="'delivery.metrics.scheduled' | translate" [value]="scheduledDeliveries().length" [hint]="'delivery.metrics.scheduledHint' | translate" icon="schedule" tone="success" />
+      <nexa-metric-card [label]="'delivery.metrics.pendingProof' | translate" [value]="pendingProof().length" [hint]="'delivery.metrics.pendingProofHint' | translate" icon="verified" tone="warning" />
+    </div>
+
+    <nexa-section-panel [title]="'delivery.listTitle' | translate" [description]="'delivery.listDescription' | translate">
+      <div class="delivery-list">
+        @for (item of deliveries(); track item.id) {
+          <article class="delivery-card">
+            <div class="delivery-card-head">
+              <div class="delivery-identity">
+                <span class="delivery-code">{{ item.dispatchNumber }}</span>
+                <nexa-status-badge [label]="('delivery.status.' + item.status) | translate" [tone]="deliveryTone(item.status)" emphasis="standard" />
+              </div>
+              <a class="open-link" [routerLink]="['/portal/deliveries', item.id]">
+                {{ 'delivery.open' | translate }}
+                <nexa-icon name="arrow_forward" aria-hidden="true" />
+              </a>
+            </div>
+            <div class="delivery-body">
+              <div class="delivery-route">
+                <span class="route-icon" aria-hidden="true"><nexa-icon name="local_shipping" /></span>
+                <div><strong>{{ item.salesOrderNumber || '—' }}</strong><span>{{ destinationLabel(item) }}</span></div>
+              </div>
+              <dl class="delivery-facts">
+                <div><dt>{{ 'delivery.fields.window' | translate }}</dt><dd>@if (item.deliveryWindowStart; as start) { {{ start | date:'short' }} } @else { — } @if (item.deliveryWindowEnd; as end) { <span> – {{ end | date:'short' }}</span> }</dd></div>
+                <div><dt>{{ 'delivery.fields.eta' | translate }}</dt><dd>{{ item.eta ? (item.eta | date:'short') : '—' }}</dd></div>
+                <div><dt>{{ 'delivery.fields.pod' | translate }}</dt><dd><nexa-status-badge [label]="item.podStatus === 'COMPLETED' ? ('delivery.podComplete' | translate) : ('delivery.podPending' | translate)" [tone]="podTone(item)" /></dd></div>
+              </dl>
+            </div>
+            @if (item.alerts.length) { <p class="delivery-alert"><nexa-icon name="warning" aria-hidden="true" />{{ 'delivery.incident' | translate }}</p> }
+          </article>
+        }
+      </div>
+    </nexa-section-panel>
+  }
+</section>

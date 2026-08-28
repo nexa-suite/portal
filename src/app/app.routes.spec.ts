@@ -21,8 +21,8 @@ describe('Portal routes', () => {
     expect(children.some((route) => route.path === 'payment-methods')).toBe(true);
     expect(children.some((route) => route.path === 'purchase-orders')).toBe(true);
     expect(children.some((route) => route.path === 'purchase-orders/success')).toBe(true);
-    expect(children.some((route) => route.path === 'premium')).toBe(false);
-    expect(children.some((route) => route.path === 'support')).toBe(false);
+    expect(children.some((route) => route.path === 'premium')).toBe(true);
+    expect(children.find((route) => route.path === 'support')?.data?.['section']).toBe('support');
     expect(children.some((route) => route.path === 'legal')).toBe(true);
     for (const path of ['legal', 'legal/terms', 'legal/privacy']) {
       expect(children.find((route) => route.path === path)?.data?.['section']).toBe('legal');

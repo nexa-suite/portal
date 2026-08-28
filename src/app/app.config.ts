@@ -10,12 +10,11 @@ import { accessTokenInterceptor } from './core/security/access-token.interceptor
 import { portalSurfaceInterceptor } from './core/security/portal-surface.interceptor';
 import { refreshInterceptor } from './core/security/refresh.interceptor';
 import { providePortalSecurityBoundary, PORTAL_SECURITY_BOUNDARY } from './core/security/portal-security.boundary';
-import { CHANGE_FEED_FETCH_PORT } from './core/change-feed/application/change-feed-fetch.port';
-import { ChangeFeedFetchClient } from './core/change-feed/infrastructure/change-feed-fetch.client';
-import { providePortalAuthPort } from './tenantaccessgovernance/iam/infrastructure/portal-auth-api.client';
-import { provideSecurityPort } from './tenantaccessgovernance/iam/infrastructure/security-api.client';
-import { NotificationsApiPort } from './notifications/application/ports/notifications-api.port';
-import { NotificationsApiClient } from './notifications/infrastructure/notifications-api.client';
+import { provideChangeFeedAdapter, provideNotificationsApiAdapter, providePaymentElementAdapter, providePortalAuthAdapter, provideSecurityAdapter } from './core/compositions/portal/data-mode.providers';
+import { PurchaseRequestCartPort } from './salescommitment/application/ports/purchase-request-cart.port';
+import { PurchaseRequestCartStoragePort } from './salescommitment/application/ports/purchase-request-cart-storage.port';
+import { PurchaseRequestCartService } from './salescommitment/application/buyer-requests/purchase-request-cart.service';
+import { BrowserPurchaseRequestCartStorageAdapter } from './salescommitment/infrastructure/buyer-requests/browser-purchase-request-cart-storage.adapter';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,11 +23,16 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([portalSurfaceInterceptor, accessTokenInterceptor, refreshInterceptor]),
     ),
-    providePortalAuthPort(),
-    provideSecurityPort(),
+    providePortalAuthAdapter(),
+    provideSecurityAdapter(),
     providePortalSecurityBoundary(),
-    { provide: CHANGE_FEED_FETCH_PORT, useExisting: ChangeFeedFetchClient },
-    { provide: NotificationsApiPort, useExisting: NotificationsApiClient },
+    provideChangeFeedAdapter(),
+    provideNotificationsApiAdapter(),
+    providePaymentElementAdapter(),
+    PurchaseRequestCartService,
+    BrowserPurchaseRequestCartStorageAdapter,
+    { provide: PurchaseRequestCartPort, useExisting: PurchaseRequestCartService },
+    { provide: PurchaseRequestCartStoragePort, useExisting: BrowserPurchaseRequestCartStorageAdapter },
     provideAppInitializer(() => inject(PORTAL_SECURITY_BOUNDARY).restore()),
     provideRouter(routes, withComponentInputBinding()),
     provideTranslateService({

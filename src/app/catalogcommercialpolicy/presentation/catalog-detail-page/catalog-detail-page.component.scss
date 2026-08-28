@@ -167,6 +167,37 @@ h1 {
   font-weight: var(--nexa-font-weight-bold);
   cursor: pointer;
 }
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nexa-space-3);
+}
+.detail-actions .cart-button {
+  min-height: 2.75rem;
+  padding: 0 var(--nexa-space-5);
+  border: 1px solid var(--nexa-color-primary-600);
+  border-radius: var(--nexa-radius-md);
+  background: var(--nexa-color-primary-600);
+  color: var(--nexa-color-text-inverse);
+  font: inherit;
+  font-weight: var(--nexa-font-weight-bold);
+  cursor: pointer;
+}
+.detail-actions .cart-button.selected {
+  border-color: var(--nexa-color-border-default);
+  background: var(--nexa-surface-inset);
+  color: var(--nexa-color-text-primary);
+}
+.detail-actions .cart-button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+.request-link {
+  color: var(--nexa-color-primary-700);
+  font-weight: var(--nexa-font-weight-bold);
+  text-decoration: none;
+}
 @media (max-width: 700px) {
   .catalog-detail-card {
     grid-template-columns: 1fr;

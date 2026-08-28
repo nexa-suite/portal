@@ -44,9 +44,10 @@ export class PurchaseRequestBuilderFacade {
   private editingDraftId: string | null = null;
 
   loadInitial(clientAccountId: string | null): Observable<void> {
-    const resolvedAccountId$ = clientAccountId
-      ? of(clientAccountId)
-      : this.buyer.clientAccount().pipe(tap((account) => this.clientAccount.set(account)), map((account) => account.id));
+    const resolvedAccountId$ = this.buyer.clientAccount().pipe(
+      tap((account) => this.clientAccount.set(account)),
+      map((account) => account.id || clientAccountId || ''),
+    );
     return this.run(() => forkJoin({
       departments: this.buyer.reference('departments'),
       roadTypes: this.buyer.reference('road-types'),
