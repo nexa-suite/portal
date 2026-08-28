@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Release | Summary |
 |---|---|
+| [v0.16.0](./v0.16.0.md) | Server-authoritative buyer payment preferences |
 | [v0.15.0](./v0.15.0.md) | Workspace-aware IAM and Vue-aligned buyer request flow |
 | [v0.14.0](./v0.14.0.md) | Runtime mock slices for generic and ICISA buyers |
 | [v0.13.0](./v0.13.0.md) | Canonical bounded-context layering and Angular composition |
@@ -24,7 +25,9 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.15.0`. Buyer IAM now includes workspace
+Current release is `0.16.0`. Buyer Request Builder now honors the payment
+condition returned by the active Client Account and exposes every payment
+option accepted by the existing draft contract. Buyer IAM now includes workspace
 recognition and an explicit two-factor boundary; the catalog cart, four-step
 request builder and embedded route map follow the audited local Vue flow. This
 does not claim full product migration or pixel-level parity with Vue.

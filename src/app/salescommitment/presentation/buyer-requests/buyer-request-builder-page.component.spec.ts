@@ -7,15 +7,17 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PORTAL_SECURITY_BOUNDARY } from '../../../core/security/portal-security.boundary';
 import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/buyer-request-builder.facade';
 import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
+import type { SalesCommitmentBuyerAccountReference } from '../../domain/buyer-requests/sales-commitment-buyer-reference.models';
 import {
   BUYER_REQUEST_BUILDER_STEPS,
   BuyerRequestBuilderPageComponent,
+  paymentOptionFromCondition,
 } from './buyer-request-builder-page.component';
 
 describe('BuyerRequestBuilderPageComponent', () => {
   const facade = {
     addresses: signal<readonly never[]>([]),
-    clientAccount: signal(null),
+    clientAccount: signal<SalesCommitmentBuyerAccountReference | null>(null),
     departments: signal<readonly never[]>([]),
     provinces: signal<readonly never[]>([]),
     districts: signal<readonly never[]>([]),
@@ -55,6 +57,7 @@ describe('BuyerRequestBuilderPageComponent', () => {
     facade.previewState.set({ status: 'idle', snapshot: null, message: null });
     facade.busy.set(false);
     facade.message.set(null);
+    facade.clientAccount.set(null);
     cart.items.set([]);
     cart.count.set(0);
     cart.subtotal.set(0);
@@ -78,6 +81,29 @@ describe('BuyerRequestBuilderPageComponent', () => {
       'delivery',
       'confirmation',
     ]);
+  });
+
+  it('normalizes server payment conditions to the canonical request options', () => {
+    expect(paymentOptionFromCondition('credit_30')).toBe('CREDIT_LINE');
+    expect(paymentOptionFromCondition('cash_on_delivery')).toBe('CASH_ON_DELIVERY');
+    expect(paymentOptionFromCondition('BANK_TRANSFER')).toBe('BANK_TRANSFER');
+    expect(paymentOptionFromCondition('unknown-condition')).toBeNull();
+  });
+
+  it('initializes a new request from the payment condition returned by the buyer account API', () => {
+    facade.clientAccount.set({
+      id: 'account-1',
+      businessName: 'Buyer business',
+      commercialName: 'Buyer business',
+      taxType: 'RUC',
+      taxValue: '20123456789',
+      segment: 'STANDARD',
+      paymentCondition: 'credit_30',
+    });
+
+    const fixture = TestBed.createComponent(BuyerRequestBuilderPageComponent);
+
+    expect(fixture.componentInstance.form.controls.paymentOption.value).toBe('CREDIT_LINE');
   });
 
   it('navigates buyer context to products, delivery preview and confirmation', () => {

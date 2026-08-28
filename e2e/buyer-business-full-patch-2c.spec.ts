@@ -89,7 +89,7 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   // The seeded ICISA account has no usable credit exposure in this runtime.
   // Bank transfer is a server-supported non-credit option and exercises the
   // same real preview/submission contracts without masking that API rule.
-  await page.getByRole('button', { name: /bank transfer|transferencia bancaria/i }).click();
+  await page.getByRole('radio', { name: /bank transfer|transferencia bancaria/i }).click();
 
   const deliveryDate = page.locator('input[type="date"]');
   const minimumDate = await deliveryDate.getAttribute('min');
