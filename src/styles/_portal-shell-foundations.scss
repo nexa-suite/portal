@@ -205,6 +205,10 @@
   font-size: var(--nexa-font-size-sm);
 }
 
+.notifications-popover > .notification-error {
+  color: var(--nexa-color-danger-text);
+}
+
 .notification-preview {
   display: grid;
   gap: var(--nexa-space-1);

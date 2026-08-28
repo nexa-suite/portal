@@ -5,7 +5,7 @@ import { BusinessDocumentsApiPort } from '../../../businessdocuments/application
 import { Delivery } from '../../../fulfillmentdelivery/domain/delivery.models';
 import { DeliveryTrackingApiPort } from '../../../fulfillmentdelivery/application/ports/delivery-tracking-api.port';
 
-export type SalesOrderListDelivery = Pick<Delivery, 'id' | 'dispatchNumber' | 'salesOrderId' | 'salesOrderNumber' | 'status' | 'destination' | 'updatedAt'>;
+export type SalesOrderListDelivery = Pick<Delivery, 'id' | 'dispatchNumber' | 'salesOrderId' | 'salesOrderNumber' | 'status' | 'destination' | 'routeName' | 'temperatureMin' | 'temperatureMax' | 'temperatureUnit' | 'temperatureStatus' | 'podStatus' | 'alerts' | 'updatedAt'>;
 export type SalesOrderListDocument = Pick<BusinessDocument, 'id' | 'subjectId' | 'documentNumber' | 'documentType' | 'status' | 'generatedAt'>;
 
 /** Composition-only read model joining delivery and document projections for order list. */
@@ -16,15 +16,17 @@ export class SalesOrderListContextFacade {
 
   readonly deliveries = signal<readonly SalesOrderListDelivery[]>([]);
   readonly documents = signal<readonly SalesOrderListDocument[]>([]);
+  readonly deliveryError = signal(false);
+  readonly documentsError = signal(false);
 
   constructor() {
     this.deliveryApi.list().subscribe({
-      next: (page) => this.deliveries.set(page.items.map(({ id, dispatchNumber, salesOrderId, salesOrderNumber, status, destination, updatedAt }) => ({ id, dispatchNumber, salesOrderId, salesOrderNumber, status, destination, updatedAt }))),
-      error: () => this.deliveries.set([]),
+      next: (page) => { this.deliveryError.set(false); this.deliveries.set(page.items.map(({ id, dispatchNumber, salesOrderId, salesOrderNumber, status, destination, routeName, temperatureMin, temperatureMax, temperatureUnit, temperatureStatus, podStatus, alerts, updatedAt }) => ({ id, dispatchNumber, salesOrderId, salesOrderNumber, status, destination, routeName, temperatureMin, temperatureMax, temperatureUnit, temperatureStatus, podStatus, alerts, updatedAt }))); },
+      error: () => { this.deliveryError.set(true); this.deliveries.set([]); },
     });
     this.documentsApi.list(0, 100).subscribe({
-      next: (page) => this.documents.set(page.items.map(({ id, subjectId, documentNumber, documentType, status, generatedAt }) => ({ id, subjectId, documentNumber, documentType, status, generatedAt }))),
-      error: () => this.documents.set([]),
+      next: (page) => { this.documentsError.set(false); this.documents.set(page.items.map(({ id, subjectId, documentNumber, documentType, status, generatedAt }) => ({ id, subjectId, documentNumber, documentType, status, generatedAt }))); },
+      error: () => { this.documentsError.set(true); this.documents.set([]); },
     });
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { catchError, finalize, Observable, throwError } from 'rxjs';
+import { catchError, EMPTY, finalize, Observable } from 'rxjs';
 import { NotificationPage, PortalNotification } from '../domain/notification.models';
 import { NotificationsApiPort } from './ports/notifications-api.port';
 
@@ -26,7 +26,6 @@ export class PortalNotificationsFacade {
     if (item.readAt) return;
     this.run(() => this.api.markRead(item.id)).subscribe({
       next: () => this.page.update((page) => ({ ...page, unreadCount: Math.max(0, page.unreadCount - 1), items: page.items.map((current) => current.id === item.id ? { ...current, readAt: new Date().toISOString() } : current) })),
-      error: () => undefined,
     });
   }
 
@@ -34,14 +33,13 @@ export class PortalNotificationsFacade {
     if (this.page().unreadCount === 0) return;
     this.run(() => this.api.markAllRead()).subscribe({
       next: () => this.page.update((page) => ({ ...page, unreadCount: 0, items: page.items.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })) })),
-      error: () => undefined,
     });
   }
 
   private run<T>(factory: () => Observable<T>): Observable<T> {
     this.busy.set(true);
     return factory().pipe(
-      catchError((error: unknown) => { this.message.set('NOTIFICATIONS_ACTION_FAILED'); return throwError(() => error); }),
+      catchError(() => { this.message.set('NOTIFICATIONS_ACTION_FAILED'); return EMPTY; }),
       finalize(() => this.busy.set(false)),
     );
   }
