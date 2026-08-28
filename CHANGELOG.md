@@ -3,6 +3,36 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.19.0] - 2026-08-28
+
+API-backed Buyer order telemetry and explicit action feedback.
+
+### Added
+
+- Buyer order cards now expose the route and temperature status returned by the existing delivery API projection.
+- Delivery client mapping preserves the API `Client Account`, nested route assignment, temperature range and POD context.
+- Partial delivery/document failures are visible to the Buyer instead of looking like complete empty projections.
+
+### Changed
+
+- Removed fabricated pending-weight, route and temperature values from the Buyer Sales Order list; line units and server delivery telemetry are now rendered.
+- Notification mark-read actions expose API failures through the existing localized error treatment without mutating the last successful inbox.
+- Explicit mock delivery fixtures carry the same optional telemetry shape while API mode remains the runtime default.
+
+### Boundary
+
+- Portal remains Buyer-only. `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch remain Platform permission concerns.
+- `BOM` is not introduced because the accepted API and Blueprint define no canonical role, endpoint, entity or lifecycle contract.
+- API, Blueprint, Design Lab and Vue/legacy sources were not modified.
+
+### Validation
+
+- Portal unit suite: 127 tests across 63 files passed.
+- Design Lab v1.0.2 foundation, catalog asset and bounded-context validators passed.
+- Production build passed with existing bundle/style budget warnings.
+- Authenticated Buyer canonical E2E against Docker: desktop and mobile 2/2 passed.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+
 ## [0.18.0] - 2026-08-28
 
 API continuity and server-owned delivery origin.
