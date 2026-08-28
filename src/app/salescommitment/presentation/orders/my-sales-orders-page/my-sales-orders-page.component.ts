@@ -36,6 +36,8 @@ export class MySalesOrdersPageComponent {
   readonly totalOrders = computed(() => this.orders().length);
   readonly deliveries = this.context.deliveries;
   readonly documents = this.context.documents;
+  readonly deliveryDataError = this.context.deliveryError;
+  readonly documentsDataError = this.context.documentsError;
   readonly activeOrders = computed(() => this.orders().filter((order) => this.isActiveOrder(order)).length);
   readonly pendingDocuments = computed(() => this.orders().reduce((total, order) => total + this.documentsFor(order).filter((document) => !this.isDocumentReady(document)).length, 0));
   readonly latestOrder = computed(() => this.orders()[0] ?? null);
@@ -92,6 +94,22 @@ export class MySalesOrdersPageComponent {
 
   readyDocumentCount(order: SalesOrder): number {
     return this.documentsFor(order).filter((document) => this.isDocumentReady(document)).length;
+  }
+
+  orderUnits(order: SalesOrder): number {
+    return order.lines.reduce((total, line) => total + line.quantity, 0);
+  }
+
+  routeLabel(order: SalesOrder): string {
+    return this.deliveryFor(order)?.routeName ?? 'orders.list.routeNotExposed';
+  }
+
+  temperatureStatusKey(order: SalesOrder): string {
+    const delivery = this.deliveryFor(order);
+    if (!delivery?.temperatureStatus) return 'orders.list.temperatureNotExposed';
+    if (delivery.temperatureStatus === 'OUT_OF_RANGE') return 'orders.list.temperatureReview';
+    if (delivery.temperatureStatus === 'WITHIN_RANGE') return 'orders.list.temperatureWithinRange';
+    return 'orders.list.temperatureNotExposed';
   }
 
   documentLabel(document: SalesOrderListDocument): string {
