@@ -101,25 +101,30 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   const minimumDate = await deliveryDate.getAttribute('min');
   expect(minimumDate).toBeTruthy();
   await deliveryDate.fill(minimumDate!);
-  const preview = page.waitForResponse((response) => response.request().method() === 'POST' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/route-previews$/.test(new URL(response.url()).pathname));
+  let previewBody: {
+    readonly destination?: { readonly addressId?: string | null };
+    readonly route?: { readonly provider?: string | null; readonly snapshot?: string | null };
+    readonly warehouseSelection?: { readonly warehouseId?: string | null; readonly snapshot?: string | null };
+  } | null = null;
+  const preview = page.waitForResponse(async (response) => {
+    if (response.request().method() !== 'POST' || !/\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/route-previews$/.test(new URL(response.url()).pathname)) return false;
+    previewBody = await response.json();
+    return true;
+  });
   const review = page.waitForResponse((response) => response.request().method() === 'GET' && /\/api\/v1\/buyer\/purchase-request-drafts\/[^/]+\/review$/.test(new URL(response.url()).pathname));
   await page.locator('.request-step-actions').getByRole('button', { name: /review|revisar/i }).click();
   const previewResponse = await preview;
   const reviewResponse = await review;
   expect(previewResponse.status()).toBe(200);
   expect(reviewResponse.status()).toBe(200);
-  const previewBody = await previewResponse.json() as {
-    readonly destination?: { readonly addressId?: string | null };
-    readonly route?: { readonly provider?: string | null; readonly snapshot?: string | null };
-    readonly warehouseSelection?: { readonly warehouseId?: string | null; readonly snapshot?: string | null };
-  };
-  expect(previewBody.destination?.addressId).toBeTruthy();
-  expect(previewBody.route?.provider).toMatch(/LOCAL/i);
-  expect(previewBody.warehouseSelection?.warehouseId).toBeTruthy();
-  const warehouseSnapshot = JSON.parse(previewBody.warehouseSelection?.snapshot ?? '{}') as {
+  expect(previewBody).not.toBeNull();
+  expect(previewBody?.destination?.addressId).toBeTruthy();
+  expect(previewBody?.route?.provider).toMatch(/LOCAL/i);
+  expect(previewBody?.warehouseSelection?.warehouseId).toBeTruthy();
+  const warehouseSnapshot = JSON.parse(previewBody?.warehouseSelection?.snapshot ?? '{}') as {
     readonly warehouseId?: string;
   };
-  const routeSnapshot = JSON.parse(previewBody.route?.snapshot ?? '{}') as {
+  const routeSnapshot = JSON.parse(previewBody?.route?.snapshot ?? '{}') as {
     readonly originWarehouseId?: string;
   };
   expect(warehouseSnapshot.warehouseId).toBeTruthy();

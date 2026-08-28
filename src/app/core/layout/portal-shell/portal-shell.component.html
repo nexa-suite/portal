@@ -121,6 +121,7 @@
         </div>
       </div>
       @if (notifications.state() === 'loading') { <p>{{ 'notifications.loading' | translate }}</p> }
+      @if (notifications.message(); as message) { <p class="notification-error" role="alert">{{ ('messages.' + message) | translate }}</p> }
       @for (item of notifications.page().items.slice(0, 4); track item.id) {
         <button class="notification-preview" type="button" [class.unread]="!item.readAt" (click)="openNotification(item)">
           <strong>{{ item.title }}</strong>

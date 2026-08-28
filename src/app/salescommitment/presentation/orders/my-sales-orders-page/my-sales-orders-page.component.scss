@@ -322,3 +322,5 @@
   .orders-order-head { gap: 12px; }
   .orders-address { white-space: normal; }
 }
+.orders-data-warning { display: flex; align-items: flex-start; gap: var(--nexa-space-2); margin: 0; padding: var(--nexa-space-3); border: 1px solid var(--nexa-color-warning-border); border-radius: var(--nexa-radius-control); background: var(--nexa-surface-warning); color: var(--nexa-color-warning-text); line-height: var(--nexa-line-height-relaxed); }
+.orders-data-warning nexa-icon { flex: 0 0 auto; }

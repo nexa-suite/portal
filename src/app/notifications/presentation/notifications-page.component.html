@@ -34,6 +34,6 @@
         }
       </div>
     </nexa-section-panel>
-    @if (facade.message(); as message) { <p class="inline-error" role="alert">{{ message | translate }}</p> }
   }
+  @if (facade.message(); as message) { <p class="inline-error" role="alert">{{ ('messages.' + message) | translate }}</p> }
 </section>

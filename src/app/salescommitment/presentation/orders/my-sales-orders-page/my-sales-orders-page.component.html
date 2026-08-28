@@ -49,6 +49,13 @@
       </article>
     </section>
 
+    @if (deliveryDataError() || documentsDataError()) {
+      <p class="orders-data-warning" role="status">
+        <nexa-icon name="warning" aria-hidden="true" />
+        {{ 'orders.list.partialData' | translate }}
+      </p>
+    }
+
     <div class="orders-stack">
       @for (order of orders(); track order.id) {
         <article class="buyer-card flow-panel-pad buyer-order-card">
@@ -67,7 +74,7 @@
               <div class="orders-order-note">
                 @if (order.createdAt; as createdAt) { {{ createdAt | date:'yyyy-MM-dd' }} } @else { — }
                 · {{ 'orders.list.items' | translate: { count: order.lines.length } }}
-                · {{ 'orders.list.pendingWeight' | translate }}
+                · {{ orderUnits(order) | number:'1.0-2' }} {{ 'orders.card.units' | translate }}
               </div>
               <div class="orders-address">
                 <nexa-icon name="location_on" aria-hidden="true" />
@@ -90,11 +97,11 @@
             </div>
             <div class="orders-meta-card">
               <span>{{ 'orders.list.temperature' | translate }}</span>
-              <strong>{{ 'orders.metrics.pending' | translate }}</strong>
+              <strong>{{ temperatureStatusKey(order) | translate }}</strong>
             </div>
             <div class="orders-meta-card">
               <span>{{ 'orders.list.route' | translate }}</span>
-              <strong>{{ 'orders.list.notAssigned' | translate }}</strong>
+              <strong>{{ routeLabel(order) | translate }}</strong>
             </div>
           </div>
 
