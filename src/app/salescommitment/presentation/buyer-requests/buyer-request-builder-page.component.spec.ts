@@ -9,6 +9,7 @@ import { PurchaseRequestBuilderFacade } from '../../application/buyer-requests/b
 import { PurchaseRequestCartPort } from '../../application/ports/purchase-request-cart.port';
 import { PurchaseRequestDraftSessionPort } from '../../application/ports/purchase-request-draft-session.port';
 import type { SalesCommitmentBuyerAccountReference } from '../../domain/buyer-requests/sales-commitment-buyer-reference.models';
+import type { PurchaseRequestDraftView } from '../../domain/buyer-requests/purchase-request-draft.models';
 import {
   BUYER_REQUEST_BUILDER_STEPS,
   BuyerRequestBuilderPageComponent,
@@ -24,6 +25,7 @@ describe('BuyerRequestBuilderPageComponent', () => {
     districts: signal<readonly never[]>([]),
     roadTypes: signal<readonly never[]>([]),
     previewState: signal({ status: 'idle' as const, snapshot: null, message: null }),
+    draft: signal<PurchaseRequestDraftView | null>(null),
     busy: signal(false),
     message: signal<string | null>(null),
     loadInitial: vi.fn(() => of(undefined)),
@@ -57,6 +59,7 @@ describe('BuyerRequestBuilderPageComponent', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     facade.previewState.set({ status: 'idle', snapshot: null, message: null });
+    facade.draft.set(null);
     facade.busy.set(false);
     facade.message.set(null);
     facade.clientAccount.set(null);
@@ -107,6 +110,52 @@ describe('BuyerRequestBuilderPageComponent', () => {
     const fixture = TestBed.createComponent(BuyerRequestBuilderPageComponent);
 
     expect(fixture.componentInstance.form.controls.paymentOption.value).toBe('CREDIT_LINE');
+  });
+
+  it('does not fabricate a warehouse before the server calculates the route', () => {
+    const fixture = TestBed.createComponent(BuyerRequestBuilderPageComponent);
+
+    expect(fixture.componentInstance.warehouse()).toEqual({
+      id: '',
+      name: '',
+      address: '',
+      originLabel: '',
+    });
+    expect(fixture.componentInstance.routeDirectionsUrl()).toBe('');
+  });
+
+  it('uses the warehouse and route snapshots returned by the canonical draft', () => {
+    facade.draft.set({
+      id: 'draft-1',
+      clientAccountId: 'account-1',
+      buyerMembershipId: 'membership-1',
+      status: 'READY_TO_SUBMIT',
+      version: 4,
+      requestedDeliveryDate: '2099-12-31',
+      paymentPreference: 'BANK_TRANSFER',
+      creditResult: 'NOT_APPLICABLE',
+      routeProvider: 'LOCAL_ESTIMATE',
+      lines: [],
+      destination: null,
+      route: { snapshot: JSON.stringify({ originLabel: 'Server route origin', previewUrl: 'https://maps.example/route' }) },
+      warehouseSelection: {
+        warehouseId: 'warehouse-1',
+        snapshot: JSON.stringify({ name: 'Server Cold Hub', address: 'Server address 123' }),
+      },
+      createdAt: '2099-01-01T00:00:00Z',
+      updatedAt: '2099-01-01T00:00:00Z',
+      submittedAt: null,
+      etag: '"4"',
+    });
+    const fixture = TestBed.createComponent(BuyerRequestBuilderPageComponent);
+
+    expect(fixture.componentInstance.warehouse()).toEqual({
+      id: 'warehouse-1',
+      name: 'Server Cold Hub',
+      address: 'Server address 123',
+      originLabel: 'Server route origin',
+    });
+    expect(fixture.componentInstance.routePreviewUrl()).toBe('https://maps.example/route');
   });
 
   it('navigates buyer context to products, delivery preview and confirmation', () => {
