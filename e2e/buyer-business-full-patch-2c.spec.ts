@@ -117,15 +117,13 @@ test('Buyer commerce workspace performs the canonical purchase request draft flo
   expect(previewBody.route?.provider).toMatch(/LOCAL/i);
   expect(previewBody.warehouseSelection?.warehouseId).toBeTruthy();
   const warehouseSnapshot = JSON.parse(previewBody.warehouseSelection?.snapshot ?? '{}') as {
-    readonly name?: string;
-    readonly address?: string;
+    readonly warehouseId?: string;
   };
   const routeSnapshot = JSON.parse(previewBody.route?.snapshot ?? '{}') as {
-    readonly originLabel?: string;
+    readonly originWarehouseId?: string;
   };
-  expect(warehouseSnapshot.name).toBeTruthy();
-  expect(warehouseSnapshot.address).toBeTruthy();
-  expect(routeSnapshot.originLabel).toBeTruthy();
+  expect(warehouseSnapshot.warehouseId).toBeTruthy();
+  expect(routeSnapshot.originWarehouseId).toBeTruthy();
   await expect(page.locator('body')).not.toContainText(/warehouseId|reservationId|internal warehouse/i);
   await expect(page.getByRole('heading', { name: /confirm cold-chain purchase request|confirmar solicitud de compra refrigerada/i })).toBeVisible();
   await expect(page.locator('.buyer-confirm-panel')).toContainText(/delivery and comments|entrega y comentarios|bank transfer|transferencia bancaria/i);
