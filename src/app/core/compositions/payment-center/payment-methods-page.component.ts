@@ -2,7 +2,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { catchError, forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { RECEIVABLES_PORT } from '../../../creditreceivables/application/receivables.port';
 import { Receivable } from '../../../creditreceivables/domain/receivables.models';
 import { ReceivablesPaymentFacade } from '../receivables-payment/receivables-payment.facade';
@@ -130,7 +130,6 @@ export class PaymentMethodsPageComponent {
     if (!items.length) return of([]);
     return forkJoin(items.map((item) => this.paymentsApi.listPaymentsForReceivable(item.id).pipe(
       map((page) => page.items),
-      catchError(() => of([] as readonly PaymentHistoryItem[])),
     ))).pipe(map((pages) => pages.flatMap((page) => [...page])));
   }
 }

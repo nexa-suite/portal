@@ -32,6 +32,13 @@ interface BuilderLine extends BuyerRequestLineInput {
   readonly coldChainRequirement?: string;
 }
 
+interface WarehouseDisplay {
+  readonly id: string;
+  readonly name: string;
+  readonly address: string;
+  readonly originLabel: string;
+}
+
 export type BuyerRequestBuilderStep = 1 | 2 | 3 | 4;
 
 export const BUYER_REQUEST_BUILDER_STEPS = [
@@ -131,17 +138,24 @@ export class BuyerRequestBuilderPageComponent {
   readonly accountLabel = computed(
     () => this.facade.clientAccount()?.commercialName || this.facade.clientAccount()?.businessName || this.accountId() || '',
   );
-  readonly warehouse = computed(() =>
-    this.auth.identity()?.workspaceSlug === 'icisa'
-      ? {
-          name: 'ICISA Lima Cold Hub',
-          address: 'Av. Guillermo Dansey 2211, Cercado de Lima, Lima, Perú',
-        }
-      : {
-          name: 'Nexa cold-chain warehouse',
-          address: 'Lima, Peru',
-        },
-  );
+  /**
+   * The route-preview contract owns the operational origin. Before preview,
+   * the API has not selected a fulfilment warehouse yet, so the UI must show
+   * the designed pending state instead of fabricating a workspace-specific
+   * warehouse from the browser session.
+   */
+  readonly warehouse = computed<WarehouseDisplay>(() => {
+    const draft = this.facade.draft();
+    const selection = draft?.warehouseSelection;
+    const selectionSnapshot = draftObject(selection?.['snapshot']);
+    const routeSnapshot = draftObject(draft?.route?.['snapshot']);
+    return {
+      id: draftText(selection?.['warehouseId']) || draftText(selectionSnapshot['warehouseId']),
+      name: draftText(selectionSnapshot['name']),
+      address: draftText(selectionSnapshot['address']),
+      originLabel: draftText(routeSnapshot['originLabel']),
+    };
+  });
   readonly form = this.fb.group({
     addressMode: this.fb.control<'saved' | 'manual' | 'current'>('saved'),
     addressId: this.fb.control(''),
@@ -680,15 +694,17 @@ export class BuyerRequestBuilderPageComponent {
   }
 
   routePreviewUrl(): string {
-    const route = this.facade.previewState().snapshot?.delivery?.route;
-    return route?.previewUrl?.startsWith('http') ? route.previewUrl : '';
+    const route = this.routeSnapshot();
+    return route['previewUrl'] && typeof route['previewUrl'] === 'string' && route['previewUrl'].startsWith('http')
+      ? route['previewUrl']
+      : '';
   }
 
   routeEmbedUrl(): string {
-    const route = this.facade.previewState().snapshot?.delivery?.route;
-    const destination = this.selectedAddressLabel() || route?.destinationLabel || '';
-    if (!destination) return '';
+    const route = this.routeSnapshot();
+    const destination = this.selectedAddressLabel() || draftText(route['destinationLabel']);
     const origin = this.warehouseOrigin();
+    if (!destination || !origin) return '';
     return `https://maps.google.com/maps?f=d&source=s_d&saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(`${destination}, Peru`)}&hl=es&z=12&output=embed`;
   }
 
@@ -703,12 +719,20 @@ export class BuyerRequestBuilderPageComponent {
 
   routeDirectionsUrl(): string {
     const destination = this.selectedAddressLabel();
-    if (!destination) return '';
-    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(this.warehouseOrigin())}&destination=${encodeURIComponent(`${destination}, Peru`)}&travelmode=driving`;
+    const origin = this.warehouseOrigin();
+    if (!destination || !origin) return '';
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(`${destination}, Peru`)}&travelmode=driving`;
   }
 
   private warehouseOrigin(): string {
-    return `${this.warehouse().name}, ${this.warehouse().address}`;
+    const warehouse = this.warehouse();
+    return [warehouse.name, warehouse.address].filter(Boolean).join(', ') || warehouse.originLabel;
+  }
+
+  private routeSnapshot(): Record<string, unknown> {
+    const previewRoute = this.facade.previewState().snapshot?.delivery?.route;
+    if (previewRoute) return draftObject(previewRoute);
+    return draftObject(this.facade.draft()?.route?.['snapshot']);
   }
 
   private lineFromCartItem(item: PurchaseRequestCartItem): BuilderLine {

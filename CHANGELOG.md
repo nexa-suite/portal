@@ -3,6 +3,26 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.18.0] - 2026-08-28
+
+API continuity and server-owned delivery origin.
+
+### Changed
+
+- Request Builder now reads the fulfilment warehouse and route origin from the canonical purchase-request draft snapshots returned by the API.
+- Reloaded drafts can restore the server route preview and its traceable origin without relying on the workspace slug or a browser-side warehouse constant.
+- Payment history failures remain visible through the existing explicit page error and retry state instead of becoming an empty payment history.
+
+### Boundary
+
+- The Portal remains Buyer-only; internal `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch role separation remains a Platform permission concern.
+- `BOM` is not introduced because the current accepted API/Blueprint contract does not define that role or capability.
+
+### Validation
+
+- Canonical Request Builder unit tests cover pending origin state and server snapshot hydration.
+- Live E2E asserts warehouse selection and route-origin snapshots returned by the API.
+
 ## [0.17.0] - 2026-08-28
 
 Server-backed Buyer Request Builder continuity.
