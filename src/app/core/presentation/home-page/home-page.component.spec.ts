@@ -1,12 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { CatalogApiClient } from '../../../catalogcommercialpolicy/infrastructure/catalog-api.client';
-import { DeliveryTrackingApiClient } from '../../../fulfillmentdelivery/infrastructure/delivery-tracking-api.client';
-import { ReceivablesApiClient } from '../../../creditreceivables/infrastructure/receivables-api.client';
-import { PurchaseRequestApiClient } from '../../../salescommitment/infrastructure/purchase-requests/purchase-request-api.client';
-import { SalesOrderApiClient } from '../../../salescommitment/infrastructure/orders/sales-order-api.client';
+import { CatalogApiPort } from '../../../catalogcommercialpolicy/application/ports/catalog-api.port';
+import { BuyerAccountApiPort } from '../../../customerbuyerrelationships/application/ports/buyer-account-api.port';
+import { DeliveryTrackingApiPort } from '../../../fulfillmentdelivery/application/ports/delivery-tracking-api.port';
+import { RECEIVABLES_PORT } from '../../../creditreceivables/application/receivables.port';
+import { PurchaseRequestApiPort } from '../../../salescommitment/application/ports/purchase-request-api.port';
+import { SalesOrderApiPort } from '../../../salescommitment/application/ports/sales-order-api.port';
+import { PurchaseRequestCartPort } from '../../../salescommitment/application/ports/purchase-request-cart.port';
+import { PORTAL_SECURITY_BOUNDARY } from '../../security/portal-security.boundary';
 import { HomePageComponent } from './home-page.component';
 
 describe('HomePageComponent', () => {
@@ -17,18 +21,39 @@ describe('HomePageComponent', () => {
       providers: [
         provideTranslateService(),
         provideRouter([]),
-        { provide: CatalogApiClient, useValue: { list: () => of({ items: [], page: 0, size: 1, totalItems: 0, totalPages: 0, sort: { field: '', direction: '' } }) } },
-        { provide: DeliveryTrackingApiClient, useValue: { list: () => of({ items: [], page: 0, size: 100, total: 0 }) } },
-        { provide: ReceivablesApiClient, useValue: { list: () => of({ items: [], page: 0, size: 25, total: 0 }) } },
-        { provide: PurchaseRequestApiClient, useValue: { list: () => of({ items: [], page: 0, size: 50, total: 0 }) } },
-        { provide: SalesOrderApiClient, useValue: { list: () => of({ items: [], page: 0, size: 50, total: 0 }) } },
+        { provide: PORTAL_SECURITY_BOUNDARY, useValue: { identity: signal({ id: 'buyer-1', email: 'buyer@example.com', displayName: 'Buyer', roles: ['BUYER'], workspaceSlug: 'demo', clientAccountId: null }) } },
+        { provide: PurchaseRequestCartPort, useValue: { items: signal([]), count: signal(0), subtotal: signal(0), setScope: () => undefined, add: () => undefined, remove: () => undefined, setQuantity: () => undefined, replace: () => undefined, clear: () => undefined } },
+        { provide: CatalogApiPort, useValue: { list: () => of({ items: [], page: 0, size: 1, totalItems: 0, totalPages: 0, sort: { field: '', direction: '' } }) } },
+        { provide: BuyerAccountApiPort, useValue: { clientAccount: () => of({
+          id: 'client-1',
+          code: 'CLI-001',
+          businessName: 'Buyer business',
+          commercialName: 'Buyer business',
+          countryCode: 'PE',
+          taxType: 'RUC',
+          taxValue: '20123456789',
+          segment: 'STANDARD',
+          contactPerson: 'Buyer',
+          contactEmail: 'buyer@example.com',
+          phone: '+51 999 999 999',
+          deliveryProfile: 'COLD_CHAIN',
+          paymentCondition: 'CREDIT',
+          status: 'ACTIVE',
+          buyerMembershipId: 'membership-1',
+          version: 1,
+        }) } },
+        { provide: DeliveryTrackingApiPort, useValue: { list: () => of({ items: [], page: 0, size: 100, total: 0 }) } },
+        { provide: RECEIVABLES_PORT, useValue: { list: () => of({ items: [], page: 0, size: 25, total: 0 }) } },
+        { provide: PurchaseRequestApiPort, useValue: { list: () => of({ items: [], page: 0, size: 50, total: 0 }) } },
+        { provide: SalesOrderApiPort, useValue: { list: () => of({ items: [], page: 0, size: 50, total: 0 }) } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(HomePageComponent);
     fixture.detectChanges();
   });
   it('renders reusable buyer foundations', () => {
-    expect(fixture.nativeElement.querySelector('nexa-page-header')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('nexa-section-panel')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.buyer-shell-band')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.flow-panel')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.no-client-state')).toBeNull();
   });
 });

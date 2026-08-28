@@ -6,6 +6,8 @@
 @use './styles/application-foundations';
 @use './styles/portal-shell-foundations';
 @use './styles/request-builder-foundations';
+@use './app/tenantaccessgovernance/iam/presentation/sign-in/sign-in-page.component';
+@use './app/core/presentation/home-page/home-page.component';
 
 * { box-sizing: border-box; }
 

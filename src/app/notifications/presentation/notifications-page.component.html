@@ -1,19 +1,39 @@
-<section class="notifications-page">
-  <nexa-page-header [eyebrow]="'notifications.eyebrow' | translate" [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate" />
-  @if (facade.state() === 'loading') { <nexa-loading-state [lines]="5" [label]="'notifications.loading' | translate" /> }
-  @if (facade.state() === 'error') { <nexa-error-state [title]="'notifications.errorTitle' | translate" [retryLabel]="'notifications.retry' | translate" (retry)="facade.load()" /> }
-  @if (facade.state() === 'success') {
-    <div class="actions"><span class="unread-count">{{ 'notifications.unreadCount' | translate:{ count: facade.page().unreadCount } }}</span><button mat-stroked-button type="button" [disabled]="facade.page().unreadCount === 0" (click)="facade.markAllRead()">{{ 'notifications.markAll' | translate }}</button></div>
-    <div class="notification-list">
-      @for (item of facade.page().items; track item.id) {
-        <mat-card class="notification-card" [class.unread]="!item.readAt">
-          <mat-card-content>
-            <div class="notification-head"><strong>{{ item.title }}</strong><time [attr.datetime]="item.createdAt">{{ item.createdAt | date:'medium' }}</time></div>
-            <p>{{ item.message }}</p>
-            <div class="notification-actions"><span>{{ item.category }}</span>@if (item.deepLink?.startsWith('/portal/')) { <button mat-button type="button" (click)="open(item)">{{ 'notifications.open' | translate }}</button> } @else if (!item.readAt) { <button mat-button type="button" (click)="facade.markRead(item)">{{ 'notifications.markRead' | translate }}</button> }</div>
-          </mat-card-content>
-        </mat-card>
-      } @empty { <p class="empty">{{ 'notifications.empty' | translate }}</p> }
+<section class="page">
+  <nexa-page-header [eyebrow]="'notifications.eyebrow' | translate" [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate">
+    <div page-header-actions>
+      <nexa-button variant="secondary" size="compact" [disabled]="facade.page().unreadCount === 0 || facade.busy()" [loading]="facade.busy()" (click)="facade.markAllRead()">
+        <nexa-icon name="check" />{{ 'notifications.markAll' | translate }}
+      </nexa-button>
     </div>
+  </nexa-page-header>
+
+  @if (facade.state() === 'loading') {
+    <nexa-loading-state [lines]="5" [label]="'notifications.loading' | translate" />
+  } @else if (facade.state() === 'error') {
+    <nexa-error-state [title]="'notifications.errorTitle' | translate" [retryLabel]="'notifications.retry' | translate" (retry)="facade.load()" />
+  } @else if (facade.state() === 'success') {
+    <section class="metrics-grid" [attr.aria-label]="'notificationSummary.label' | translate">
+      <nexa-metric-card icon="warning" [label]="'notificationSummary.unread' | translate" [value]="facade.page().unreadCount" [hint]="'notificationSummary.unreadHint' | translate" tone="info" />
+      <nexa-metric-card icon="receipt_long" [label]="'notificationSummary.total' | translate" [value]="facade.page().items.length" [hint]="'notificationSummary.totalHint' | translate" tone="neutral" />
+      <nexa-metric-card icon="check" [label]="'notificationSummary.read' | translate" [value]="facade.page().items.length - facade.page().unreadCount" [hint]="'notificationSummary.readHint' | translate" tone="success" />
+    </section>
+
+    <nexa-section-panel [title]="'notificationSummary.listTitle' | translate" [description]="'notificationSummary.listDescription' | translate">
+      <div class="notification-list">
+        @for (item of facade.page().items; track item.id) {
+          <article class="notification-card" [class.unread]="!item.readAt">
+            <span class="notification-icon"><nexa-icon [name]="iconFor(item.category)" /></span>
+            <div class="notification-content">
+              <div class="notification-head"><div><strong>{{ item.title }}</strong><span class="category">{{ ('notificationSummary.categories.' + categoryKey(item.category)) | translate }}</span></div><time [attr.datetime]="item.createdAt">{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</time></div>
+              <p>{{ item.message }}</p>
+              <div class="notification-footer"><nexa-status-badge [label]="item.readAt ? ('notificationSummary.status.read' | translate) : ('notificationSummary.status.unread' | translate)" [tone]="statusTone(item)" /><div class="notification-actions">@if (item.deepLink?.startsWith('/portal/')) { <nexa-button variant="quiet" size="compact" (click)="open(item)">{{ 'notifications.open' | translate }}</nexa-button> } @else if (!item.readAt) { <nexa-button variant="quiet" size="compact" (click)="facade.markRead(item)">{{ 'notifications.markRead' | translate }}</nexa-button> }</div></div>
+            </div>
+          </article>
+        } @empty {
+          <nexa-empty-state icon="check" [title]="'notificationSummary.emptyTitle' | translate" [description]="'notifications.empty' | translate" />
+        }
+      </div>
+    </nexa-section-panel>
+    @if (facade.message(); as message) { <p class="inline-error" role="alert">{{ message | translate }}</p> }
   }
 </section>

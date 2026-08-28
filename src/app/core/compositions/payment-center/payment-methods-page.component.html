@@ -1,0 +1,232 @@
+<section class="payment-page">
+  <header class="payment-page-header">
+    <div>
+      <h1>{{ 'payments.pageTitle' | translate }}</h1>
+      <p>{{ 'payments.pageSubtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <nexa-loading-state [label]="'payments.loading' | translate" [lines]="5" />
+  } @else if (error(); as message) {
+    <nexa-error-state [title]="'payments.errorTitle' | translate" [description]="message" [retryLabel]="'payments.actions.retry' | translate" (retry)="load()" />
+  } @else {
+    <section class="flow-panel payment-credit-panel" aria-labelledby="payment-credit-title">
+      <div class="flow-panel-pad payment-credit-grid">
+        <div class="credit-copy">
+          <span class="flow-eyebrow" id="payment-credit-title">{{ 'payments.credit.eyebrow' | translate }}</span>
+          <strong>{{ totalOutstanding() | number:'1.2-2' }} {{ receivables()[0]?.currency || 'PEN' }}</strong>
+          <p class="flow-note">{{ 'payments.credit.description' | translate }}</p>
+          <div class="payment-meter" role="progressbar" [attr.aria-valuenow]="paidPercentage()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'payments.credit.progress' | translate">
+            <span [style.width.%]="paidPercentage()"></span>
+          </div>
+        </div>
+
+        <div class="payment-next-card">
+          <span class="flow-eyebrow">{{ 'payments.credit.nextPayment' | translate }}</span>
+          @if (nextDue(); as item) {
+            <strong>{{ item.currency }} {{ item.remaining | number:'1.2-2' }}</strong>
+            <span>{{ item.number }} · {{ item.dueAt ? (item.dueAt | date:'dd/MM/yyyy') : ('payments.credit.datePending' | translate) }}</span>
+          } @else {
+            <strong>—</strong>
+            <span>{{ 'payments.credit.noPending' | translate }}</span>
+          }
+        </div>
+
+        <div class="payment-next-card payment-option-card">
+          <span class="flow-eyebrow">{{ 'payments.credit.paymentOption' | translate }}</span>
+          <label class="sr-only" for="payment-option-reference">{{ 'payments.credit.paymentOption' | translate }}</label>
+          <select id="payment-option-reference" class="plain-input" disabled>
+            <option>{{ 'payments.credit.referencePaymentOption' | translate }}</option>
+          </select>
+          <span>{{ 'payments.credit.paymentOptionHelp' | translate }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpi-grid" [attr.aria-label]="'payments.kpi.label' | translate">
+      <article class="card kpi-card kpi-paid">
+        <div class="kpi-label"><nexa-icon name="check" />{{ 'payments.kpi.paid' | translate }}</div>
+        <strong>{{ receivables()[0]?.currency || 'PEN' }} {{ totalPaid() | number:'1.2-2' }}</strong>
+        <p>{{ 'payments.kpi.paidSub' | translate }}</p>
+      </article>
+      <article class="card kpi-card kpi-pending">
+        <div class="kpi-label"><nexa-icon name="schedule" />{{ 'payments.kpi.pending' | translate }}</div>
+        <strong>{{ payments()[0]?.currency || receivables()[0]?.currency || 'PEN' }} {{ totalPending() | number:'1.2-2' }}</strong>
+        <p>{{ 'payments.kpi.pendingSub' | translate }}</p>
+      </article>
+      <article class="card kpi-card kpi-records">
+        <div class="kpi-label"><nexa-icon name="credit_card" />{{ 'payments.kpi.records' | translate }}</div>
+        <strong>{{ payments().length }}</strong>
+        <p>{{ 'payments.kpi.recordsSub' | translate }}</p>
+      </article>
+    </section>
+
+    <section class="flow-panel stripe-panel" aria-labelledby="stripe-payment-title">
+      <header class="flow-panel-head">
+        <div>
+          <h2 class="flow-title" id="stripe-payment-title">{{ 'payments.stripe.title' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'payments.stripe.description' | translate }}</p>
+        </div>
+        <span class="flow-pill flow-pill-warning"><span aria-hidden="true">•</span>{{ 'payments.stripe.boundaryLabel' | translate }}</span>
+      </header>
+      <div class="stripe-content">
+        @if (nextDue(); as item) {
+          <div class="stripe-selection">
+            <span class="flow-eyebrow">{{ 'payments.stripe.selected' | translate }}</span>
+            <strong>{{ item.currency }} {{ item.remaining | number:'1.2-2' }}</strong>
+            <span>{{ item.number }}</span>
+          </div>
+          <div class="stripe-boundary">
+            <h3>{{ 'payments.stripe.statesTitle' | translate }}</h3>
+            <p>{{ 'payments.stripe.statesDescription' | translate }}</p>
+          </div>
+          <a class="stripe-action" [routerLink]="['/portal/receivables', item.id]" [attr.aria-label]="'payments.stripe.prepare' | translate">
+            <nexa-icon name="credit_card" />
+            {{ 'payments.stripe.prepare' | translate }}
+          </a>
+        } @else {
+          <div class="stripe-empty">
+            <nexa-icon name="credit_card" />
+            <span>{{ 'payments.stripe.noPayment' | translate }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="payment-insights-grid" [attr.aria-label]="'payments.insights.label' | translate">
+      <article class="flow-panel payment-chart-panel">
+        <header class="flow-panel-head">
+          <div>
+            <h2 class="flow-title">{{ 'payments.insights.balanceTitle' | translate }}</h2>
+            <p class="flow-subtitle">{{ 'payments.insights.balanceSubtitle' | translate }}</p>
+          </div>
+        </header>
+        <div class="flow-panel-pad payment-bars">
+          @for (row of paymentChart(); track row.key) {
+            <div class="payment-bar-row" [class.payment-bar-row-pending]="row.tone === 'pending'">
+              <div class="flow-row-between"><strong>{{ row.labelKey | translate }}</strong><span>{{ formatMoney(row.amount, row.currency) }}</span></div>
+              <div class="payment-bar-track"><span [style.width.%]="row.percent"></span></div>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="flow-panel payment-chart-panel">
+        <header class="flow-panel-head">
+          <div>
+            <h2 class="flow-title">{{ 'payments.insights.recentActivity' | translate }}</h2>
+            <p class="flow-subtitle">{{ 'payments.insights.recentActivitySubtitle' | translate }}</p>
+          </div>
+        </header>
+        <div class="flow-panel-pad payment-bars">
+          @for (row of recentPaymentChart(); track row.id) {
+            <div class="payment-bar-row compact">
+              <div class="flow-row-between"><span class="mono">{{ row.label }}</span><strong>{{ formatMoney(row.amount, row.currency) }}</strong></div>
+              <div class="payment-bar-track"><span [style.width.%]="row.percent"></span></div>
+            </div>
+          } @empty {
+            <div class="chart-empty"><nexa-icon name="credit_card" /><span>{{ 'payments.insights.noPaymentActivity' | translate }}</span></div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="flow-panel records-panel" aria-labelledby="payment-records-title">
+      <header class="flow-panel-head records-header">
+        <div>
+          <h2 class="flow-title" id="payment-records-title">{{ 'payments.recordsView.title' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'payments.recordsView.description' | translate }}</p>
+        </div>
+        <div class="filter-row" role="group" [attr.aria-label]="'payments.records.filterLabel' | translate">
+          @for (filter of paymentFilters; track filter) {
+            <button type="button" class="filter-button" [class.active]="paymentFilter() === filter" [attr.aria-pressed]="paymentFilter() === filter" (click)="setPaymentFilter(filter)">
+              {{ filter === 'ALL' ? ('payments.recordsView.all' | translate) : ('payments.filters.' + filter.toLowerCase()) | translate }}
+            </button>
+          }
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'payments.recordsView.reference' | translate }}</th>
+              <th>{{ 'payments.recordsView.invoice' | translate }}</th>
+              <th>{{ 'payments.recordsView.order' | translate }}</th>
+              <th>{{ 'payments.recordsView.amount' | translate }}</th>
+              <th>{{ 'payments.recordsView.status' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of visiblePayments(); track payment.id) {
+              <tr>
+                <td><span class="mono">{{ payment.reference || payment.id }}</span></td>
+                <td><span class="mono">{{ 'payments.recordsView.notAvailable' | translate }}</span></td>
+                <td><span class="mono">{{ 'payments.recordsView.notAvailable' | translate }}</span></td>
+                <td class="amount-cell">{{ formatMoney(payment.amount, payment.currency) }}</td>
+                <td><nexa-status-badge [label]="('payments.status.' + paymentState(payment.status)) | translate" [tone]="paymentTone(payment.status)" /></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5">
+                  <div class="table-empty">
+                    <nexa-icon name="credit_card" />
+                    <strong>{{ 'payments.records.emptyTitle' | translate }}</strong>
+                    <span>{{ 'payments.records.emptyDescription' | translate }}</span>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="flow-panel methods-panel" aria-labelledby="payment-methods-title">
+      <header class="flow-panel-head">
+        <div>
+          <h2 class="flow-title" id="payment-methods-title">{{ 'payments.methodsView.title' | translate }}</h2>
+          <p class="flow-subtitle">{{ 'payments.methodsView.description' | translate }}</p>
+        </div>
+        <a class="methods-cancel" routerLink="/portal/receivables" [attr.aria-label]="'payments.methodsView.cancel' | translate">
+          <nexa-icon name="cancel" />
+          {{ 'payments.methodsView.cancel' | translate }}
+        </a>
+      </header>
+      <div class="methods-content">
+        <div class="payment-method-form" aria-disabled="true">
+          <label class="field">
+            <span class="field-label">{{ 'payments.methodsView.form.methodType' | translate }}</span>
+            <select class="plain-input" disabled><option>{{ 'payments.methodsView.form.card' | translate }}</option></select>
+          </label>
+          <label class="field">
+            <span class="field-label">{{ 'payments.methodsView.form.cardBrand' | translate }}</span>
+            <select class="plain-input" disabled><option>Visa</option></select>
+          </label>
+          <label class="field">
+            <span class="field-label">{{ 'payments.methodsView.form.lastFour' | translate }}</span>
+            <input class="plain-input" disabled placeholder="1234" />
+            <small>{{ 'payments.methodsView.form.maskedCardHelp' | translate }}</small>
+          </label>
+          <label class="payment-default-check">
+            <input type="checkbox" disabled />
+            <span>{{ 'payments.methodsView.form.useDefault' | translate }}</span>
+          </label>
+          <button class="save-method-button" type="button" disabled>
+            <nexa-icon name="check" />
+            {{ 'payments.methodsView.form.saveMethod' | translate }}
+          </button>
+          <p class="method-boundary"><nexa-icon name="info" />{{ 'payments.methodsView.unavailable' | translate }}</p>
+        </div>
+        <div class="method-empty-card">
+          <span class="method-empty-icon"><nexa-icon name="account_balance_wallet" /></span>
+          <div>
+            <strong>{{ 'payments.methodsView.emptyTitle' | translate }}</strong>
+            <span>{{ 'payments.methodsView.emptyDescription' | translate }}</span>
+          </div>
+          <a class="secondary-action" routerLink="/portal/receivables">{{ 'payments.methodsView.openReceivables' | translate }}</a>
+        </div>
+      </div>
+    </section>
+  }
+</section>

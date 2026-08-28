@@ -2,10 +2,11 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PORTAL_RUNTIME_CONFIG, portalApiUrl } from '../../core/security/runtime-config';
+import { PaymentsApiPort } from '../application/ports/payments-api.port';
 import { BankTransferPayment, PaymentHistoryItem, PaymentIntent, PaymentPage } from '../domain/payment.models';
 
 @Injectable({ providedIn: 'root' })
-export class PaymentsApiClient {
+export class PaymentsApiClient implements PaymentsApiPort {
   private readonly http = inject(HttpClient);
   private readonly config = inject(PORTAL_RUNTIME_CONFIG);
 

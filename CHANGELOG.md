@@ -3,6 +3,80 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.15.0] - 2026-08-28
+
+Buyer IAM boundary hardening for the canonical Portal surface.
+
+### Added
+
+- Workspace preview and recognized-workspace gating before buyer credentials are submitted.
+- Explicit two-factor challenge boundary with deterministic mock verification and an API-mode capability error when the backend contract does not expose a second-factor endpoint.
+- Shared sign-in structure and language switching behavior aligned with Platform while preserving the buyer-only surface.
+- Catalog-owned request cart shared by catalog list, detail and the four-step Request Builder; empty carts link back to Catalog instead of exposing a second selector.
+- Business-day delivery-date rules, server route preview and embedded Google Maps route in the buyer delivery step.
+- Design provenance synchronized to Nexa Design Lab v1.0.2 with source-checked consumer tokens.
+
+### Changed
+
+- Prevented API-mode bootstrap from manufacturing an authenticated buyer session when refresh has no valid backend session.
+- Kept the buyer shell capability-safe and aligned the Request Builder action flow with the local Vue reference.
+- Kept password recovery and reset behind the existing unauthenticated API boundary; email delivery remains backend-owned.
+- Raised the Portal initial-bundle warning threshold to `550 kB` to accommodate the explicit workspace/2FA auth boundary; the error threshold remains `1 MB`.
+
+### Validation
+
+- 116 unit tests passed across 59 files.
+- Bounded-context, catalog-asset and Design Lab foundation validators passed.
+- Production build passed; initial bundle `590.68 kB` exceeds the `550 kB`
+  warning budget but remains below the `1 MB` error budget.
+- Production dependency audit reported zero vulnerabilities.
+- Browser evidence: ICISA workspace preview, Portal 2FA, catalog-to-cart, four-step Request Builder, embedded map and submit completed without console errors; one non-blocking LCP lazy-loading warning remains.
+
+### Boundary
+
+- No API, Blueprint canonical definition or Vue source was changed.
+- No Portal organization-registration flow was added because it is not present in the canonical Portal/Vue surface.
+- API mode remains the default; mock sessions are in-memory and do not claim backend persistence, email delivery or production 2FA.
+- Blueprint marks detailed Web acceptance criteria as pending; this release does not claim 100% of those pending criteria.
+
+## [0.14.0] - 2026-08-26
+
+Runtime mock slices for generic and ICISA buyer workspaces across the canonical frontend boundaries.
+
+### Added
+
+- Runtime-selectable `api` and local `mock` modes with deterministic `generic` and `icisa` buyer fixtures.
+- Mock adapters behind application ports across the implemented buyer-safe
+  surfaces of BC-01 through BC-10, plus the local BC-11 change-feed
+  projection: delivery, sales orders, receivables, payments, documents and
+  notifications are available in the offline demo.
+- Offline no-op change-feed adapter for mock mode; the existing SSE stream remains the API-mode adapter.
+- Functional baseline and mock-mode documentation for the executable Buyer
+  Portal slices.
+
+### Changed
+
+- Preserved buyer navigation and REST contracts while making the implemented
+  buyer-safe flows executable without the API.
+- Kept tenant profile selection in runtime configuration and infrastructure composition, outside the domain layer.
+- Moved the first home and receivables composition dependencies behind application-facing boundaries.
+- Adjusted the initial production budget for the explicitly included mock adapter baseline.
+
+### Validation
+
+- Bounded-context, catalog-asset and Design Lab foundation validators passed.
+- 111 unit tests passed across 57 test files.
+- Angular production build passed with a `533.48 kB` initial bundle and no budget warning.
+- Production dependency audit reported zero vulnerabilities; `git diff --check` passed.
+- Local Playwright evidence passed for ICISA login, catalog, four-step request builder, submit, list and detail without console errors.
+
+### Boundary
+
+- No API endpoints, API contracts or Blueprint canonical definitions were changed.
+- Mock state is in-memory and intentionally does not simulate backend
+  persistence, authorization, jobs or webhooks.
+- This remains a PRE-V1 functional foundation; it does not claim complete product migration or Production Readiness.
+
 ## [0.13.0] - 2026-08-26
 
 Canonical bounded-context layering and Angular composition release for the Nexa Buyer Portal.

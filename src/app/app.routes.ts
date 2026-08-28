@@ -2,11 +2,22 @@ import { inject } from '@angular/core';
 import { RedirectFunction, Router, Routes } from '@angular/router';
 import { PortalShellComponent } from './core/layout/portal-shell/portal-shell.component';
 import { portalAuthGuard, buyerRoleGuard, publicOnlyGuard, buyerPermissionGuard } from './core/routing/portal.guards';
+import { PORTAL_HOME_PROVIDERS, provideBuyerAccountApiAdapter } from './core/compositions/portal/data-mode.providers';
+import { BuyerProfileContextFacade } from './core/compositions/portal/buyer-profile-context.facade';
+import { ReceivablesPaymentFacade } from './core/compositions/receivables-payment/receivables-payment.facade';
+import { provideBusinessDocumentsApiAdapter, providePaymentsApiAdapter, provideReceivablesApiAdapter, providePaymentElementAdapter, provideSalesOrderApiAdapter } from './core/compositions/portal/data-mode.providers';
 import { ForbiddenPageComponent } from './tenantaccessgovernance/iam/presentation/forbidden/forbidden-page.component';
 import { SignInPageComponent } from './tenantaccessgovernance/iam/presentation/sign-in/sign-in-page.component';
 
 const dynamicRedirect = (target: string, parameter: string): RedirectFunction => (route) =>
   inject(Router).createUrlTree([target, route.params[parameter]]);
+
+const receivablesPaymentProviders = [
+  provideReceivablesApiAdapter(),
+  providePaymentsApiAdapter(),
+  providePaymentElementAdapter(),
+  ReceivablesPaymentFacade,
+];
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
@@ -25,8 +36,8 @@ export const routes: Routes = [
     canActivate: [portalAuthGuard, buyerRoleGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
-      { path: 'home', loadComponent: () => import('./core/presentation/home-page/home-page.component').then((module) => module.HomePageComponent) },
-      { path: 'profile', loadComponent: () => import('./tenantaccessgovernance/iam/presentation/buyer-profile-page/buyer-profile-page.component').then((module) => module.BuyerProfilePageComponent) },
+      { path: 'home', loadComponent: () => import('./core/presentation/home-page/home-page.component').then((module) => module.HomePageComponent), providers: PORTAL_HOME_PROVIDERS },
+      { path: 'profile', loadComponent: () => import('./tenantaccessgovernance/iam/presentation/buyer-profile-page/buyer-profile-page.component').then((module) => module.BuyerProfilePageComponent), providers: [BuyerProfileContextFacade, provideBuyerAccountApiAdapter(), provideSalesOrderApiAdapter(), provideBusinessDocumentsApiAdapter()] },
       { path: 'account', loadChildren: () => import('./core/compositions/portal/buyer-account.routes').then((module) => module.BUYER_ACCOUNT_ROUTES), canActivate: [buyerPermissionGuard('sales:buyer:read')] },
       { path: 'client-account', pathMatch: 'full', redirectTo: 'account' },
       { path: 'notifications', loadComponent: () => import('./notifications/presentation/notifications-page.component').then((module) => module.NotificationsPageComponent), canActivate: [buyerPermissionGuard('notification.read')] },
@@ -41,9 +52,11 @@ export const routes: Routes = [
       { path: 'purchase-orders/:salesOrderId', redirectTo: dynamicRedirect('/portal/sales-orders', 'salesOrderId') },
       { path: 'sales-orders', loadChildren: () => import('./core/compositions/portal/sales-orders.routes').then((module) => module.SALES_ORDER_ROUTES), canActivate: [buyerPermissionGuard('orders:buyer:read')] },
       { path: 'documents', loadChildren: () => import('./core/compositions/portal/business-documents.routes').then((module) => module.BUSINESS_DOCUMENT_ROUTES), canActivate: [buyerPermissionGuard('document.read')] },
-      { path: 'receivables', loadComponent: () => import('./core/compositions/receivables-payment/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
-      { path: 'receivables/:receivableId', loadComponent: () => import('./core/compositions/receivables-payment/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
-      { path: 'payment-methods', loadComponent: () => import('./payments/presentation/payment-methods-page.component').then((module) => module.PaymentMethodsPageComponent), canActivate: [buyerPermissionGuard('payment.read')] },
+      { path: 'receivables', loadComponent: () => import('./core/compositions/receivables-payment/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')], providers: receivablesPaymentProviders },
+      { path: 'receivables/:receivableId', loadComponent: () => import('./core/compositions/receivables-payment/receivables-page.component').then((module) => module.ReceivablesPageComponent), canActivate: [buyerPermissionGuard('payment.read')], providers: receivablesPaymentProviders },
+      { path: 'payment-methods', loadComponent: () => import('./core/compositions/payment-center/payment-methods-page.component').then((module) => module.PaymentMethodsPageComponent), canActivate: [buyerPermissionGuard('payment.read')], providers: receivablesPaymentProviders },
+      { path: 'premium', loadComponent: () => import('./core/presentation/premium/premium-page.component').then((module) => module.PremiumPageComponent) },
+      { path: 'support', loadComponent: () => import('./core/presentation/legal/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'support' } },
       { path: 'legal', loadComponent: () => import('./core/presentation/legal/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
       { path: 'legal/terms', loadComponent: () => import('./core/presentation/legal/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
       { path: 'legal/privacy', loadComponent: () => import('./core/presentation/legal/support-legal-page.component').then((module) => module.SupportLegalPageComponent), data: { section: 'legal' } },
