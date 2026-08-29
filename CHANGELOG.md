@@ -3,6 +3,36 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.20.0] - 2026-08-28
+
+Buyer API source-state recovery and honest payment-history feedback.
+
+### Added
+
+- Buyer Home now distinguishes an unavailable `Client Account` lookup from a genuinely unlinked Buyer account.
+- Available API-backed Home sources remain visible when the account lookup fails, with an explicit retry action.
+- Receivables payment-history failures now remain visible with an accessible retry action instead of rendering as an empty history.
+
+### Changed
+
+- Partial Home data notices use Nexa semantic tokens and the shared Button component for the recovery action.
+- Payment history loading was extracted into a reusable component method so opening and retrying the same receivable follow one state path.
+
+### Boundary
+
+- Portal remains Buyer-only. `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch remain Platform permission concerns.
+- `BOM` is not introduced because the accepted API and Blueprint define no canonical role, endpoint, entity or lifecycle contract.
+- No API, Blueprint, Design Lab or legacy source was modified; the release uses existing Buyer contracts.
+
+### Validation
+
+- Portal unit suite: 130 tests across 64 files passed.
+- Design Lab v1.0.2 foundation, catalog asset and bounded-context validators passed.
+- Production build passed with existing bundle/style budget warnings.
+- Authenticated Buyer E2E against Docker: 16/16 desktop and mobile tests passed.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- `git diff --check`: passed.
+
 ## [0.19.0] - 2026-08-28
 
 API-backed Buyer order telemetry and explicit action feedback.

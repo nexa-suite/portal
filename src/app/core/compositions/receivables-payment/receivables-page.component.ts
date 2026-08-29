@@ -49,6 +49,7 @@ export class ReceivablesPageComponent {
   readonly paymentHistoryFor = signal<string | null>(null);
   readonly paymentHistory = signal<readonly PaymentHistoryItem[]>([]);
   readonly paymentHistoryLoading = signal(false);
+  readonly paymentHistoryError = signal<string | null>(null);
   private paymentSession: PaymentElementSession | null = null;
 
   readonly focused = computed(() => this.receivables().find((item) => item.id === this.receivableId()) ?? null);
@@ -108,10 +109,24 @@ export class ReceivablesPageComponent {
     }
     this.paymentHistoryFor.set(item.id);
     this.paymentHistory.set([]);
+    this.loadPaymentHistory(item.id);
+  }
+
+  retryPaymentHistory(): void {
+    const receivableId = this.paymentHistoryFor();
+    if (!receivableId || this.paymentHistoryLoading()) return;
+    this.loadPaymentHistory(receivableId);
+  }
+
+  private loadPaymentHistory(receivableId: string): void {
+    this.paymentHistoryError.set(null);
     this.paymentHistoryLoading.set(true);
-    this.paymentsApi.listPaymentsForReceivable(item.id).subscribe({
+    this.paymentsApi.listPaymentsForReceivable(receivableId).subscribe({
       next: (page) => { this.paymentHistory.set(page.items); this.paymentHistoryLoading.set(false); },
-      error: () => { this.paymentHistoryLoading.set(false); },
+      error: () => {
+        this.paymentHistoryLoading.set(false);
+        this.paymentHistoryError.set('receivables.errorTitle');
+      },
     });
   }
 

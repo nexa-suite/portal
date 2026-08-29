@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Release | Summary |
 |---|---|
+| [v0.20.0](./v0.20.0.md) | Buyer API source-state recovery and payment-history feedback |
 | [v0.19.0](./v0.19.0.md) | API-backed Buyer delivery telemetry and action feedback |
 | [v0.16.0](./v0.16.0.md) | Server-authoritative buyer payment preferences |
 | [v0.15.0](./v0.15.0.md) | Workspace-aware IAM and Vue-aligned buyer request flow |
@@ -26,7 +27,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.19.0`. Buyer orders now expose delivery telemetry from
+Current release is `0.20.0`. Buyer orders now expose delivery telemetry from
 the existing API contract and partial source failures remain visible. Buyer
 Request Builder honors the payment condition returned by the active Client Account and exposes every payment
 option accepted by the existing draft contract. Buyer IAM now includes workspace

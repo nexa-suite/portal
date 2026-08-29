@@ -1,20 +1,36 @@
 <div class="home-page buyer-home-page">
   @if (loading()) {
     <nexa-loading-state [label]="'home.loading' | translate" [lines]="5" />
-  } @else if (!hasClient()) {
-    <section class="flow-panel no-client-state" aria-live="polite">
-      <nexa-icon name="lock" />
-      <h1>{{ 'home.homePanel.noClientTitle' | translate }}</h1>
-      <p>{{ 'home.homePanel.noClientDescription' | translate }}</p>
-    </section>
   } @else if (error(); as message) {
     <nexa-error-state
       [title]="'home.errorTitle' | translate"
       [description]="message"
       [retryLabel]="'home.retry' | translate"
       (retry)="load()" />
+  } @else if (!hasClient() && !accountUnavailable()) {
+    <section class="flow-panel no-client-state" aria-live="polite">
+      <nexa-icon name="lock" />
+      <h1>{{ 'home.homePanel.noClientTitle' | translate }}</h1>
+      <p>{{ 'home.homePanel.noClientDescription' | translate }}</p>
+    </section>
   } @else {
-    @if (partial()) { <p class="partial-notice" role="status">{{ 'home.partial' | translate }}</p> }
+    @if (accountUnavailable()) {
+      <section class="partial-notice partial-notice-danger account-unavailable" role="alert">
+        <div class="partial-notice-copy">
+          <nexa-icon name="warning" />
+          <div>
+            <strong>{{ 'iamSecurity.buyer.accountUnavailable' | translate }}</strong>
+            <p>{{ 'home.partial' | translate }}</p>
+          </div>
+        </div>
+        <nexa-button variant="secondary" size="compact" (click)="load()">{{ 'home.retry' | translate }}</nexa-button>
+      </section>
+    } @else if (partial()) {
+      <section class="partial-notice" role="status">
+        <span>{{ 'home.partial' | translate }}</span>
+        <nexa-button variant="secondary" size="compact" (click)="load()">{{ 'home.retry' | translate }}</nexa-button>
+      </section>
+    }
 
     <section class="buyer-shell-band" aria-labelledby="buyer-home-title">
       <div class="buyer-shell-copy">

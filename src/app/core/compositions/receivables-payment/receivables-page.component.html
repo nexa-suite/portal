@@ -62,7 +62,13 @@
               <div class="history-panel" aria-live="polite">
                 <div class="history-heading"><strong>{{ 'receivables.history.title' | translate }}</strong><span>{{ 'receivables.history.description' | translate }}</span></div>
                 @if (paymentHistoryLoading()) { <span role="status">{{ 'receivables.history.loading' | translate }}</span> }
-                @else { @for (payment of paymentHistory(); track payment.id) { <div class="history-row"><span><strong>{{ payment.reference || payment.id }}</strong><small>{{ payment.method }} · {{ payment.createdAt | date:'dd/MM/yyyy' }}</small></span><span class="history-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</span><nexa-status-badge [label]="('payments.status.' + paymentState(payment.status)) | translate" [tone]="paymentTone(payment.status)" /></div> } @empty { <span>{{ 'receivables.history.empty' | translate }}</span> } }
+                @else if (paymentHistoryError(); as message) {
+                  <div class="history-error" role="alert">
+                    <nexa-icon name="warning" />
+                    <span>{{ message | translate }}</span>
+                    <nexa-button variant="secondary" size="compact" (click)="retryPaymentHistory()">{{ 'receivables.actions.retry' | translate }}</nexa-button>
+                  </div>
+                } @else { @for (payment of paymentHistory(); track payment.id) { <div class="history-row"><span><strong>{{ payment.reference || payment.id }}</strong><small>{{ payment.method }} · {{ payment.createdAt | date:'dd/MM/yyyy' }}</small></span><span class="history-amount">{{ payment.amount | number:'1.2-2' }} {{ payment.currency }}</span><nexa-status-badge [label]="('payments.status.' + paymentState(payment.status)) | translate" [tone]="paymentTone(payment.status)" /></div> } @empty { <span>{{ 'receivables.history.empty' | translate }}</span> } }
               </div>
             }
           </article>
