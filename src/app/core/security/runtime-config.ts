@@ -49,10 +49,6 @@ function stringValue(value: unknown, fallback: string): string {
   return typeof value === 'string' ? value : fallback;
 }
 
-function dataModeValue(value: unknown): PortalDataMode {
-  return typeof value === 'string' && value.trim().toLowerCase() === 'mock' ? 'mock' : 'api';
-}
-
 function tenantProfileValue(value: unknown): TenantProfile {
   return typeof value === 'string' && value.trim().toLowerCase() === 'icisa' ? 'icisa' : 'generic';
 }
@@ -62,11 +58,8 @@ function localQueryRuntimeConfig(): Partial<PortalRuntimeConfig> {
   if (!location || !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) return {};
   const params = new URLSearchParams(location.search);
   const stored = readLocalRuntimeConfig();
-  const hasExplicitOverride = params.has('nexaDataMode') || params.has('nexaTenantProfile');
+  const hasExplicitOverride = params.has('nexaTenantProfile');
   const resolved = {
-    dataMode: params.has('nexaDataMode')
-      ? params.get('nexaDataMode') === 'mock' ? 'mock' : 'api'
-      : stored?.dataMode ?? 'api',
     tenantProfile: params.has('nexaTenantProfile')
       ? params.get('nexaTenantProfile') === 'icisa' ? 'icisa' : 'generic'
       : stored?.tenantProfile ?? 'generic',
@@ -75,22 +68,19 @@ function localQueryRuntimeConfig(): Partial<PortalRuntimeConfig> {
   return resolved;
 }
 
-function readLocalRuntimeConfig(): Pick<PortalRuntimeConfig, 'dataMode' | 'tenantProfile'> | null {
+function readLocalRuntimeConfig(): Pick<PortalRuntimeConfig, 'tenantProfile'> | null {
   if (typeof sessionStorage === 'undefined') return null;
   try {
     const value: unknown = JSON.parse(sessionStorage.getItem(LOCAL_RUNTIME_STORAGE_KEY) ?? 'null');
     if (!value || typeof value !== 'object') return null;
     const record = value as Record<string, unknown>;
-    return {
-      dataMode: record['dataMode'] === 'mock' ? 'mock' : 'api',
-      tenantProfile: record['tenantProfile'] === 'icisa' ? 'icisa' : 'generic',
-    };
+    return { tenantProfile: record['tenantProfile'] === 'icisa' ? 'icisa' : 'generic' };
   } catch {
     return null;
   }
 }
 
-function writeLocalRuntimeConfig(value: Pick<PortalRuntimeConfig, 'dataMode' | 'tenantProfile'>): void {
+function writeLocalRuntimeConfig(value: Pick<PortalRuntimeConfig, 'tenantProfile'>): void {
   if (typeof sessionStorage === 'undefined') return;
   try {
     sessionStorage.setItem(LOCAL_RUNTIME_STORAGE_KEY, JSON.stringify(value));
@@ -118,7 +108,7 @@ export function resolvePortalRuntimeConfig(): PortalRuntimeConfig {
       runtime?.pricingPreviewPath,
       DEFAULT_RUNTIME_CONFIG.pricingPreviewPath ?? '',
     ),
-    dataMode: dataModeValue(runtime?.dataMode),
+    dataMode: 'api',
     tenantProfile: tenantProfileValue(runtime?.tenantProfile),
     surface: PORTAL_SURFACE,
   };

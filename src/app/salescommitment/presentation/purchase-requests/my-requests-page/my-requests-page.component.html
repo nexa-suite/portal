@@ -49,18 +49,25 @@
             </div>
             @if (summaryText(request); as summary) { <p class="request-summary">{{ summary }}</p> } @else { <p class="request-summary">{{ 'purchaseRequests.card.noSpecifications' | translate }}</p> }
             <div class="request-meta-grid">
-              <div><span>{{ 'purchaseRequests.card.lines' | translate }}</span><strong>{{ request.lines.length }}</strong></div>
+              <div><span>{{ 'purchaseRequests.card.lines' | translate }}</span><strong>{{ lineCount(request) }}</strong></div>
               <div><span>{{ 'purchaseRequests.fields.deliveryDate' | translate }}</span><strong>{{ request.requestedDeliveryDate || ('purchaseRequests.list.datePending' | translate) }}</strong></div>
               <div><span>{{ 'purchaseRequests.fields.payment' | translate }}</span><strong>{{ request.paymentOption ? (('purchaseRequests.payment.' + request.paymentOption) | translate) : '—' }}</strong></div>
             </div>
-            <div class="request-product-strip">
-              @for (line of request.lines.slice(0, 3); track line.id) {
-                <article class="request-product">
-                  <span class="product-icon" aria-hidden="true"><nexa-icon name="category" /></span>
-                  <div><strong>{{ line.itemName }}</strong><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }}</span></div>
-                </article>
-              }
-            </div>
+            @if (request.lines.length > 0) {
+              <div class="request-product-strip">
+                @for (line of request.lines.slice(0, 3); track line.id) {
+                  <article class="request-product">
+                    <span class="product-icon" aria-hidden="true"><nexa-icon name="category" /></span>
+                    <div><strong>{{ line.itemName }}</strong><span>{{ line.quantity }} {{ line.unit }} · {{ line.presentation }}</span></div>
+                  </article>
+                }
+              </div>
+            } @else if (lineCount(request) > 0) {
+              <p class="request-lines-summary">
+                <nexa-icon name="inventory_2" aria-hidden="true" />
+                {{ 'purchaseRequests.card.lineSummary' | translate: { count: lineCount(request) } }}
+              </p>
+            }
           </article>
         }
       </div>

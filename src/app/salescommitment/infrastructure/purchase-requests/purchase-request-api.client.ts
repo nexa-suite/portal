@@ -53,6 +53,7 @@ function purchaseRequest(rawValue: unknown, etag?: string): PurchaseRequest {
   const version = number(raw['version']);
   const priority = text(raw['priority']).toUpperCase();
   const payment = text(raw['paymentOption']).toUpperCase();
+  const lines = Array.isArray(raw['lines']) ? raw['lines'].map(line) : [];
   return {
     id: text(raw['id']),
     code: text(raw['code']),
@@ -65,7 +66,8 @@ function purchaseRequest(rawValue: unknown, etag?: string): PurchaseRequest {
       : null,
     comment: nullableText(raw['comment']),
     reviewNote: nullableText(raw['reviewNote']),
-    lines: Array.isArray(raw['lines']) ? raw['lines'].map(line) : [],
+    lines,
+    lineCount: number(raw['lineCount'], lines.length),
     version,
     etag: etag ?? `"${version}"`,
   };
