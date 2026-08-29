@@ -1,15 +1,12 @@
 import { Routes } from '@angular/router';
 import { CatalogQueryService } from '../../../catalogcommercialpolicy/application/catalog-query.service';
-import { CatalogApiPort } from '../../../catalogcommercialpolicy/application/ports/catalog-api.port';
-import { CatalogApiClient } from '../../../catalogcommercialpolicy/infrastructure/catalog-api.client';
-import { provideApiOnlyPortalAdapter } from './data-mode.providers';
+import { PORTAL_CATALOG_PROVIDERS } from './production.providers';
 import { CatalogDetailPageComponent } from '../../../catalogcommercialpolicy/presentation/catalog-detail-page/catalog-detail-page.component';
 import { CatalogListPageComponent } from '../../../catalogcommercialpolicy/presentation/catalog-list-page/catalog-list-page.component';
 
 const catalogProviders = [
   CatalogQueryService,
-  CatalogApiClient,
-  provideApiOnlyPortalAdapter(CatalogApiPort, CatalogApiClient),
+  ...PORTAL_CATALOG_PROVIDERS,
 ];
 
 export const CATALOG_ROUTES: Routes = [

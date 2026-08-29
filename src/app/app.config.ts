@@ -10,7 +10,7 @@ import { accessTokenInterceptor } from './core/security/access-token.interceptor
 import { portalSurfaceInterceptor } from './core/security/portal-surface.interceptor';
 import { refreshInterceptor } from './core/security/refresh.interceptor';
 import { providePortalSecurityBoundary, PORTAL_SECURITY_BOUNDARY } from './core/security/portal-security.boundary';
-import { provideChangeFeedAdapter, provideNotificationsApiAdapter, providePaymentElementAdapter, providePortalAuthAdapter, provideSecurityAdapter } from './core/compositions/portal/data-mode.providers';
+import { PORTAL_PRODUCTION_PROVIDERS } from './core/compositions/portal/production.providers';
 import { PurchaseRequestCartPort } from './salescommitment/application/ports/purchase-request-cart.port';
 import { PurchaseRequestCartStoragePort } from './salescommitment/application/ports/purchase-request-cart-storage.port';
 import { PurchaseRequestCartService } from './salescommitment/application/buyer-requests/purchase-request-cart.service';
@@ -25,12 +25,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([portalSurfaceInterceptor, accessTokenInterceptor, refreshInterceptor]),
     ),
-    providePortalAuthAdapter(),
-    provideSecurityAdapter(),
+    ...PORTAL_PRODUCTION_PROVIDERS,
     providePortalSecurityBoundary(),
-    provideChangeFeedAdapter(),
-    provideNotificationsApiAdapter(),
-    providePaymentElementAdapter(),
     PurchaseRequestCartService,
     BrowserPurchaseRequestCartStorageAdapter,
     { provide: PurchaseRequestCartPort, useExisting: PurchaseRequestCartService },
