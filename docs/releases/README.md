@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Release | Summary |
 |---|---|
+| [v0.21.0](./v0.21.0.md) | Buyer Sales Order delivery-source recovery |
 | [v0.20.0](./v0.20.0.md) | Buyer API source-state recovery and payment-history feedback |
 | [v0.19.0](./v0.19.0.md) | API-backed Buyer delivery telemetry and action feedback |
 | [v0.16.0](./v0.16.0.md) | Server-authoritative buyer payment preferences |
@@ -27,8 +28,9 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.20.0`. Buyer orders now expose delivery telemetry from
-the existing API contract and partial source failures remain visible. Buyer
+Current release is `0.21.0`. Buyer Sales Order detail now exposes an explicit
+delivery-source loading/unavailable state with independent retry, while partial
+source failures remain visible. Buyer
 Request Builder honors the payment condition returned by the active Client Account and exposes every payment
 option accepted by the existing draft contract. Buyer IAM now includes workspace
 recognition and an explicit two-factor boundary; the catalog cart, four-step
