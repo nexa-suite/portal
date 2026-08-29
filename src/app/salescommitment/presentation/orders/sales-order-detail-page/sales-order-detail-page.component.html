@@ -37,6 +37,17 @@
           </a>
         }
       </div>
+      @if (deliveryLoading()) {
+        <nexa-loading-state [compact]="true" [lines]="2" [label]="'orders.states.loading' | translate" />
+      } @else if (deliveryError()) {
+        <div class="data-warning" role="alert">
+          <nexa-icon name="warning" aria-hidden="true" />
+          <span>{{ 'orders.list.partialData' | translate }}</span>
+          <nexa-button variant="quiet" size="compact" [loading]="deliveryLoading()" (click)="retryDelivery()">
+            {{ 'orders.actions.retry' | translate }}
+          </nexa-button>
+        </div>
+      }
       <ol class="flow-track">
         @for (step of flowSteps(); track step.key; let index = $index) {
           <li class="flow-step" [class.complete]="step.state === 'complete'" [class.current]="step.state === 'current'">
