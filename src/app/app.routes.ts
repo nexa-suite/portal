@@ -2,10 +2,9 @@ import { inject } from '@angular/core';
 import { RedirectFunction, Router, Routes } from '@angular/router';
 import { PortalShellComponent } from './core/layout/portal-shell/portal-shell.component';
 import { portalAuthGuard, buyerRoleGuard, publicOnlyGuard, buyerPermissionGuard } from './core/routing/portal.guards';
-import { PORTAL_HOME_PROVIDERS, provideBuyerAccountApiAdapter } from './core/compositions/portal/data-mode.providers';
+import { PORTAL_BUSINESS_DOCUMENTS_PROVIDERS, PORTAL_BUYER_ACCOUNT_PROVIDERS, PORTAL_HOME_PROVIDERS, PORTAL_PAYMENT_ELEMENT_PROVIDERS, PORTAL_PAYMENTS_PROVIDERS, PORTAL_RECEIVABLES_PROVIDERS, PORTAL_SALES_ORDER_PROVIDERS } from './core/compositions/portal/production.providers';
 import { BuyerProfileContextFacade } from './core/compositions/portal/buyer-profile-context.facade';
 import { ReceivablesPaymentFacade } from './core/compositions/receivables-payment/receivables-payment.facade';
-import { provideBusinessDocumentsApiAdapter, providePaymentsApiAdapter, provideReceivablesApiAdapter, providePaymentElementAdapter, provideSalesOrderApiAdapter } from './core/compositions/portal/data-mode.providers';
 import { ForbiddenPageComponent } from './tenantaccessgovernance/iam/presentation/forbidden/forbidden-page.component';
 import { SignInPageComponent } from './tenantaccessgovernance/iam/presentation/sign-in/sign-in-page.component';
 
@@ -13,9 +12,9 @@ const dynamicRedirect = (target: string, parameter: string): RedirectFunction =>
   inject(Router).createUrlTree([target, route.params[parameter]]);
 
 const receivablesPaymentProviders = [
-  provideReceivablesApiAdapter(),
-  providePaymentsApiAdapter(),
-  providePaymentElementAdapter(),
+  ...PORTAL_RECEIVABLES_PROVIDERS,
+  ...PORTAL_PAYMENTS_PROVIDERS,
+  ...PORTAL_PAYMENT_ELEMENT_PROVIDERS,
   ReceivablesPaymentFacade,
 ];
 
@@ -37,7 +36,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
       { path: 'home', loadComponent: () => import('./core/presentation/home-page/home-page.component').then((module) => module.HomePageComponent), providers: PORTAL_HOME_PROVIDERS },
-      { path: 'profile', loadComponent: () => import('./tenantaccessgovernance/iam/presentation/buyer-profile-page/buyer-profile-page.component').then((module) => module.BuyerProfilePageComponent), providers: [BuyerProfileContextFacade, provideBuyerAccountApiAdapter(), provideSalesOrderApiAdapter(), provideBusinessDocumentsApiAdapter()] },
+      { path: 'profile', loadComponent: () => import('./tenantaccessgovernance/iam/presentation/buyer-profile-page/buyer-profile-page.component').then((module) => module.BuyerProfilePageComponent), providers: [BuyerProfileContextFacade, ...PORTAL_BUYER_ACCOUNT_PROVIDERS, ...PORTAL_SALES_ORDER_PROVIDERS, ...PORTAL_BUSINESS_DOCUMENTS_PROVIDERS] },
       { path: 'account', loadChildren: () => import('./core/compositions/portal/buyer-account.routes').then((module) => module.BUYER_ACCOUNT_ROUTES), canActivate: [buyerPermissionGuard('sales:buyer:read')] },
       { path: 'client-account', pathMatch: 'full', redirectTo: 'account' },
       { path: 'notifications', loadComponent: () => import('./notifications/presentation/notifications-page.component').then((module) => module.NotificationsPageComponent), canActivate: [buyerPermissionGuard('notification.read')] },

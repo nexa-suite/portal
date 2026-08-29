@@ -3,6 +3,39 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.26.0] - 2026-08-29
+
+API-only production composition for the Buyer Portal.
+
+### Changed
+
+- Production bootstrap and route composition bind the existing HTTP adapters
+  directly to the application ports for authentication, security, change feed,
+  notifications, payments, catalog, buyer account, purchase requests, sales
+  orders, deliveries, receivables and business documents.
+- Browser runtime no longer imports the mock data-mode provider composition.
+- Notification facade wiring now uses the canonical `NotificationsApiPort`,
+  with a provider regression test covering the production binding.
+
+### Boundary
+
+- Portal remains Buyer-only; Platform roles and Dispatch remain outside the
+  Portal projection.
+- No endpoint, entity, state, persistence model or cross-context contract was
+  introduced. `BOM` remains `OPEN`/`DEFERRED`.
+- Mock adapters remain available only for isolated tests; they are not a
+  browser-runtime data source.
+
+### Validation
+
+- Portal unit suite: 136 tests across 67 files passed.
+- Production build passed with existing bundle/style budget warnings.
+- Browser E2E passed 16/16 against the isolated API runtime in local
+  verification and in the mandatory CI verification job.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Design Lab v1.0.2 foundation, catalog-asset and bounded-context validators
+  passed.
+
 ## [0.25.0] - 2026-08-29
 
 API-only Purchase Request summaries and runtime hardening.
