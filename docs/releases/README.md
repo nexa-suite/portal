@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Release | Summary |
 |---|---|
+| [v0.24.0](./v0.24.0.md) | Design Lab-aligned Buyer Catalog and cart stepper |
 | [v0.21.0](./v0.21.0.md) | Buyer Sales Order delivery-source recovery |
 | [v0.20.0](./v0.20.0.md) | Buyer API source-state recovery and payment-history feedback |
 | [v0.19.0](./v0.19.0.md) | API-backed Buyer delivery telemetry and action feedback |
@@ -28,11 +29,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.21.0`. Buyer Sales Order detail now exposes an explicit
-delivery-source loading/unavailable state with independent retry, while partial
-source failures remain visible. Buyer
-Request Builder honors the payment condition returned by the active Client Account and exposes every payment
-option accepted by the existing draft contract. Buyer IAM now includes workspace
-recognition and an explicit two-factor boundary; the catalog cart, four-step
-request builder and embedded route map follow the audited local Vue flow. This
-does not claim full product migration or pixel-level parity with Vue.
+Current release is `0.24.0`. The Buyer Catalog now follows the executable Design
+Lab foundation and the legacy Vue product-card composition more closely, while
+preserving the existing server-backed catalog contract. This does not claim full
+product migration or pixel-level parity across every Portal route.
