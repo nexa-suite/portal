@@ -17,6 +17,7 @@ import { SalesOrder, SalesOrderPage } from '../../../salescommitment/domain/orde
 import { SalesOrderApiPort } from '../../../salescommitment/application/ports/sales-order-api.port';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
+import { ButtonComponent } from '../../../shared/presentation/components/button/button.component';
 import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import { StatusBadgeComponent, StatusTone } from '../../../shared/presentation/components/status-badge/status-badge.component';
 import { PORTAL_SECURITY_BOUNDARY } from '../../security/portal-security.boundary';
@@ -41,6 +42,7 @@ interface TrackingStep {
   imports: [
     ErrorStateComponent,
     LoadingStateComponent,
+    ButtonComponent,
     NexaIconComponent,
     RouterLink,
     StatusBadgeComponent,
@@ -63,6 +65,7 @@ export class HomePageComponent {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly partial = signal(false);
+  readonly accountUnavailable = signal(false);
   readonly requestItems = signal<readonly PurchaseRequest[]>([]);
   readonly orderItems = signal<readonly SalesOrder[]>([]);
   readonly deliveryItems = signal<readonly Delivery[]>([]);
@@ -115,6 +118,7 @@ export class HomePageComponent {
         this.featuredItems.set(feed.catalog.value.items);
         this.clientAccount.set(feed.account.value);
         this.catalogTotal.set(feed.catalog.value.totalItems);
+        this.accountUnavailable.set(feed.account.failed);
         this.partial.set(Object.values(feed).some((item) => item.failed));
         this.loading.set(false);
       },
