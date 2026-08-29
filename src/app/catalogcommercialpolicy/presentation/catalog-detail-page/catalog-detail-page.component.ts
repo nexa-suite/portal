@@ -8,6 +8,7 @@ import {
 } from '../../../shared/presentation/components/cold-chain-badge/cold-chain-badge.component';
 import { ErrorStateComponent } from '../../../shared/presentation/components/error-state/error-state.component';
 import { LoadingStateComponent } from '../../../shared/presentation/components/loading-state/loading-state.component';
+import { NexaIconComponent } from '../../../shared/presentation/components/nexa-icon/nexa-icon.component';
 import {
   StatusBadgeComponent,
   StatusTone,
@@ -29,6 +30,7 @@ import {
     ErrorStateComponent,
     LoadingStateComponent,
     CatalogPricingSummaryComponent,
+    NexaIconComponent,
     RouterLink,
     StatusBadgeComponent,
     TranslatePipe,
@@ -56,6 +58,7 @@ export class CatalogDetailPageComponent {
   }));
   readonly previewQuantity = signal('1');
   readonly previewQuantityInvalid = signal(false);
+  private readonly brokenImage = signal(false);
 
   constructor() {
     this.cart.activate();
@@ -104,6 +107,14 @@ export class CatalogDetailPageComponent {
 
   isUnavailable(item: CatalogItemDetail): boolean {
     return item.availabilityStatus === 'OUT_OF_STOCK' || item.availabilityStatus === 'UNAVAILABLE';
+  }
+
+  imageUnavailable(): boolean {
+    return this.brokenImage();
+  }
+
+  markImageUnavailable(): void {
+    this.brokenImage.set(true);
   }
 
   previewPrice(): void {

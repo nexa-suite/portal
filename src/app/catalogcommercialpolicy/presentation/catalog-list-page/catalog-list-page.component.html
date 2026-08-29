@@ -1,12 +1,13 @@
 <div class="catalog-page buyer-catalog-page">
   <div class="page-header catalog-page-header">
     <div>
+      <div class="page-eyebrow">{{ 'catalog.eyebrow' | translate }}</div>
       <div class="page-title">{{ 'catalog.title' | translate }}</div>
       <div class="page-subtitle">{{ 'catalog.authorizedProducts' | translate: { count: totalItems() } }}</div>
     </div>
     <a class="btn btn-primary" [routerLink]="draftId() ? ['/portal/request-builder', draftId()] : ['/portal/request-builder']">
       <nexa-icon name="shopping_cart" />
-      {{ 'catalog.requestBuilderCount' | translate: { count: cart.count() } }}
+      {{ 'shell.navigation.requestBuilder' | translate }}
     </a>
   </div>
 
@@ -161,10 +162,12 @@
                     type="button"
                     [attr.aria-label]="('catalog.viewDetails' | translate) + ': ' + productTitle(item)"
                     (click)="openDetails(item)">
-                    @if (item.image?.url) {
-                      <img class="buyer-product-image" [src]="item.image?.url" [alt]="productTitle(item)" loading="lazy" />
+                    @if (item.image?.url && !imageUnavailable(item)) {
+                      <img class="buyer-product-image" [src]="item.image?.url" [alt]="productTitle(item)" loading="lazy" (error)="markImageUnavailable(item.catalogItemId)" />
                     } @else {
-                      <nexa-icon name="category" aria-hidden="true" />
+                      <span class="catalog-image-placeholder" aria-hidden="true">
+                        <nexa-icon name="inventory_2" />
+                      </span>
                     }
                     @if (item.promotionLabel || item.appliedPromotions.length > 0) {
                       <span class="flow-pill flow-pill-amber catalog-card-offer">{{ 'catalog.offer' | translate }}</span>
@@ -182,15 +185,35 @@
                         <div class="catalog-brand-line">{{ 'catalog.brandLine' | translate: { brand: item.brandName } }}</div>
                         @if (item.presentation) { <div class="catalog-presentation">{{ item.presentation }}</div> }
                       </div>
-                      <button
-                        class="add-btn"
-                        [class.add-btn-added]="isInCart(item)"
-                        type="button"
-                        [disabled]="isUnavailable(item)"
-                        [attr.aria-label]="(isInCart(item) ? 'catalog.removeFromRequest' : 'catalog.addToRequest') | translate"
-                        (click)="toggleCart(item)">
-                        <span aria-hidden="true">{{ isInCart(item) ? '−' : '+' }}</span>
-                      </button>
+                      @if (isInCart(item)) {
+                        <div
+                          class="catalog-quantity-stepper"
+                          role="group"
+                          [attr.aria-label]="'catalog.selected' | translate">
+                          <button
+                            type="button"
+                            [attr.aria-label]="'catalog.removeFromRequest' | translate"
+                            (click)="decreaseCartQuantity(item)">
+                            <nexa-icon [name]="cartQuantity(item) > 1 ? 'remove' : 'delete'" />
+                          </button>
+                          <span class="catalog-quantity-value" aria-live="polite">{{ cartQuantity(item) }}</span>
+                          <button
+                            type="button"
+                            [attr.aria-label]="'catalog.addToRequest' | translate"
+                            (click)="increaseCartQuantity(item)">
+                            <nexa-icon name="add" />
+                          </button>
+                        </div>
+                      } @else {
+                        <button
+                          class="add-btn"
+                          type="button"
+                          [disabled]="isUnavailable(item)"
+                          [attr.aria-label]="'catalog.addToRequest' | translate"
+                          (click)="toggleCart(item)">
+                          <nexa-icon name="add" />
+                        </button>
+                      }
                     </div>
 
                     <div class="flow-row catalog-card-badges">
@@ -200,7 +223,7 @@
 
                     <div class="flow-row-between catalog-card-footer">
                       <strong>{{ priceLabel(item) }}</strong>
-                      <span class="catalog-availability-summary">{{ availabilityLabelKey(item.availabilityStatus) | translate }}</span>
+                      <span class="catalog-price-context">{{ item.unitOfMeasure || 'UNIT' }}</span>
                     </div>
 
                     <div class="sr-only" aria-label="{{ 'catalog.pricingDetails' | translate }}">

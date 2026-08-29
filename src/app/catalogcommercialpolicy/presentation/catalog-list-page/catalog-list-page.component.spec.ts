@@ -62,10 +62,13 @@ function mockCatalog(status: CatalogListStatus) {
 
 function mockCart() {
   return {
+    items: signal([]),
     count: signal(0),
     activate: vi.fn(),
     has: vi.fn(() => false),
     toggle: vi.fn(),
+    remove: vi.fn(),
+    setQuantity: vi.fn(),
   };
 }
 
@@ -129,6 +132,7 @@ describe('CatalogListPageComponent', () => {
     expect(text).toContain('PEN 17.30');
     expect(text).toContain('PEN 2.70');
     expect(text).toContain('Buyer launch price');
+    expect(fixture.nativeElement.querySelector('.add-btn nexa-icon')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('[routerlink*="admin"], [href*="admin"]')).toBeNull();
   });
 });
