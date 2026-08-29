@@ -3,6 +3,38 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.24.0] - 2026-08-29
+
+Design Lab-aligned Buyer Catalog and cart interaction hardening.
+
+### Added
+
+- Buyer Catalog list and detail surfaces now use the Design Lab visual foundation, responsive product-card composition and canonical Nexa icons.
+- Product cards expose an accessible quantity stepper that increments, decrements and removes cart lines without turning the browser cart into authoritative inventory state.
+- Broken product media now degrades to an explicit catalog placeholder instead of a raw fallback character.
+
+### Changed
+
+- Catalog filters, product identity, offer status, cold-chain status, pricing context and detail actions use tokenized, responsive styles aligned with the legacy Vue evidence.
+- The catalog page CTA uses the canonical Buyer “Crear solicitud” label; the existing cart badge remains the source of visible draft-line count.
+- Existing HTTP catalog and cart ports remain in place; no endpoint, entity or backend business rule was invented.
+
+### Boundary
+
+- Portal remains Buyer-only. `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch remain Platform permission concerns.
+- `BOM` is not introduced because the accepted API and Blueprint do not define a canonical role, endpoint, entity or lifecycle contract for it.
+- Mock mode remains an explicit demo/test mode; the default catalog path remains the existing API-backed client.
+
+### Validation
+
+- Portal unit suite: 131 tests across 65 files passed.
+- Production build passed; existing initial-bundle and component-style budget warnings remain non-blocking.
+- Design Lab v1.0.2 foundation validator passed with 50 catalog assets.
+- Bounded-context validator passed for 11 canonical contexts.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Authenticated Playwright ICISA mock smoke passed at 1200 px and 390 px; cart interaction verified 0 → 1 → 2 → 1 → 0 and no horizontal overflow was observed.
+- `git diff --check` and both locale JSON parses passed.
+
 ## [0.21.0] - 2026-08-28
 
 Buyer Sales Order delivery-source recovery.
