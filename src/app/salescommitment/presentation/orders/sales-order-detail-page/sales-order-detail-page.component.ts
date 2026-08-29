@@ -30,6 +30,8 @@ export class SalesOrderDetailPageComponent {
     return this.deliveryPage().find(item => item.salesOrderNumber === number)?.id ?? null;
   });
   private readonly deliveryPage = signal<readonly SalesOrderDeliveryProjection[]>([]);
+  readonly deliveryLoading = signal(false);
+  readonly deliveryError = signal(false);
   readonly flowSteps = computed(() => {
     const order = this.facade.detailState().item;
     if (!order) return [];
@@ -44,14 +46,13 @@ export class SalesOrderDetailPageComponent {
     const id = this.route.snapshot.paramMap.get('salesOrderId');
     if (id) {
       this.facade.loadDetail(id);
-      this.delivery.list().subscribe({
-        next: page => this.deliveryPage.set(page),
-        error: () => this.deliveryPage.set([]),
-      });
+      this.loadDelivery();
     }
   }
 
   reload(): void { this.facade.reloadCurrent(); }
+
+  retryDelivery(): void { this.loadDelivery(); }
 
   orderTone(status: SalesOrderStatus): StatusTone {
     if (status === 'CONFIRMED') return 'success';
@@ -69,5 +70,22 @@ export class SalesOrderDetailPageComponent {
 
   itemCount(order: SalesOrder): number {
     return order.lines.reduce((total, line) => total + line.quantity, 0);
+  }
+
+  private loadDelivery(): void {
+    if (this.deliveryLoading()) return;
+    this.deliveryLoading.set(true);
+    this.deliveryError.set(false);
+    this.delivery.list().subscribe({
+      next: page => {
+        this.deliveryPage.set(page);
+        this.deliveryLoading.set(false);
+      },
+      error: () => {
+        this.deliveryPage.set([]);
+        this.deliveryLoading.set(false);
+        this.deliveryError.set(true);
+      },
+    });
   }
 }
