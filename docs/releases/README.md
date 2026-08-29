@@ -4,6 +4,7 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 
 | Release | Summary |
 |---|---|
+| [v0.26.0](./v0.26.0.md) | API-only production composition and notifications wiring |
 | [v0.25.0](./v0.25.0.md) | API-only Purchase Request summaries and runtime hardening |
 | [v0.24.0](./v0.24.0.md) | Design Lab-aligned Buyer Catalog and cart stepper |
 | [v0.21.0](./v0.21.0.md) | Buyer Sales Order delivery-source recovery |
@@ -30,8 +31,9 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 |---|---|
 | [UNRELEASED HISTORICAL CANDIDATE: v0.6.0](./v0.6.0.md) | Consolidated into later published work; no tag or GitHub Release |
 
-Current release is `0.25.0`. Buyer Purchase Request summaries now preserve the
-server-provided line count without fabricating list-detail data, and browser
-runtime configuration is API-only. The release continues the executable Design
-Lab foundation and legacy Vue visual direction; it does not claim full product
-migration or pixel-level parity across every Portal route.
+Current release is `0.26.0`. Production composition now binds the existing
+Buyer HTTP adapters directly to application ports, including the canonical
+notifications port; mock providers remain isolated test fixtures. The release
+continues the executable Design Lab foundation and legacy Vue visual direction;
+it does not claim full product migration or pixel-level parity across every
+Portal route.
