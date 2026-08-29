@@ -67,6 +67,7 @@ export class CatalogListPageComponent {
   readonly stockFilter = signal<StockFilter>('all');
   readonly onlyOffers = signal(false);
   readonly brandExpanded = signal(false);
+  private readonly brokenImages = signal<ReadonlySet<string>>(new Set());
   readonly stockOptions: readonly StockFilter[] = ['all', 'ok', 'low', 'out'];
   readonly items = computed(() => catalogItemsWithOutOfStockLast(this.catalog.items()));
   readonly visibleItems = computed(() => {
@@ -127,6 +128,36 @@ export class CatalogListPageComponent {
 
   toggleCart(item: CatalogItemSummary): void {
     this.cart.toggle(item);
+  }
+
+  cartQuantity(item: CatalogItemSummary): number {
+    return this.cart.items().find((line) => line.catalogItemId === item.catalogItemId)?.quantity ?? 0;
+  }
+
+  increaseCartQuantity(item: CatalogItemSummary): void {
+    const quantity = this.cartQuantity(item);
+    if (quantity > 0) this.cart.setQuantity(item.catalogItemId, quantity + 1);
+  }
+
+  decreaseCartQuantity(item: CatalogItemSummary): void {
+    const quantity = this.cartQuantity(item);
+    if (quantity <= 1) {
+      this.cart.remove(item.catalogItemId);
+      return;
+    }
+    this.cart.setQuantity(item.catalogItemId, quantity - 1);
+  }
+
+  imageUnavailable(item: CatalogItemSummary): boolean {
+    return this.brokenImages().has(item.catalogItemId);
+  }
+
+  markImageUnavailable(catalogItemId: string): void {
+    this.brokenImages.update((current) => {
+      const next = new Set(current);
+      next.add(catalogItemId);
+      return next;
+    });
   }
 
   isInCart(item: CatalogItemSummary): boolean {

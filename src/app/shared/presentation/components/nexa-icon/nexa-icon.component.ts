@@ -39,6 +39,7 @@ const ICON_PATHS: Record<string, IconPath> = {
   person_edit: ['M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M3 21a6 6 0 0 1 12 0', 'M16 15l5-5 2 2-5 5-3 1z'],
   receipt_long: ['M5 3h14v18l-3-2-4 2-4-2-3 2z', 'M8 8h8', 'M8 12h8', 'M8 16h5'],
   request_quote: ['M4 5h16v14H4z', 'M8 9h8', 'M8 13h5', 'M17 3v4'],
+  remove: ['M5 12h14'],
   search: ['M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z', 'M16 16l5 5'],
   schedule: ['M12 7v5l3 2', 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'],
   send: ['M3 4l18 8-18 8 4-8-4-8z', 'M7 12h10'],
