@@ -3,6 +3,35 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.21.0] - 2026-08-28
+
+Buyer Sales Order delivery-source recovery.
+
+### Added
+
+- Sales Order detail now distinguishes delivery-source loading from an unavailable delivery lookup.
+- An independent retry action recovers the existing delivery projection without reloading the Sales Order detail.
+
+### Changed
+
+- Buyer order detail no longer presents a failed delivery lookup as pending or empty tracking.
+- Delivery-source feedback uses existing Nexa loading, button and semantic warning primitives.
+
+### Boundary
+
+- Portal remains Buyer-only; `COMPANY_OWNER`, `SALES`, `WAREHOUSE` and `LOGISTICS`/Dispatch stay Platform permission concerns.
+- `BOM` remains OPEN/DEFERRED because no accepted role, endpoint, entity or lifecycle contract exists.
+- API, Blueprint, Design Lab and Vue/legacy repositories were not modified; the existing API delivery projection remains authoritative.
+
+### Validation
+
+- Portal unit suite: 131 tests across 65 files passed.
+- Design Lab v1.0.2 foundation, catalog asset and bounded-context validators passed.
+- Production build passed with existing bundle/style budget warnings.
+- Authenticated Buyer E2E against Docker: 16/16 passed.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- `git diff --check`: passed.
+
 ## [0.20.0] - 2026-08-28
 
 Buyer API source-state recovery and honest payment-history feedback.
