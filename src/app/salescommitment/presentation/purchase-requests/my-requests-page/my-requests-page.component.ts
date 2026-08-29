@@ -45,4 +45,6 @@ export class MyRequestsPageComponent {
   summaryText(request: PurchaseRequest): string | null {
     return request.reviewNote || request.comment || null;
   }
+
+  lineCount(request: PurchaseRequest): number { return request.lineCount; }
 }

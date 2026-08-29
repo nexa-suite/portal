@@ -1,68 +1,36 @@
-# Portal mock mode
+# Portal mock adapters
 
-El primer runtime mock del Buyer Portal se activa únicamente con el global
-`__NEXA_RUNTIME_CONFIG__`. El valor por defecto sigue siendo `dataMode: 'api'`
-con `tenantProfile: 'generic'`; no hay flags de build ni cambios de contrato
-REST.
+Buyer Portal runtime resolves `dataMode: 'api'` unconditionally. Runtime global,
+local storage and localhost query parameters cannot switch browser execution to
+mock data. This keeps catalog, Client Account, request builder and Purchase
+Request views on existing HTTP contracts.
 
-## Activación
+Mock classes remain available for unit tests, adapter tests and isolated build
+fixtures. Tests may inject `PORTAL_RUNTIME_CONFIG` with `dataMode: 'mock'` or
+bind a mock adapter directly; this does not represent production runtime.
 
-Define el global antes de que Angular haga bootstrap. En un `index.html` servido
-por una integración local, el bloque debe aparecer antes del bundle de Angular:
+## Runtime configuration
+
+`__NEXA_RUNTIME_CONFIG__` may still provide existing API base and tenant profile
+settings before Angular bootstrap:
 
 ```html
 <script>
   window.__NEXA_RUNTIME_CONFIG__ = {
-    dataMode: 'mock',
+    apiBase: 'http://api.local',
     tenantProfile: 'icisa'
   };
 </script>
 ```
 
-Para el perfil genérico usa `tenantProfile: 'generic'`. Si un valor no está
-soportado, el runtime vuelve a API/generic. El `apiBaseUrl` y las rutas existentes
-siguen disponibles para `dataMode: 'api'`.
+`tenantProfile` supports `generic` and `icisa`. Unsupported values fall back to
+`generic`. `dataMode` is ignored by runtime resolver and always returns `api`;
+`nexaDataMode=mock` is no longer a browser activation path.
 
-Como atajo local, también se puede abrir
-`http://localhost:4300/sign-in?nexaDataMode=mock&nexaTenantProfile=icisa`. El
-override por query sólo se acepta en `localhost`, `127.0.0.1` o `::1`.
+## Test fixtures
 
-## Credenciales deterministas
-
-Los dos perfiles usan la contraseña `mock-password`:
-
-| Perfil | Workspace | Buyer |
-|---|---|---|
-| `generic` | `generic` | `buyer@generic.example` |
-| `icisa` | `icisa` | `buyer@icisa.example` |
-
-El mock expone los permisos Buyer necesarios para catálogo, cuenta, solicitudes,
-órdenes, documentos, tracking, notificaciones y pagos. Los fixtures no son
-persistencia y se reinician al recargar la aplicación.
-
-## Alcance funcional
-
-El runtime mock cubre los ports Buyer-safe implementados en cada bounded
-context:
-
-- BC-01 Tenant Access & Governance: autenticación, sesión y perfil Buyer.
-- BC-02 Customer & Buyer Relationships: cuenta y direcciones Buyer.
-- BC-03 Catalog & Commercial Policy: catálogo y preview de precio.
-- BC-04 Sales Commitment: draft canónico de Purchase Request, ciclo de
-  solicitudes, sales orders y su descarga.
-- BC-06 Fulfillment & Delivery: entregas y tracking buyer-safe.
-- BC-07 Credit & Receivables y BC-08 Payments: cuentas por cobrar, historial,
-  transferencia reportada y Payment Intent local.
-- BC-09 Business Documents: documentos y evidencias descargables.
-- BC-10 Notifications: feed, contador y estado de lectura.
-- BC-11 Business Traceability: change-feed offline no-op.
-
-El store en memoria comparte el resultado del submit entre el draft y la lista
-de solicitudes; sus cambios respetan `If-Match` mediante `version`/ETag y
-rechazan versiones obsoletas con error 409. El Payment Element mock reemplaza
-el SDK externo durante la demo; no contacta Stripe.
-
-El mock no simula persistencia, autorización real, jobs, webhooks ni datos
-internos de Platform. `api` conserva los clientes HTTP existentes y es el
-modo por defecto; `mock` sólo cambia los adapters seleccionados detrás de los
-application ports.
+Mock adapters cover deterministic Buyer-safe contracts for isolated tests. They
+must not be used as evidence of API behavior, persistence, authorization, jobs,
+webhooks, provider reconciliation or production readiness. Real API behavior
+requires corresponding API client, authenticated environment and server
+contract.

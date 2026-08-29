@@ -25,5 +25,7 @@
 .request-product > div { display: grid; gap: var(--nexa-space-1); min-width: 0; }
 .request-product strong, .request-product span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .request-product span { color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-xs); }
+.request-lines-summary { display: flex; align-items: center; gap: var(--nexa-space-2); margin: 0; padding: var(--nexa-space-3); border: 1px solid var(--nexa-color-border-default); border-radius: var(--nexa-radius-md); color: var(--nexa-color-text-secondary); font-size: var(--nexa-font-size-sm); line-height: var(--nexa-line-height-relaxed); }
+.request-lines-summary nexa-icon { width: 1.2rem; height: 1.2rem; flex: 0 0 1.2rem; color: var(--nexa-color-primary-700); }
 @media (max-width: 900px) { .page { padding: var(--nexa-space-6); } .request-product-strip { grid-template-columns: 1fr; } }
 @media (max-width: 650px) { .page { padding: var(--nexa-space-5) var(--nexa-space-4); } .metrics { grid-template-columns: 1fr; } .request-card-head { align-items: flex-start; flex-direction: column; } .request-meta-grid { grid-template-columns: 1fr; } .open-link { align-self: flex-start; } }

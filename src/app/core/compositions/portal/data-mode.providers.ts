@@ -63,6 +63,11 @@ export function provideSelectedPortalAdapter<T>(
   };
 }
 
+/** Binds a route to its real HTTP adapter; mock mode cannot replace it. */
+export function provideApiOnlyPortalAdapter<T>(port: ProviderToken<T>, apiAdapter: Type<T>): Provider {
+  return { provide: port, useExisting: apiAdapter };
+}
+
 export function provideChangeFeedAdapter(): Provider {
   return provideSelectedPortalAdapter(CHANGE_FEED_FETCH_PORT, ChangeFeedFetchClient, MockChangeFeedFetchClient);
 }

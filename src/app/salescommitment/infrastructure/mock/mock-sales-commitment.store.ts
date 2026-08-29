@@ -247,6 +247,7 @@ export class MockSalesCommitmentStore {
       comment: command.comment,
       reviewNote: null,
       lines: command.lines.map((line, index) => this.requestLine(id, line, index + 1)),
+      lineCount: command.lines.length,
       version: 1,
       etag: '"1"',
     };
@@ -350,9 +351,12 @@ export class MockSalesCommitmentStore {
     patch: Partial<PurchaseRequest>,
   ): PurchaseRequest {
     const version = current.version + 1;
+    const lines = patch.lines ?? current.lines;
     const updated: PurchaseRequest = {
       ...current,
       ...patch,
+      lines,
+      lineCount: lines.length,
       version,
       etag: `"${version}"`,
     };
@@ -420,6 +424,7 @@ export class MockSalesCommitmentStore {
       comment: null,
       reviewNote: null,
       lines: draft.lines.map((line, index) => this.requestLineFromDraft(id, line, index + 1)),
+      lineCount: draft.lines.length,
       version: draft.version,
       etag: draft.etag,
     };
@@ -480,6 +485,7 @@ export class MockSalesCommitmentStore {
         unit: 'unit',
         notes: '',
       }, 1)],
+      lineCount: 1,
       version: 2,
       etag: '"2"',
     };

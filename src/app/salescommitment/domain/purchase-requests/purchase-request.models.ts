@@ -34,6 +34,8 @@ export interface PurchaseRequest {
   readonly comment: string | null;
   readonly reviewNote: string | null;
   readonly lines: readonly PurchaseRequestLine[];
+  /** Summary responses expose this count; detail responses derive it from lines. */
+  readonly lineCount: number;
   readonly version: number;
   readonly etag?: string;
 }
