@@ -12,7 +12,7 @@ import { DeliveryTrackingApiPort } from '../../../fulfillmentdelivery/applicatio
 import { DeliveryTrackingApiClient } from '../../../fulfillmentdelivery/infrastructure/delivery-tracking-api.client';
 import { CHANGE_FEED_FETCH_PORT } from '../../change-feed/application/change-feed-fetch.port';
 import { ChangeFeedFetchClient } from '../../change-feed/infrastructure/change-feed-fetch.client';
-import { NOTIFICATIONS_PORT } from '../../../notifications/application/notifications.port';
+import { NotificationsApiPort } from '../../../notifications/application/ports/notifications-api.port';
 import { NotificationsApiClient } from '../../../notifications/infrastructure/notifications-api.client';
 import { PAYMENT_ELEMENT_PORT } from '../../../payments/application/ports/payment-element.port';
 import { PAYMENTS_PORT } from '../../../payments/application/ports/payments-api.port';
@@ -37,7 +37,7 @@ function bind<T>(port: ProviderToken<T>, client: Type<T>): Provider[] {
 export const PORTAL_AUTH_PROVIDERS = bind(PORTAL_AUTH_PORT, PortalAuthApiClient);
 export const PORTAL_SECURITY_PROVIDERS = bind(SECURITY_PORT, SecurityApiClient);
 export const PORTAL_CHANGE_FEED_PROVIDERS = bind(CHANGE_FEED_FETCH_PORT, ChangeFeedFetchClient);
-export const PORTAL_NOTIFICATIONS_PROVIDERS = bind(NOTIFICATIONS_PORT, NotificationsApiClient);
+export const PORTAL_NOTIFICATIONS_PROVIDERS = bind(NotificationsApiPort, NotificationsApiClient);
 export const PORTAL_PAYMENT_ELEMENT_PROVIDERS = bind<PaymentElementPort>(PAYMENT_ELEMENT_PORT, StripePaymentElementAdapter);
 
 export const PORTAL_CATALOG_PROVIDERS = bind(CatalogApiPort, CatalogApiClient);
