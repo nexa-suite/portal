@@ -35,4 +35,13 @@ describe('PurchaseRequestApiClient', () => {
     request.flush({ id: 'PR-001', code: 'PR-0001', status: 'SUBMITTED', priority: 'NORMAL', paymentOption: 'CARD_STRIPE', version: 1, lines: [] });
     expect(result?.paymentOption).toBe('CARD_STRIPE');
   });
+
+  it('maps the API summary line count when list responses omit detail lines', () => {
+    let result: PurchaseRequest | undefined;
+    client.list().subscribe((page) => result = page.items[0]);
+    const request = http.expectOne('http://api.local/api/v1/purchase-requests?page=0&size=50&sort=createdAt,desc');
+    request.flush({ items: [{ id: 'PR-001', code: 'PR-0001', status: 'SUBMITTED', priority: 'NORMAL', lineCount: 3, version: 1 }], page: 0, size: 50, total: 1 });
+    expect(result?.lineCount).toBe(3);
+    expect(result?.lines).toEqual([]);
+  });
 });

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
 import { PortalRuntimeConfig, PORTAL_RUNTIME_CONFIG } from '../../security/runtime-config';
-import { provideSelectedPortalAdapter, selectPortalAdapter } from './data-mode.providers';
+import { provideApiOnlyPortalAdapter, provideSelectedPortalAdapter, selectPortalAdapter } from './data-mode.providers';
 
 class ApiAdapter { readonly mode: string = 'api'; }
 class MockAdapter { readonly mode: string = 'mock'; }
@@ -43,5 +43,18 @@ describe('portal data mode selector', () => {
     });
 
     expect(TestBed.inject(ADAPTER_PORT)).toBeInstanceOf(MockAdapter);
+  });
+
+  it('keeps an API-only route on its HTTP implementation in mock mode', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        ApiAdapter,
+        MockAdapter,
+        { provide: PORTAL_RUNTIME_CONFIG, useValue: config('mock') },
+        provideApiOnlyPortalAdapter(ADAPTER_PORT, ApiAdapter),
+      ],
+    });
+
+    expect(TestBed.inject(ADAPTER_PORT)).toBeInstanceOf(ApiAdapter);
   });
 });

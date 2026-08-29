@@ -6,7 +6,7 @@ import { PurchaseRequestSelfServiceFacade } from './purchase-request-self-servic
 import { PurchaseRequestLiveRefreshService } from '../../../core/change-feed/application/purchase-request-live-refresh.service';
 
 describe('PurchaseRequestSelfServiceFacade', () => {
-  const item = { id: 'PR-1', code: 'PR-0001', status: 'DRAFT' as const, priority: 'NORMAL' as const, requestedDeliveryDate: null, deliveryProfileSnapshot: null, paymentOption: null, comment: null, reviewNote: null, lines: [], version: 0 };
+  const item = { id: 'PR-1', code: 'PR-0001', status: 'DRAFT' as const, priority: 'NORMAL' as const, requestedDeliveryDate: null, deliveryProfileSnapshot: null, paymentOption: null, comment: null, reviewNote: null, lines: [], lineCount: 0, version: 0 };
   beforeEach(() => TestBed.resetTestingModule());
   it('loads own requests, creates draft and submits with generated key', () => {
     const api = { list: vi.fn(() => of({ items: [item], page: 0, size: 50, total: 1 })), create: vi.fn(() => of(item)), submit: vi.fn(() => of({ ...item, status: 'SUBMITTED' as const })), cancel: vi.fn(() => of({ ...item, status: 'CANCELLED' as const })) };

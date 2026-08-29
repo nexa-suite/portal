@@ -15,7 +15,7 @@ describe('portal runtime config', () => {
     );
   });
 
-  it('accepts mock mode and a tenant profile only through the runtime global', () => {
+  it('always resolves API mode while preserving supported runtime identity settings', () => {
     vi.stubGlobal('__NEXA_RUNTIME_CONFIG__', {
       dataMode: 'mock',
       tenantProfile: 'icisa',
@@ -24,10 +24,22 @@ describe('portal runtime config', () => {
 
     const config = resolvePortalRuntimeConfig();
 
-    expect(config.dataMode).toBe('mock');
+    expect(config.dataMode).toBe('api');
     expect(config.tenantProfile).toBe('icisa');
     expect(config.apiBaseUrl).toBe('http://api.local');
     expect(config.surface).toBe('PORTAL');
+  });
+
+  it('ignores the localhost mock query override', () => {
+    vi.stubGlobal('location', {
+      hostname: 'localhost',
+      search: '?nexaDataMode=mock&nexaTenantProfile=icisa',
+    });
+
+    const config = resolvePortalRuntimeConfig();
+
+    expect(config.dataMode).toBe('api');
+    expect(config.tenantProfile).toBe('icisa');
   });
 
   it('falls back to API/generic for unsupported runtime values', () => {
