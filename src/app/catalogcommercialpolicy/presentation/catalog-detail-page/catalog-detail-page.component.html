@@ -1,6 +1,6 @@
 <div class="catalog-detail-page">
   <a class="back-link" routerLink="/portal/product-catalog" [queryParams]="backQueryParams()"
-    >← {{ 'catalog.backToCatalog' | translate }}</a
+    ><nexa-icon name="arrow_back" /> <span>{{ 'catalog.backToCatalog' | translate }}</span></a
   >
 
   @switch (catalog.detailStatus()) {
@@ -25,10 +25,10 @@
       @if (catalog.detail(); as item) {
         <article class="catalog-detail-card">
           <div class="detail-visual">
-            @if (item.image?.url) {
-              <img [src]="item.image?.url" [alt]="item.productFamilyName || item.itemName" />
+            @if (item.image?.url && !imageUnavailable()) {
+              <img [src]="item.image?.url" [alt]="item.productFamilyName || item.itemName" (error)="markImageUnavailable()" />
             } @else {
-              <span class="image-placeholder" aria-hidden="true">N</span>
+              <span class="image-placeholder" aria-hidden="true"><nexa-icon name="inventory_2" /></span>
             }
           </div>
           <div class="detail-copy">
@@ -105,6 +105,7 @@
                 [class.selected]="isInCart(item)"
                 (click)="toggleCart(item)"
               >
+                <nexa-icon [name]="isInCart(item) ? 'delete' : 'add'" />
                 {{ (isInCart(item) ? 'catalog.removeFromRequest' : 'catalog.addToRequest') | translate }}
               </button>
               <a class="request-link" [routerLink]="draftId() ? ['/portal/request-builder', draftId()] : ['/portal/request-builder']">
@@ -112,6 +113,7 @@
               </a>
             </div>
             <button type="button" class="back-button" (click)="backToCatalog()">
+              <nexa-icon name="arrow_back" />
               {{ 'catalog.backToResults' | translate }}
             </button>
           </div>
