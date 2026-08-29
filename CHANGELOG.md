@@ -3,6 +3,44 @@
 All notable changes to this project are documented in this file.
 The project uses Semantic Versioning.
 
+## [0.25.0] - 2026-08-29
+
+API-only Purchase Request summaries and runtime hardening.
+
+### Added
+
+- Purchase Request list cards now expose the server-provided `lineCount` and
+  show product lines only when the response actually includes detail lines.
+- Focused coverage for summary mapping, list rendering and API-only runtime
+  configuration.
+
+### Changed
+
+- Browser runtime ignores mock data switches and resolves the existing HTTP
+  adapters for the Buyer Portal.
+- Purchase Request route composition keeps the existing application ports and
+  API contracts; list responses no longer imply fabricated product details.
+
+### Boundary
+
+- Portal remains Buyer-only. Platform roles and Dispatch remain outside the
+  Portal projection.
+- `BOM` remains `OPEN`/`DEFERRED`: no accepted role, endpoint, entity, state or
+  lifecycle contract was invented.
+- Mock adapters remain available only for isolated tests; they are not a
+  browser-runtime data source.
+
+### Validation
+
+- Portal unit suite: 135 tests across 66 files passed.
+- Production build passed with existing bundle/style budget warnings.
+- Design Lab v1.0.2 foundation, catalog-asset and bounded-context validators
+  passed.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Pull request #56 CodeQL and both CI verification checks passed.
+- No authenticated live API smoke is claimed; the local API endpoint was not
+  available during release preparation.
+
 ## [0.24.0] - 2026-08-29
 
 Design Lab-aligned Buyer Catalog and cart interaction hardening.
