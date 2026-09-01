@@ -1,0 +1,25 @@
+# HISTORICAL INTERNAL LABEL — NOT A CURRENT PUBLIC RELEASE — Nexa Buyer Portal v0.6.0
+
+This document preserves candidate content later consolidated into published `v0.7.0`. `v0.6.0` has no published tag or GitHub Release.
+
+## Summary
+
+Buyer-facing Sales Order visibility with server-backed event timelines and session-safe live synchronization.
+
+## Highlights
+
+- Buyer Sales Orders list/detail pages link each order to its source Purchase Request.
+- Lines, totals, status, rejection reason and lifecycle events are read-only in the Buyer surface.
+- Change-feed client uses bearer authentication, aborts on logout, refreshes once on `401` and reconnects with bounded exponential backoff.
+- Loading, empty, error and retry states remain explicit when data is unavailable.
+
+## Security and contract
+
+- Sales Order reads remain limited by the API to the authenticated buyer's client account.
+- The Portal does not expose internal confirmation, rejection or cancellation controls.
+- API response DTOs are mapped into Portal domain models; no browser storage is used for access or refresh tokens.
+
+## Validation scope
+
+- Unit tests, optimized build, catalog asset validation and npm audit are required gates.
+- Structural parity is advanced; pixel-level Vue parity is not claimed without matched authenticated captures.

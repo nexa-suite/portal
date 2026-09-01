@@ -1,4 +1,4 @@
-# Nexa Buyer Portal v0.15.0
+# HISTORICAL RELEASE RECORD — FORMER PUBLIC LABEL v0.15.0 — NOT A CURRENT RELEASE
 
 Release record for workspace-aware buyer IAM and the Vue-aligned
 buyer request flow over the canonical bounded contexts.

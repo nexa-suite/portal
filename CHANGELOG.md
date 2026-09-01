@@ -5,14 +5,12 @@ The project uses Semantic Versioning.
 
 ## Historical consolidation
 
-The published `v0.15.0` through `v0.25.0` records were consecutive
-The published `v0.15.0` through `v0.21.0`, plus `v0.24.0` and `v0.25.0`,
-were implementation snapshots from one compressed delivery wave. Their public
-release refs were retired during authorized SCM normalization; commits and
-detailed entries remain historical evidence. `v0.14.0` was an internal
-preparation state and has no published tag or GitHub Release.
+Former release labels and retired implementation snapshots remain below as
+historical evidence. Current public headings use the normalized sequence.
 
-## [0.26.0] - 2026-08-29
+## [0.12.0] - 2026-08-29
+
+Former historical label: `v0.26.0`.
 
 API-only production composition for the Buyer Portal.
 
@@ -45,7 +43,9 @@ API-only production composition for the Buyer Portal.
 - Design Lab v1.0.2 foundation, catalog-asset and bounded-context validators
   passed.
 
-## [0.25.0] - 2026-08-29
+## Historical release records
+
+### Former historical label `v0.25.0` - 2026-08-29
 
 API-only Purchase Request summaries and runtime hardening.
 
@@ -83,7 +83,7 @@ API-only Purchase Request summaries and runtime hardening.
 - No authenticated live API smoke is claimed; the local API endpoint was not
   available during release preparation.
 
-## [0.24.0] - 2026-08-29
+### Former historical label `v0.24.0` - 2026-08-29
 
 Design Lab-aligned Buyer Catalog and cart interaction hardening.
 
@@ -115,7 +115,7 @@ Design Lab-aligned Buyer Catalog and cart interaction hardening.
 - Authenticated Playwright ICISA mock smoke passed at 1200 px and 390 px; cart interaction verified 0 → 1 → 2 → 1 → 0 and no horizontal overflow was observed.
 - `git diff --check` and both locale JSON parses passed.
 
-## [0.21.0] - 2026-08-28
+### Former historical label `v0.21.0` - 2026-08-28
 
 Buyer Sales Order delivery-source recovery.
 
@@ -144,7 +144,7 @@ Buyer Sales Order delivery-source recovery.
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - `git diff --check`: passed.
 
-## [0.20.0] - 2026-08-28
+### Former historical label `v0.20.0` - 2026-08-28
 
 Buyer API source-state recovery and honest payment-history feedback.
 
@@ -174,7 +174,7 @@ Buyer API source-state recovery and honest payment-history feedback.
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - `git diff --check`: passed.
 
-## [0.19.0] - 2026-08-28
+### Former historical label `v0.19.0` - 2026-08-28
 
 API-backed Buyer order telemetry and explicit action feedback.
 
@@ -204,7 +204,7 @@ API-backed Buyer order telemetry and explicit action feedback.
 - Authenticated Buyer canonical E2E against Docker: desktop and mobile 2/2 passed.
 - `npm audit --omit=dev`: 0 vulnerabilities.
 
-## [0.18.0] - 2026-08-28
+### Former historical label `v0.18.0` - 2026-08-28
 
 API continuity and server-owned delivery origin.
 
@@ -224,7 +224,7 @@ API continuity and server-owned delivery origin.
 - Canonical Request Builder unit tests cover pending origin state and server snapshot hydration.
 - Live E2E asserts warehouse selection and route-origin snapshots returned by the API.
 
-## [0.17.0] - 2026-08-28
+### Former historical label `v0.17.0` - 2026-08-28
 
 Server-backed Buyer Request Builder continuity.
 
@@ -251,7 +251,7 @@ Server-backed Buyer Request Builder continuity.
 - Portal production build passed; existing bundle/style budget warnings remain non-blocking.
 - Live Buyer canonical request E2E passed against the Docker API.
 
-## [0.16.0] - 2026-08-28
+### Former historical label `v0.16.0` - 2026-08-28
 
 Server-authoritative buyer payment preferences and canonical payment choices.
 
@@ -275,7 +275,7 @@ Server-authoritative buyer payment preferences and canonical payment choices.
 - Buyer Request Builder tests passed (5/5).
 - Bounded-context, i18n and diff checks are required before publication.
 
-## [0.15.0] - 2026-08-28
+### Former historical label `v0.15.0` - 2026-08-28
 
 Buyer IAM boundary hardening for the canonical Portal surface.
 
@@ -311,13 +311,9 @@ Buyer IAM boundary hardening for the canonical Portal surface.
 - API mode remains the default; mock sessions are in-memory and do not claim backend persistence, email delivery or production 2FA.
 - Blueprint marks detailed Web acceptance criteria as pending; this release does not claim 100% of those pending criteria.
 
-## [0.14.0] - 2026-08-26
+### Former historical label `v0.14.0` - 2026-08-26
 
 Runtime mock slices for generic and ICISA buyer workspaces across the canonical frontend boundaries.
-
-### Status
-
-- Unreleased historical candidate: no Git tag or GitHub Release exists for `v0.14.0`.
 
 ### Added
 
@@ -353,7 +349,9 @@ Runtime mock slices for generic and ICISA buyer workspaces across the canonical 
   persistence, authorization, jobs or webhooks.
 - This remains a PRE-V1 functional foundation; it does not claim complete product migration or Production Readiness.
 
-## [0.13.0] - 2026-08-26
+## [0.11.0] - 2026-08-26
+
+Former historical label: `v0.13.0`.
 
 Canonical bounded-context layering and Angular composition release for the Nexa Buyer Portal.
 
@@ -382,7 +380,9 @@ Canonical bounded-context layering and Angular composition release for the Nexa 
 - No API endpoints, API contracts or Blueprint canonical definitions were changed by this release.
 - This remains a PRE-V1 architecture release; it does not claim complete product migration or Production Readiness.
 
-## [0.12.0] - 2026-08-23
+## [0.10.0] - 2026-08-23
+
+Former historical label: `v0.12.0`.
 
 Visual and interaction convergence baseline using Nexa Design Lab (v1.0.1) tokens and components.
 
@@ -402,7 +402,9 @@ Visual and interaction convergence baseline using Nexa Design Lab (v1.0.1) token
 
 - Unit tests (`100% PASS`), Design Lab v1.0.1 token checksum validation (`PASS`), catalog asset validation (`PASS`), and production build (`PASS`).
 
-## [0.11.0] - 2026-08-23
+## [0.9.0] - 2026-08-23
+
+Former historical label: `v0.11.0`.
 
 PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
 
@@ -429,7 +431,9 @@ PRE-V1 Architecture & Governance Foundation release for the Nexa Buyer Portal.
 - 90 unit tests passed across 44 test suites.
 - Angular production build succeeded.
 
-## [0.10.0] - 2026-08-22
+## [0.8.0] - 2026-08-22
+
+Former historical label: `v0.10.0`.
 
 Functional convergence continuation baseline for the Nexa Buyer Portal.
 
@@ -442,11 +446,15 @@ Functional convergence continuation baseline for the Nexa Buyer Portal.
 
 - Catalog asset validation, tests, production build and CI gates passed.
 
-## [0.7.1] - 2026-08-18
+## [0.7.0] - 2026-08-18
+
+Former historical label: `v0.7.1`.
 
 Buyer availability and delivery-tracking stabilization.
 
-## [0.7.0] - 2026-08-01
+## [0.6.0] - 2026-08-01
+
+Former historical label: `v0.7.0`.
 
 Consolidated Buyer commercial and delivery-tracking surface.
 
@@ -460,7 +468,7 @@ Consolidated Buyer commercial and delivery-tracking surface.
 
 - 44 tests, production build, npm audit, canonical Modern Docker build and authenticated responsive browser checks passed.
 
-[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.7.0) · [Detailed evidence](https://github.com/nexa-suite/portal/blob/v0.7.0/docs/releases/v0.7.0.md)
+[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.6.0) · [Detailed evidence (historical filename)](https://github.com/nexa-suite/portal/blob/v0.6.0/docs/releases/v0.7.0.md)
 
 ## [0.5.0] - 2026-07-30
 
@@ -477,7 +485,9 @@ Consolidated Buyer authentication, catalog and Purchase Request work; intermedia
 
 [Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.5.0) · [Detailed evidence](https://github.com/nexa-suite/portal/blob/v0.5.0/docs/releases/v0.5.0.md)
 
-## [0.3.0] - 2026-07-29
+## [0.4.0] - 2026-07-29
+
+Former historical label: `v0.3.0`.
 
 Angular buyer shell at `/home`, packaged as a static Nginx image.
 
@@ -490,9 +500,11 @@ Angular buyer shell at `/home`, packaged as a static Nginx image.
 
 - Catalog assets, 25 unit tests, production build and `/home` Playwright smoke passed.
 
-[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.3.0) · [Detailed evidence](https://github.com/nexa-suite/portal/blob/v0.3.0/docs/releases/v0.3.0.md)
+[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.4.0) · [Detailed evidence (historical filename)](https://github.com/nexa-suite/portal/blob/v0.4.0/docs/releases/v0.3.0.md)
 
-## [0.2.1] - 2026-07-29
+## [0.3.0] - 2026-07-29
+
+Former historical label: `v0.2.1`.
 
 Repository experience and governance update.
 
@@ -504,7 +516,7 @@ Repository experience and governance update.
 
 - Documentation, Mermaid, duplicate cleanup, asset validation, tests and production build checks passed.
 
-[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.2.1) · [Detailed evidence](https://github.com/nexa-suite/portal/blob/v0.2.1/docs/releases/v0.2.1.md)
+[Release evidence](https://github.com/nexa-suite/portal/releases/tag/v0.3.0) · [Detailed evidence (historical filename)](https://github.com/nexa-suite/portal/blob/v0.3.0/docs/releases/v0.2.1.md)
 
 ## [0.2.0] - 2026-07-28
 
