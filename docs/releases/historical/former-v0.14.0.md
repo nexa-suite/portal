@@ -1,4 +1,4 @@
-# Nexa Buyer Portal v0.14.0
+# HISTORICAL RELEASE RECORD — FORMER PUBLIC LABEL v0.14.0 — NOT A CURRENT RELEASE
 
 Local release preparation for executable buyer slices over the canonical
 bounded contexts.

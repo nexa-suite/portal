@@ -1,4 +1,4 @@
-# Nexa Buyer Portal v0.16.0
+# HISTORICAL RELEASE RECORD — FORMER PUBLIC LABEL v0.16.0 — NOT A CURRENT RELEASE
 
 Release record for server-authoritative buyer payment preferences in the
 canonical Request Builder.
