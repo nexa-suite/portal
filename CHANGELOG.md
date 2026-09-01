@@ -6,10 +6,11 @@ The project uses Semantic Versioning.
 ## Historical consolidation
 
 The published `v0.15.0` through `v0.25.0` records were consecutive
-implementation snapshots from the same compressed delivery wave. Their
-release refs are consolidated into the retained `v0.26.0` milestone; the
-commits and detailed entries below remain historical implementation evidence.
-`v0.14.0` has no published tag or GitHub Release.
+The published `v0.15.0` through `v0.21.0`, plus `v0.24.0` and `v0.25.0`,
+were implementation snapshots from one compressed delivery wave. Their public
+release refs were retired during authorized SCM normalization; commits and
+detailed entries remain historical evidence. `v0.14.0` was an internal
+preparation state and has no published tag or GitHub Release.
 
 ## [0.26.0] - 2026-08-29
 
