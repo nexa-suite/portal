@@ -25,6 +25,30 @@ Release notes are scoped to the Buyer Portal repository and distinguish the buye
 | [v0.2.0](./v0.2.0.md) | Responsive buyer shell, shared UI foundations and catalog assets |
 | [v0.1.0](./v0.1.0.md) | Initial Angular buyer repository baseline |
 
+## Release-lineage classification
+
+| Version | Classification | Original target | Reachable from retained `v0.26.0` | Meaning |
+|---|---|---|---|---|
+| `v0.4.0` | INTERNAL_PREPARATION_ONLY | — | — | Preparation commits only; no public tag or GitHub Release. |
+| `v0.6.0` | INTERNAL_PREPARATION_ONLY | — | — | Feature/preparation evidence only; no public tag or GitHub Release. |
+| `v0.8.0` | NEVER_PUBLISHED | — | — | No public tag, GitHub Release or release evidence found. |
+| `v0.9.0` | NEVER_PUBLISHED | — | — | No public tag, GitHub Release or release evidence found. |
+| `v0.14.0` | INTERNAL_PREPARATION_ONLY | — | — | Release document and implementation evidence exist; no public tag or GitHub Release. |
+| `v0.15.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `55cec233ab6927da0feb82d02adfd9456714b02f` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.16.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `0b1d9ce6f039447ea00874414695f356b3ff30a1` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.17.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `5f9aabb449238f879d9dd6cbdae26ec2c8a3bfc0` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.18.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `1555d3e07a20415922a6f86d07bbc611510b6e84` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.19.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `85091ca318f2b51e6fc803b5d76352519efb26a0` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.20.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `7f47d107335ef1b60c0704bd990b67d3b83af296` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.21.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `2f057ec6371b413d942742195f747e77fbc31835` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.22.0` | NEVER_PUBLISHED | — | — | No public tag, GitHub Release or release evidence found. |
+| `v0.23.0` | NEVER_PUBLISHED | — | — | No public tag, GitHub Release or release evidence found. |
+| `v0.24.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `e2e180ba425d20aa1077bb627c91a2c4ede20b72` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+| `v0.25.0` | RETIRED_DURING_AUTHORIZED_CONSOLIDATION | `2fc4dee3b294f4ee17448c55a39b0eadc239617d` | YES | Former public snapshot; ref retired into retained `v0.26.0`. |
+
+`v0.26.0` is the retained `PUBLISHED` consolidated milestone. Its version
+number remains intentionally unchanged; no missing number is restored.
+
 ## Historical material
 
 | Draft | Status |
