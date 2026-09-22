@@ -4,11 +4,11 @@
 
 # Nexa Buyer Portal
 
-**Buyer-facing business experience for reliable B2B purchasing.**
+**Buyer-facing Web experience for reliable B2B purchasing.**
 
-![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Angular Material](https://img.shields.io/badge/Angular%20Material-22-757575?style=flat-square&logo=materialdesign&logoColor=white) ![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/portal?display_name=tag&sort=semver&style=flat-square&label=release)
+![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Angular Material](https://img.shields.io/badge/Angular%20Material%2FCDK-22.1-757575?style=flat-square&logo=materialdesign&logoColor=white) ![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white) ![Release](https://img.shields.io/github/v/release/nexa-suite/portal?display_name=tag&sort=semver&style=flat-square&label=release)
 
-[Changelog](./CHANGELOG.md) · [Release notes](./docs/releases/) · [Contributing](./.github/CONTRIBUTING.md) · [Security](./.github/SECURITY.md)
+[Application](./src/app) · [Architecture](./docs/architecture/bounded-context-map.md) · [Releases](./docs/releases/) · [Contributing](./.github/CONTRIBUTING.md) · [Security](./.github/SECURITY.md)
 
 </div>
 
@@ -16,91 +16,214 @@
 
 ## Overview
 
-Angular buyer surface for Catalog discovery, product detail, Purchase Requests, Sales Orders and buyer-safe delivery tracking. Portal presents buyer workflows; API owns identity, tenant scope, pricing and business rules.
+Nexa Buyer Portal is the buyer-facing Angular surface for catalog discovery,
+product detail, Purchase Requests, Sales Orders and buyer-safe delivery
+visibility. The Portal presents buyer workflows; Nexa API owns identity,
+tenant scope, pricing and business rules.
 
-## Related repositories
+Cached state and UI authorization are advisory. Server authorization and
+authoritative business responses remain decisive.
 
-The organization profile owns the full public ecosystem map. This repository links to adjacent Nexa surfaces without copying their release state.
+## Nexa Product Ecosystem
 
-- [Nexa API](https://github.com/nexa-suite/api) — business and integration backbone.
-- [Nexa Platform](https://github.com/nexa-suite/platform) — internal operational workspace.
-- [Nexa Website](https://github.com/nexa-suite/website) — public product experience.
-- [Nexa Mobile](https://github.com/nexa-suite/mobile) — documentation and native runway.
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa Mobile Report](https://github.com/nexa-suite/mobile-report)
+
+Academic report and delivery evidence for Nexa Mobile.
+
+![Markdown](https://img.shields.io/badge/Markdown-academic%20evidence-000000?style=flat-square&logo=markdown&logoColor=white)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Mobile](https://github.com/nexa-suite/mobile)
+
+Partial unmerged Operations Android/Kotlin/Jetpack Compose evidence; Buyer
+Mobile remains an accepted Flutter/Dart target.
+
+![Operations Android](https://img.shields.io/badge/Operations%20Mobile-partial%20evidence-3DDC84?style=flat-square&logo=android&logoColor=white) ![Buyer target](https://img.shields.io/badge/Buyer%20Mobile-TARGET%20Flutter%2FDart-64748B?style=flat-square)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa API](https://github.com/nexa-suite/api)
+
+Authoritative business and integration backbone for Nexa Suite.
+
+![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Website](https://github.com/nexa-suite/website)
+
+Public product experience and acquisition entry point.
+
+![HTML5](https://img.shields.io/badge/HTML5-static-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-responsive-1572B6?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa Buyer Portal](https://github.com/nexa-suite/portal)
+
+This repository: buyer-facing commerce and delivery visibility surface.
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Platform](https://github.com/nexa-suite/platform)
+
+Internal operational Web workspace for tenant teams.
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)
+
+</td>
+</tr>
+</table>
 
 ## Buyer Experiences
 
 - Buyer access and session foundations.
 - Catalog browsing and product detail.
 - Purchase Request and Sales Order flows.
-- Availability, loading, error and retry states.
+- Availability, loading, empty, error and retry states.
 - Delivery tracking designed for buyer visibility.
 
-Portal does not own internal administration, backend business rules or persistence.
+Portal does not own internal administration, backend business rules or
+persistence.
 
-## Architecture
+## Architecture Boundary
 
-Standalone Angular application. The frontend follows the canonical 11-context set as API-aligned feature roots directly under [`src/app`](./src/app/README.md); the surface map is [`docs/architecture/bounded-context-map.md`](./docs/architecture/bounded-context-map.md). Core routing, shared presentation and application utilities remain separate. Buyer-facing models and API adapters require approved contracts; Portal is not a second business authority.
+The standalone Angular application follows API-aligned feature roots under
+[`src/app`](./src/app). The surface map is
+[`docs/architecture/bounded-context-map.md`](./docs/architecture/bounded-context-map.md).
+Presentation, application utilities and API adapters remain separated by
+responsibility. Portal is not a second business authority.
 
 ## Technology Stack
 
-| Concern | Technology |
+| Concern | Current evidence |
 | --- | --- |
-| Framework | Angular 22 |
-| Language | TypeScript strict mode |
-| Component system | Angular Material/CDK 22 |
-| State and async | Signals and RxJS |
-| Internationalization | ngx-translate 18 |
+| Framework | Angular 22.1.x |
+| Language | TypeScript 6.0.x with strict configuration |
+| Component system | Angular Material/CDK 22.1.x |
+| State and async | Angular Signals and RxJS 7.8.x |
+| Internationalization | `@ngx-translate/core` 18.0.0 |
 | Styling | SCSS |
 | Package manager | npm |
 
 ## Getting Started
 
-    npm ci
-    npm start
+```bash
+npm ci
+npm start
+```
 
-Open http://localhost:4300 and navigate to /home.
+Open `http://localhost:4300` and navigate to `/home`.
 
 ## Validation
 
-    npm run validate:catalog-assets
-    npm run validate:architecture
-    npm run validate:bounded-contexts
-    npm test
-    npm run build
+```bash
+npm run validate:catalog-assets
+npm run validate:design-foundations
+npm run validate:architecture
+npm run validate:bounded-contexts
+npm test
+npm run build
+git diff --check
+```
 
 ## Repository Structure
 
-    src/app/<api-context>/                Canonical API-aligned BC feature roots
-    src/app/core/                         Shell, routes and language service
-    src/app/shared/presentation/         Reusable visual components
-    src/app/shared/application/          Pure address, date and number utilities
-    public/catalog-items/                Manifest-validated catalog media
-    src/styles/                           Tokens, typography, Material and accessibility
-    docs/                                 Architecture and releases
+```text
+src/app/<api-context>/       API-aligned feature roots
+src/app/core/                Shell, routes and language service
+src/app/shared/              Reusable presentation and application utilities
+public/catalog-items/        Manifest-validated catalog media
+docs/                         Architecture and releases
+```
+
+## Ownership & Boundaries
+
+- Portal owns buyer presentation, navigation, input assistance and recovery
+  states.
+- API owns authentication, authorization, tenant scope, pricing, commercial
+  decisions and durable state.
+- Design evidence informs presentation but does not override Product or Domain
+  authority.
+- Cached data is not authoritative commercial truth.
 
 ## Documentation
 
+- [Architecture](./docs/architecture/bounded-context-map.md)
 - [Release notes](./docs/releases/)
 - [Release policy](./.github/RELEASE_POLICY.md)
 - [Changelog](./CHANGELOG.md)
 
+## Nexa Engineering & Documentation
 
-## Historical provenance
+<table>
+<tr>
+<td width="50%" valign="top">
 
-Earlier UPC repositories remain evidence only. They do not define current Nexa identity, implementation authority or TARGET architecture.
+### [Nexa Blueprint](https://github.com/nexa-suite/blueprint)
 
-- [nexa-platform](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-platform) — predecessor backend and REST API layer.
-- [nexa-webapp](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-webapp) — historical unified Vue application.
-- [nexa-website](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-website) — previous public Website lineage.
-- [nexa-ecosystem-report](https://github.com/upc-pre-202610-1asi0730-12242-king/nexa-ecosystem-report) — historical requirements and architecture evidence.
+Canonical Product, Domain, Architecture, data, security and accepted
+engineering decision source.
 
+![Markdown](https://img.shields.io/badge/Markdown-canonical%20documentation-000000?style=flat-square&logo=markdown&logoColor=white)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Web Report](https://github.com/nexa-suite/web-report)
+
+Academic report and evidence repository for the Nexa Web course.
+
+![Docs as Code](https://img.shields.io/badge/Docs%20as%20Code-academic%20evidence-64748B?style=flat-square)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### [Nexa Complementary](https://github.com/nexa-suite/complementary)
+
+Supporting references, reproducible engineering resources and shared tooling.
+
+![Support tooling](https://img.shields.io/badge/Support%20tooling-reference-64748B?style=flat-square)
+
+</td>
+<td width="50%" valign="top">
+
+### [Nexa Design Lab](https://github.com/nexa-suite/design-lab)
+
+UX/UI, interaction, design-system, prototype and current design-evidence
+workspace.
+
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white)
+
+</td>
+</tr>
+</table>
 
 ## Security
 
-Do not report vulnerabilities through public issues. Follow the repository [Security Policy](./.github/SECURITY.md).
+Follow the repository [Security Policy](./.github/SECURITY.md) for reporting
+vulnerabilities.
 
 ## Legal
 
-Copyright © 2026 Nexa. All rights reserved. No open-source license is selected by this README.
+Copyright © 2026 Nexa. All rights reserved. No open-source license is claimed
+by this README.
 
-<div align="center"><br />Nexa · Current product, explicit evidence boundaries</div>
+<div align="center"><br />Nexa · Buyer experience, server authority</div>
